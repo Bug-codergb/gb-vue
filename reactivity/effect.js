@@ -5,6 +5,7 @@ const getTargetDep = (target, key) => {
   let map = targetMap.get(target);
   if (!map) {
     targetMap.set(target, map = new Map());
+    console.log(1)
   }
   let dep = map.get(key);
   if (!dep) {
