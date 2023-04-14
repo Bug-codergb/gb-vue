@@ -6,8 +6,8 @@ const createGetter = () => {
   }
 }
 const createSetter = () => {
-  return (target,key,newValue,receiver) => {
-    Reflect.set(target, key, newValue, receiver);
+  return (target, key, newValue, receiver) => {
+   Reflect.set(target, key, newValue, receiver);
     trigger(target, key, newValue);
     return true;
   }
