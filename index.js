@@ -7,5 +7,10 @@ const user = reactive({
 })
 effect(() => {
   let label = user.isOk ? user.name : "今天是个好日子";
-  console.log("-----------------");
+  console.log("--------+"+label+"+--------");
 })
+user.name = "12"
+user.isOk = false;
+
+user.name = "app";
+user.name = "fffff";
