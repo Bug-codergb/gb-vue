@@ -18,23 +18,32 @@ const track = (target,key) => {
 const trackEffects = (dep) => {
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect);
-    activeEffect.deps.push(dep);
+    if(activeEffect) activeEffect.deps.push(dep);
   }
 } 
 
 const trigger = (target, key, value) => {
   let map = targetMap.get(target, key);
   if (!map) {
-    reutrn;
+    return;
   }
   const dep = map.get(key);
   if (!dep) {
     return;
   }
   //防止死循环
-  const effectToRun = new Set(dep);
+  const effectToRun = new Set();
+  for (let item of dep) {
+    if (item !== activeEffect) {
+      effectToRun.add(item)
+    }
+  }
   effectToRun.forEach((fn) => {
-    fn();
+    if (fn.options && fn.options.scheduler) {
+      fn.options.scheduler(fn);
+    } else {
+      fn(); 
+    }
   })
 }
 
@@ -45,17 +54,24 @@ const cleanup = (effect) => {
   effect.deps = [];
 }
 
-const effect = (effect) => {
+const effect = (effect,options) => {
   const effectFn = () => {
     cleanup(effectFn);
     activeEffect = effectFn;
     effectStack.push(effectFn);
-    effect();
+    let result = effect();
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
+    return result;
   }
+
+  if(options) effectFn.options = options;
   effectFn.deps = [];
-  effectFn();
+  
+  if (options && !options.lazy) {
+    effectFn(); //是否立即执行
+  } 
+  return effectFn;
 }
 
 export {

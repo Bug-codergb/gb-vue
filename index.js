@@ -1,17 +1,21 @@
 import { reactive } from "./reactivity/reactive.js";
+import { computed } from "./reactivity/computed.js";
 import { effect } from "./reactivity/effect.js";
+
 const user = reactive({
   name: "bug",
   age: 10,
   isOk: true,
   gender:'male'
 })
+//分支切换
 /*effect(() => {
   let label = user.isOk ? user.name : "今天是个好日子";
   console.log("--------+" + label + "+--------");
 })*/
 
-effect(() => {
+//嵌套依赖收集与执行
+/*effect(() => {
   user.gender;
   console.log("--------gender--------");
 
@@ -19,7 +23,40 @@ effect(() => {
     user.age;
     console.log("------------age-----------");
   })
+})*/
+//自增
+/*effect(() => {
+  user.age++;
+  console.log("----------age1-----------")
+})*/
+
+//调度执行，将effecFn的执行时机暴露给用户
+/*effect(() => {
+  user.age;
+  console.log("------------ag1-----------");
+}, {
+  scheduler(fn) {
+    console.log(fn);
+  }
+})
+effect(() => {
+  user.age;
+  console.log("----------age2------------");
+}, {
+  scheduler(fn) {
+    console.log(fn);
+    fn();
+  }
+})*/
+
+
+
+const res = computed(() => {
+  return user.age+1;
 })
 
-user.age = 15;
-user.gender = "female"
+effect(() => {
+  console.log(res.value);
+}, {})
+
+user.age++;
