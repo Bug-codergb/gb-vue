@@ -3,14 +3,23 @@ import { effect } from "./reactivity/effect.js";
 const user = reactive({
   name: "bug",
   age: 10,
-  isOk:true
+  isOk: true,
+  gender:'male'
 })
-effect(() => {
+/*effect(() => {
   let label = user.isOk ? user.name : "今天是个好日子";
-  console.log("--------+"+label+"+--------");
-})
-user.name = "12"
-user.isOk = false;
+  console.log("--------+" + label + "+--------");
+})*/
 
-user.name = "app";
-user.name = "fffff";
+effect(() => {
+  user.gender;
+  console.log("--------gender--------");
+
+  effect(() => {
+    user.age;
+    console.log("------------age-----------");
+  })
+})
+
+user.age = 15;
+user.gender = "female"

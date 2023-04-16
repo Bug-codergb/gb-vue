@@ -1,6 +1,7 @@
 import { createDep } from "./dep.js";
 
 let activeEffect = void 0;
+let effectStack = [];
 const targetMap = new WeakMap();
 
 const track = (target,key) => {
@@ -48,7 +49,10 @@ const effect = (effect) => {
   const effectFn = () => {
     cleanup(effectFn);
     activeEffect = effectFn;
+    effectStack.push(effectFn);
     effect();
+    effectStack.pop();
+    activeEffect = effectStack[effectStack.length - 1];
   }
   effectFn.deps = [];
   effectFn();
