@@ -1,7 +1,8 @@
 import { reactive } from "./reactivity/reactive.js";
 import { computed } from "./reactivity/computed.js";
 import { effect } from "./reactivity/effect.js";
-
+import { createApp } from "./runtime-core/createApp.js";
+import App from "./App.js";
 const user = reactive({
   name: "bug",
   age: 10,
@@ -51,12 +52,13 @@ effect(() => {
 
 
 
-const res = computed(() => {
-  return user.age+1;
-})
+// const res = computed(() => {
+//   return user.age+1;
+// })
 
-effect(() => {
-  console.log(res.value);
-}, {})
+// effect(() => {
+//   console.log(res.value);
+// }, {})
 
-user.age++;
+// user.age++;
+const app = createApp(App).mount(document.getElementById("app"));
