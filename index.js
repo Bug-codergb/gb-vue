@@ -3,12 +3,7 @@ import { computed } from "./reactivity/computed.js";
 import { effect } from "./reactivity/effect.js";
 import { createApp } from "./runtime-core/createApp.js";
 import App from "./App.js";
-const user = reactive({
-  name: "bug",
-  age: 10,
-  isOk: true,
-  gender:'male'
-})
+
 //分支切换
 /*effect(() => {
   let label = user.isOk ? user.name : "今天是个好日子";

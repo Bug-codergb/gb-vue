@@ -19,14 +19,13 @@ const createApp = (rootComponent) => {
       parent.removeChild(el);
     },
   });
-  const vnode = rootComponent.render(rootComponent.setup());
-  console.log(vnode);
+  const context = rootComponent.setup()
   let body = document.body;
   return {
     mount(container) {
       effect(() => {
-        console.log(121212121)
-        body.innerText = "";
+        body.innerHTML = "";
+        const vnode = rootComponent.render(context);
         render(vnode, container);
         body.appendChild(container);
       });

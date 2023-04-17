@@ -16,6 +16,7 @@ const track = (target, key) => {
   trackEffects(dep);
 }
 const trackEffects = (dep) => {
+  console.log(dep,activeEffect)
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect);
     if(activeEffect) activeEffect.deps.push(dep);
@@ -63,7 +64,9 @@ const effect = (effect,options) => {
     cleanup(effectFn);
     activeEffect = effectFn;
     effectStack.push(effectFn);
+
     let result = effect();
+    
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
     return result;
@@ -73,6 +76,7 @@ const effect = (effect,options) => {
   effectFn.deps = [];
   
   if ((!options) || !options.lazy) {
+    console.error(activeEffect)
     effectFn(); //是否立即执行
   } 
   return effectFn;
