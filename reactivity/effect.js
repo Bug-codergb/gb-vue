@@ -16,7 +16,6 @@ const track = (target, key) => {
   trackEffects(dep);
 }
 const trackEffects = (dep) => {
-  console.log(dep,activeEffect)
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect);
     if(activeEffect) activeEffect.deps.push(dep);
@@ -24,7 +23,6 @@ const trackEffects = (dep) => {
 } 
 
 const trigger = (target, key, value) => {
-  console.log(target,key)
   let map = targetMap.get(target, key);
   if (!map) {
     return;
@@ -40,13 +38,10 @@ const trigger = (target, key, value) => {
       effectToRun.add(item)
     }
   }
-  console.log(effectToRun)
   effectToRun.forEach((fn) => {
-    console.log(fn);
     if (fn.options && fn.options.scheduler) {
       fn.options.scheduler(fn);
     } else {
-      console.log(fn)
       fn(); 
     }
   })

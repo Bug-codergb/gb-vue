@@ -1,7 +1,6 @@
 const createRenderer = (options) => {
   const { createElement, insert, setElementText, unmount } = options;
   const render = (vnode, container) => {
-    console.log(1)
     if (vnode) {
       patch(container._vnode, vnode, container);
     } else if (container._vnode) {
