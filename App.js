@@ -5,7 +5,8 @@ export default {
     return h("ul", {}, [
       h("li", {
         onClick: () => {
-          alert("床前明月光")
+          context.user.name = "李白";
+          console.log(context.user);
         }
       },"床前明月光"),
       h("li",{},"疑似地上霜"),

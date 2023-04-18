@@ -1,8 +1,6 @@
 import { effect } from "../reactivity/effect.js";
 import { createRenderer } from "./renderer.js";
 
-//test
-
 const createApp = (rootComponent) => {
   const { render } = createRenderer({
     createElement(type) {
@@ -14,9 +12,9 @@ const createApp = (rootComponent) => {
     setElementText(container, text) {
       container.textContent = text;
     },
-    unmount(el) {
-      const parent = el.parentNode;
-      parent.removeChild(el);
+    unmount(vnode) {
+      const parent = vnode.el.parentNode;
+      parent.removeChild(vnode.el);
     },
   });
   const context = rootComponent.setup()
@@ -24,10 +22,8 @@ const createApp = (rootComponent) => {
   return {
     mount(container) {
       effect(() => {
-        body.innerHTML = "";
         const vnode = rootComponent.render(context);
         render(vnode, container);
-        body.appendChild(container);
       });
     },
   };

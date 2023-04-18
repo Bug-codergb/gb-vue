@@ -3,12 +3,14 @@ const createRenderer = (options) => {
   const render = (vnode, container) => {
     if (vnode) {
       patch(container._vnode, vnode, container);
-    } else if (container._vnode) {
+    } else if (container._vnode) {//vnode不存在但是container._vnode存在
       container.innerHTML = "";
     }
+    container._vnode = vnode;
   };
 
   const patch = (n1, n2, container) => {
+    console.log(n1,n2,container)
     if (n1 && n1.type !== n2.type) {
       unmount(n1);
       n1 = null;
@@ -53,10 +55,61 @@ const createRenderer = (options) => {
       el.setAttribute(key, vnode.props[key]);
     }
   };
+  const patchElement = (n1,n2) => {
+    const el = n2.el = n1.el;//设置el为n1的el
+    const oldProps = n1.props;
+    const newProps = n2.props;
+    for (const key in newProps) {
+      if (newProps[key] !== oldProps[key]) {
+         patchProps(el,key,oldProps[key],newProps[key]); 
+      }
+    }
+    for (const key in oldProps) {
+      if (!key in new Props) {
+        patchProps(el, key, oldProps[key], null);
+      }
+    }
+    patchChild(n1,n2,el);
+  }
+  const patchChild = (n1,n2,el) => {
+    if (typeof n2.children === "string") {
+      if (Array.isArray(n1.children)) {
+        n1.children.forEach((child) => {
+          unmount(child);
+        })
+      }
+      setElementText(el, n2.children);
+    } else if (Array.isArray(n2.children)) {
+      if (Array.isArray(n1)) {
+        //diff算法
+        n1.children.forEach((child) => {
+          unmount(child);
+        })
+        n2.children.forEach((child) => {
+          patch(null,child,el);
+        })
+      } else {
+        setElementText(el, "");
+        n2.children.forEach((child) => {
+          patch(null, child, el);
+        })
+      }
+    } else {
+      //新节点为空
+      if (typeof n1.children==="string") {
+        el.setElementText(el,"")
+      } else if (Array.isArray(n1.children)) {
+        n1.children.forEach((child) => {
+          unmount(child);
+        })
+      }
+    }
+  }
   //mount
   const mountElement = (vnode, container) => {
     const { type, children } = vnode;
     const el = createElement(type);
+    vnode.el = el;
     if (children && typeof children === "string" || typeof children === "number") {
       setElementText(el, children);
     } else if (Array.isArray(children)) {
