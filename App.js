@@ -2,10 +2,13 @@ import { reactive } from "./reactivity/reactive.js";
 import { h } from "./runtime-core/h.js";
 export default {
   render(context) {
-    return h("ul", {}, [
+    return h("ul", {
+      class:context.user.id
+    }, [
       h("li", {
         onClick: () => {
-          context.user.name = "李白";
+          //context.user.name = "李白";
+          context.user.id = "Java";
           console.log(context.user);
         }
       },"床前明月光"),
@@ -17,7 +20,8 @@ export default {
   setup() {
     const user = reactive({
       name: "foo",
-      age:12
+      age: 12,
+      id:"JavaScript"
     })
     window.user = user;
     return {

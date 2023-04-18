@@ -10,11 +10,9 @@ const createRenderer = (options) => {
   };
 
   const patch = (n1, n2, container) => {
-    console.log(n1,n2,container)
     if (n1 && n1.type !== n2.type) {
       unmount(n1);
       n1 = null;
-      debugger
     }
     const { type } = n2;
     if (typeof type === "string") {
@@ -65,7 +63,7 @@ const createRenderer = (options) => {
       }
     }
     for (const key in oldProps) {
-      if (!key in new Props) {
+      if (!key in newProps) {
         patchProps(el, key, oldProps[key], null);
       }
     }
@@ -80,14 +78,18 @@ const createRenderer = (options) => {
       }
       setElementText(el, n2.children);
     } else if (Array.isArray(n2.children)) {
-      if (Array.isArray(n1)) {
+      if (Array.isArray(n1.children)) {
         //diff算法
-        n1.children.forEach((child) => {
-          unmount(child);
-        })
-        n2.children.forEach((child) => {
-          patch(null,child,el);
-        })
+        // n1.children.forEach((child) => {
+        //   unmount(child);
+        // })
+        // n2.children.forEach((child) => {
+        //   patch(null,child,el);
+        // })
+        for (let i = 0; i < n1.children; i++){
+          patch(n1.children[i],n2.children[i]);  
+        }
+        
       } else {
         setElementText(el, "");
         n2.children.forEach((child) => {
