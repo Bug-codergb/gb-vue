@@ -86,9 +86,32 @@ const createRenderer = (options) => {
         // n2.children.forEach((child) => {
         //   patch(null,child,el);
         // })
-        for (let i = 0; i < n1.children; i++){
+        
+        /*const n1Len = n1.children.length;
+        const n2Len = n2.children.length;
+        const commonLen = Math.min(n1Len, n2Len);
+        for (let i = 0; i < commonLen; i++){
           patch(n1.children[i],n2.children[i]);  
         }
+        if (n1Len > commonLen) {
+          for (let i = commonLen; i < n1.length; i++){
+            unmount(n1.children[i]);
+          }
+        }
+        if (n2Len > commonLen) {
+          for (let i = commonLen; i < n2.length; i++){
+            unmount(n2.children[i]);
+          }
+        }*/
+        const oldChildren = n1.children;
+        const newChildren = n2.children;
+        for (let oldChild of oldChildren){
+          for (let newChild of newChildren) {
+            if (oldChild.key === newChild.key) {
+              patch(oldChild,newChild,container);
+            }
+          }
+        }  
         
       } else {
         setElementText(el, "");

@@ -2,7 +2,8 @@ const h = (type,props,child,) => {
   return {
     type,
     props,
-    children:child
+    children: child,
+    el:null
   }
 }
 export {
