@@ -1,3 +1,5 @@
+import {reactive } from '../reactivity/reactive.js';
+import { effect} from "../reactivity/effect.js";
 const createRenderer = (options) => {
   const { unmount, createElement, remove, setElementText, insert } = options;
   const render = (vnode, container) => {
@@ -116,8 +118,27 @@ const createRenderer = (options) => {
       }
     };
 
-    const mountComponent = (n2,container) => {
-      
+    const mountComponent = (n2, container) => {
+      const componentOptions = n2.type;
+      const {render,data,props:propsOptions } = componentOptions;
+      const state = reactive(data());
+      //const vnode = render(state);
+      const instance = {
+        state,
+        subTree: null,
+        isMounted:false
+      }
+      n2.component = instance;
+      effect(() => {
+        const subTree = render.call(state, state);
+        if (!instance.isMounted) {
+          patch(null, subTree, container);
+          instance.isMounted = true;
+        } else {
+          patch(instance.subTree,subTree,container);
+        }
+        instance.subTree = subTree;
+      })
     }
     const patchComponent = (n1,n2,container) => {
       
