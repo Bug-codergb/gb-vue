@@ -120,7 +120,7 @@ const createRenderer = (options) => {
 
     const mountComponent = (n2, container) => {
       const componentOptions = n2.type;
-      const {render,data,props:propsOptions } = componentOptions;
+      const {render,data,props:propsOptions ,setup} = componentOptions;
       const state = reactive(data());
       //const vnode = render(state);
       const instance = {
