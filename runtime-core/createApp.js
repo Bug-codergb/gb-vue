@@ -6,7 +6,7 @@ const createApp = (rootComponent) => {
     createElement(type) {
       return document.createElement(type);
     },
-    insert(parent, children,anchor) {
+    insert(children, parent, anchor) {
       parent.insertBefore(children,anchor);
     },
     setElementText(container, text) {
@@ -18,6 +18,7 @@ const createApp = (rootComponent) => {
     },
   });
   const context = rootComponent.setup()
+  
   let body = document.body;
   return {
     mount(container) {

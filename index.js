@@ -56,4 +56,5 @@ effect(() => {
 // }, {})
 
 // user.age++;
+window.flag = true;
 const app = createApp(App).mount(document.getElementById("app"));
