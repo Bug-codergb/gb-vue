@@ -6,8 +6,8 @@ const createApp = (rootComponent) => {
     createElement(type) {
       return document.createElement(type);
     },
-    insert(container, children) {
-      container.insertBefore(children,null);
+    insert(parent, children,anchor) {
+      parent.insertBefore(children,anchor);
     },
     setElementText(container, text) {
       container.textContent = text;

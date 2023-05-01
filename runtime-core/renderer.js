@@ -12,7 +12,7 @@ const createRenderer = (options) => {
       patch(vnode, container._vnode, container);
     }
     /* n1为旧节点，n2为新节点节点 */
-    const patch = (n1, n2, container) => {
+    const patch = (n1, n2, container,anchor) => {
       const { type } = n2;
       if (n1 && n1.type !== type) {
         unmount(n1);
@@ -20,7 +20,7 @@ const createRenderer = (options) => {
       }  
       if (type === "string") {
         if (!n1) {
-          mountElement(n2, container);
+          mountElement(n2, container,anchor);
         } else {
           patchElement(n1, n2, container);
         }
@@ -49,7 +49,7 @@ const createRenderer = (options) => {
           patchProps(el, key, null, value);
         }
       }
-      insert(n2, container);
+      insert(n2, container,anchor);
     };
     const patchProps = (el, key, prevValue, nextValue) => {
       if (/^on/.test(key)) {
@@ -100,6 +100,50 @@ const createRenderer = (options) => {
           });
         } else if (Array.isArray(n1.children)) {
           //diff
+          const oldChildren = n1.children;
+          const newChildren = n2.children;
+          let lastIndex = 0;
+          for (let i = 0; i < newChildren.length; i++){
+            const newChild = newChildren[i];
+            let find = false;
+            for (let j = 0; j < oldChildren.length; j++){
+              const oldChild = oldChildren[j];
+              
+              if (oldChild.key === newChild.key) {
+                find = true;
+                patch(oldChild, newChild, el);
+                if (j < lastIndex) {
+                  const prevNode = newChildren[i - 1];
+                  if (prevNode) {
+                    const anchor = prevNode.el.nextSibling;
+                    insert(newChild.el,container,anchor);
+                  }
+                } else {
+                  lastIndex = j;
+                }
+                break;
+              }
+            }
+            if (!find) { //说明为新节点需要挂载
+              const prevNode = newChild[i - 1];
+              let anchor = null;
+              if (prevNode) {
+                anchor = prevNode.el.nextSibling;
+              } else {
+                anchor = container.firstChild;
+              }
+              patch(null,newChild,container,anchor);
+            }
+          }
+
+          for (let oldChild of oldChildren) {
+            const has = newChildren.find(vnode => {
+              return vnode.key === oldChild.key
+            })
+            if (!has) {
+              unmount(oldChild);
+            }
+          }
         } else {
           //n1为null则直接挂载n2
           n2.children.forEach((child) => {
