@@ -30,7 +30,8 @@ export default {
       h("li", {
         key:2,
         class:context.user.id
-      },"疑似地上霜"),
+      }, "疑似地上霜"),
+      h("li", { key: 5 }, "举头望明月"),
       h("li", { key: 4 }, context.user.age),
       h("li",{key:3},context.user.name),
     ])
