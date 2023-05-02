@@ -158,7 +158,7 @@ const createRenderer = (options) => {
             console.log(newStartNode);
             //第一轮循环没有找到更新节点
             const index = oldChildren.findIndex((child) => {
-              return child.key === newStartNode.key;
+              return child!==undefined && child.key === newStartNode.key;
             });
             if (index > 0) {
               patch(oldChildren[index], newStartNode, el);
