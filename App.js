@@ -19,7 +19,6 @@ export default {
     ])
     let newTree = h("ul", {
     }, [
-      h("li",{key:5},"低头思故乡"),
       h("li", {
         key:2,
         class:context.user.id
@@ -29,7 +28,8 @@ export default {
         onClick: () => {
           
         }
-      },"床前明月光"),
+      }, "床前明月光"),
+      h("li",{key:5},"低头思故乡"),
       h("li", { key: 4 }, context.user.age),
       h("li",{key:3},context.user.name),
       

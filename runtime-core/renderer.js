@@ -139,15 +139,21 @@ const createRenderer = (options) => {
           } else if (oldStartNode.key === newEndNode.key) {
             patch(oldStartNode, newEndNode, el);
             insert(oldStartNode.el, el, oldEndNode.el.nextSibling);
+
+            oldChildren[oldStartIndex] = undefined;
+
             oldStartNode = oldChildren[++oldStartIndex];
             newEndNode = newChildren[--newEndIndex];
           } else if (oldEndNode.key === newStartNode.key) {
-            console.log(444,oldEndNode,newStartNode);
+            
             patch(oldEndNode, newStartNode, el);
             insert(oldEndNode.el, el, oldStartNode.el);
+
+            oldChildren[oldEndIndex] = undefined;
+
             oldEndNode = oldChildren[--oldEndIndex];
             newStartNode = newChildren[++newStartIndex];
-            console.log(oldStartIndex,oldEndIndex)
+            
           } else {
             console.log(newStartNode);
             //第一轮循环没有找到更新节点
@@ -168,10 +174,7 @@ const createRenderer = (options) => {
         }
 
         if (oldEndIndex < oldStartIndex && newStartIndex <= newEndIndex) {//旧children先遍历完成
-          console.log(oldEndIndex,oldStartIndex)
           for (let i = newStartIndex; i <= newEndIndex; i++) {
-            console.log(newChildren[i])
-            console.log(oldStartNode)
             patch(
               null,
               newChildren[i],
