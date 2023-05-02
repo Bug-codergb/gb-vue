@@ -7,8 +7,7 @@ export default {
       h("li", {
         key:1,
         onClick: () => {
-          context.user.age = "我是旧的年龄"
-          window.flag = false;
+          context.user.flag = false;
         }
       },"床前明月光"),
       h("li", {
@@ -20,32 +19,32 @@ export default {
     ])
     let newTree = h("ul", {
     }, [
-      h("li", {
-        key:1,
-        onClick: () => {
-          context.user.age = "我是新的年龄"
-          window.flag = true;
-        }
-      },"床前明月光"),
+      h("li",{key:5},"低头思故乡"),
       h("li", {
         key:2,
         class:context.user.id
       }, "疑似地上霜"),
-      h("li", { key: 5 }, "举头望明月"),
+      h("li", {
+        key:1,
+        onClick: () => {
+          
+        }
+      },"床前明月光"),
       h("li", { key: 4 }, context.user.age),
       h("li",{key:3},context.user.name),
+      
     ])
-    console.log(window.flag);
-    return window.flag ? oldTree : newTree;
+   
+    return context.user.flag ? oldTree : newTree;
   },
   setup() {
     const user = reactive({
       name: "foo",
       age: 12,
       id: "JavaScript",
-      age:"我是年龄180"
+      age: "我是旧年龄",
+      flag: true,
     })
-    window.user = user;
     return {
       user
     }

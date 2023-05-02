@@ -14,7 +14,7 @@ const createRenderer = (options) => {
     container._vnode = vnode;
   };
   /* n1为旧节点，n2为新节点节点 */
-  const patch = (n1, n2, container, anchor) => {
+  const patch = (n1, n2, container, anchor = null) => {
     const { type } = n2;
     if (n1 && n1.type !== type) {
       unmount(n1);
@@ -94,11 +94,11 @@ const createRenderer = (options) => {
 
     if (typeof n2.children === "string") {
       if (Array.isArray(n1.children)) {
-        n1.children.forEach(child => {
+        n1.children.forEach((child) => {
           unmount(child);
-        })
+        });
       }
-      setElementText(el,n2.children);
+      setElementText(el, n2.children);
     } else if (Array.isArray(n2.children)) {
       if (typeof n1.children === "string") {
         setElementText(el, "");
@@ -109,47 +109,79 @@ const createRenderer = (options) => {
         //diff
         const oldChildren = n1.children;
         const newChildren = n2.children;
-        let lastIndex = 0;
-        for (let i = 0; i < newChildren.length; i++) {
-          const newChild = newChildren[i];
-          let find = false;
-          for (let j = 0; j < oldChildren.length; j++) {
-            const oldChild = oldChildren[j];
 
-            if (oldChild.key === newChild.key) {
-              find = true;
-              patch(oldChild, newChild, el);
-              if (j < lastIndex) {
-                const prevNode = newChildren[i - 1];
-                if (prevNode) {
-                  const anchor = prevNode.el.nextSibling;
-                  insert(newChild.el, el, anchor);
-                }
-              } else {
-                lastIndex = j;
-              }
-              break;
-            }
-          }
-          if (!find) {
-            //说明为新节点需要挂载
-            const prevNode = newChildren[i - 1];
-            let anchor = null;
-            if (prevNode) {
-              anchor = prevNode.el.nextSibling;
+        let oldStartIndex = 0;
+        let oldEndIndex = n1.children.length - 1;
+
+        let newStartIndex = 0;
+        let newEndIndex = n2.children.length - 1;
+
+        let oldStartNode = n1.children[oldStartIndex];
+        let oldEndNode = n1.children[oldEndIndex];
+
+        let newStartNode = n2.children[newStartIndex];
+        let newEndNode = n2.children[newEndIndex];
+
+        while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
+          if (!oldStartNode) {
+            oldStartNode = oldChildren[++oldStartIndex];
+          } else if (!oldEndNode) {
+            oldEndNode = oldChildren[--oldEndIndex];
+          } else if (oldStartNode.key === newStartNode.key) {
+            patch(oldStartNode, newStartNode, el);
+            oldStartNode = oldChildren[++oldStartIndex];
+            newStartNode = newChildren[++newStartIndex];
+            console.log(1, oldStartIndex, oldEndIndex);
+          } else if (oldEndNode.key === newEndNode.key) {
+            patch(oldEndNode, newEndNode, el);
+            oldEndNode = oldChildren[--oldEndIndex];
+            newEndNode = newChildren[--newEndIndex];
+          } else if (oldStartNode.key === newEndNode.key) {
+            patch(oldStartNode, newEndNode, el);
+            insert(oldStartNode.el, el, oldEndNode.el.nextSibling);
+            oldStartNode = oldChildren[++oldStartIndex];
+            newEndNode = newChildren[--newEndIndex];
+          } else if (oldEndNode.key === newStartNode.key) {
+            console.log(444,oldEndNode,newStartNode);
+            patch(oldEndNode, newStartNode, el);
+            insert(oldEndNode.el, el, oldStartNode.el);
+            oldEndNode = oldChildren[--oldEndIndex];
+            newStartNode = newChildren[++newStartIndex];
+            console.log(oldStartIndex,oldEndIndex)
+          } else {
+            console.log(newStartNode);
+            //第一轮循环没有找到更新节点
+            const index = oldChildren.findIndex((child) => {
+              return child.key === newStartNode.key;
+            });
+            if (index > 0) {
+              patch(oldChildren[index], newStartNode, el);
+              insert(oldChildren[index].el, el, oldStartNode.el);
+              oldChildren[index] = undefined;
             } else {
-              anchor = el.firstChild;
+              console.log(111111);
+              //是新增节点
+              patch(null, newStartNode, el, oldStartNode.el);
             }
-            patch(null, newChild, el, anchor);
+            newStartNode = newChildren[++newStartIndex];
           }
         }
 
-        for (let oldChild of oldChildren) {
-          const has = newChildren.find((vnode) => {
-            return vnode.key === oldChild.key;
-          });
-          if (!has) {
-            unmount(oldChild);
+        if (oldEndIndex < oldStartIndex && newStartIndex <= newEndIndex) {//旧children先遍历完成
+          console.log(oldEndIndex,oldStartIndex)
+          for (let i = newStartIndex; i <= newEndIndex; i++) {
+            console.log(newChildren[i])
+            console.log(oldStartNode)
+            patch(
+              null,
+              newChildren[i],
+              el,
+              oldStartNode ? oldStartNode.el : oldEndNode.el.nextSibling
+            );
+          }
+        } else if (newStartIndex>newEndIndex && oldStartIndex <= oldEndIndex) {
+          for (let i = oldStartIndex; i <= oldEndIndex; i++){
+            unmount(oldChildren[i]);
           }
         }
       } else {
