@@ -47,11 +47,11 @@ export default {
       ),
       
       h("li", { key: 6 }, "低头思故乡"),
-      h("li", { key: 4 }, context.user.age),
-      h("li", { key: 3 }, context.user.name),
      
+      h("li", { key: 4 }, context.user.age),
+       h("li", { key: 7 }, "静夜思"),
+      h("li", { key: 3 }, context.user.name),
       h("li", { key: 5 }, "举头望明月"),
-      h("li", { key: 7 }, "静夜思"),
     ]);
 
     return context.user.flag ? oldTree : newTree;

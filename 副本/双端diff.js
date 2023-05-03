@@ -110,96 +110,79 @@ const createRenderer = (options) => {
         const oldChildren = n1.children;
         const newChildren = n2.children;
 
-        let j = 0;
-        while (oldChildren[j].key === newChildren[j].key) {
-          patch(oldChildren[j], newChildren[j], el);
-          j++;
-        }
+        let oldStartIndex = 0;
+        let oldEndIndex = n1.children.length - 1;
 
-        let newEndIndex = newChildren.length - 1,
-          oldEndIndex = oldChildren.length - 1;
-        while (newChildren[newEndIndex].key === oldChildren[oldEndIndex].key) {
-          patch(oldChildren[oldEndIndex], newChildren[newEndIndex], el);
-          newEndIndex--;
-          oldEndIndex--;
-        }
-        //挂载新节点
-        if (j > oldEndIndex && j <= newEndIndex) {
-          const anchorIndex = newEndIndex + 1;
-          const anchor =
-            anchorIndex < newChildren.length
-              ? newChildren[anchorIndex].el
-              : null;
-          while (j <= newEndIndex) {
+        let newStartIndex = 0;
+        let newEndIndex = n2.children.length - 1;
+
+        let oldStartNode = n1.children[oldStartIndex];
+        let oldEndNode = n1.children[oldEndIndex];
+
+        let newStartNode = n2.children[newStartIndex];
+        let newEndNode = n2.children[newEndIndex];
+
+        while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
+          if (!oldStartNode) {
+            oldStartNode = oldChildren[++oldStartIndex];
+          } else if (!oldEndNode) {
+            oldEndNode = oldChildren[--oldEndIndex];
+          } else if (oldStartNode.key === newStartNode.key) {
+            patch(oldStartNode, newStartNode, el);
+            oldStartNode = oldChildren[++oldStartIndex];
+            newStartNode = newChildren[++newStartIndex];
             
-            patch(null, newChildren[j], el, anchor);
+          } else if (oldEndNode.key === newEndNode.key) {
+            patch(oldEndNode, newEndNode, el);
+            oldEndNode = oldChildren[--oldEndIndex];
+            newEndNode = newChildren[--newEndIndex];
+          } else if (oldStartNode.key === newEndNode.key) {
+            patch(oldStartNode, newEndNode, el);
+            insert(oldStartNode.el, el, oldEndNode.el.nextSibling);
+
+            oldChildren[oldStartIndex] = undefined;
+
+            oldStartNode = oldChildren[++oldStartIndex];
+            newEndNode = newChildren[--newEndIndex];
+          } else if (oldEndNode.key === newStartNode.key) {
+            
+            patch(oldEndNode, newStartNode, el);
+            insert(oldEndNode.el, el, oldStartNode.el);
+
+            oldChildren[oldEndIndex] = undefined;
+
+            oldEndNode = oldChildren[--oldEndIndex];
+            newStartNode = newChildren[++newStartIndex];
+            
+          } else {
+            //第一轮循环没有找到更新节点
+            const index = oldChildren.findIndex((child) => {
+              return child!==undefined && child.key === newStartNode.key;
+            });
+            if (index > 0) {
+              patch(oldChildren[index], newStartNode, el);
+              insert(oldChildren[index].el, el, oldStartNode.el);
+              oldChildren[index] = undefined;
+            } else {
+              //是新增节点
+              patch(null, newStartNode, el, oldStartNode.el);
+            }
+            newStartNode = newChildren[++newStartIndex];
           }
         }
-        //删除旧节点
-        else if (j > newEndIndex && j <= oldEndIndex) {
-          while (j <= oldEndIndex) {
-            unmount(oldChildren[j]);
-          }
-        } else {
-          const count = newEndIndex - j + 1;
-          const source = new Array(count);
-          source.fill(-1);
 
-          const oldStartIndex = j;
-          const newStartIndex = j;
-          const keyIndex = {};
-          let pos = 0;
-          let moved = false;
+        if (oldEndIndex < oldStartIndex && newStartIndex <= newEndIndex) {//旧children先遍历完成
           for (let i = newStartIndex; i <= newEndIndex; i++) {
-            keyIndex[newChildren[i].key] = i;
+            patch(
+              null,
+              newChildren[i],
+              el,
+              oldStartNode ? oldStartNode.el : oldEndNode.el.nextSibling
+            );
           }
-          console.log(keyIndex)
-          let patched = 0;
-          for (let i = oldStartIndex; i <= oldEndIndex; i++) {
-            const k = keyIndex[oldChildren[i].key];
-            console.log(oldChildren[i].key, k);
-            if (patched <= count) {
-              if (typeof k !== "undefined") {
-                patch(oldChildren[i], newChildren[k], el);
-                patched++;
-                source[k - newStartIndex] = i;
-                if (k < pos) {
-                  moved = true;
-                } else {
-                  pos = k;
-                }
-              } else {
-                unmount(oldChildren[i]);
-              }
-            } else {
-              unmount(oldChildren[i]);
-            }
-          }
-          if (moved) {
-            console.log(source)
-            const seq = getSequence(source);
-            console.log(seq)
-            let s = seq.length - 1;
-            let i = count - 1;
-            for (i; i >= 0; i--) {
-              if (source[i] === -1) {
-                const pos = i + newStartIndex;
-                const newVNode = newChildren[pos];
-                const nextPos = pos + 1;
-                const anchor =
-                  nextPos < newChildren.length ? newChildren[nextPos].el : null;
-                patch(null, newVNode, el, anchor);
-              } else if (i !== seq[s]) {
-                const pos = i + newStartIndex;
-                const newVNode = newChildren[pos];
-                const nextPos = pos + 1;
-                const anchor =
-                  nextPos < newChildren.length ? newChildren[nextPos].el : null;
-                insert(newVNode.el, el, anchor);
-              } else {
-                s--;
-              }
-            }
+        } else if (newStartIndex>newEndIndex && oldStartIndex <= oldEndIndex) {
+          for (let i = oldStartIndex; i <= oldEndIndex; i++){
+            unmount(oldChildren[i]);
           }
         }
       } else {
@@ -248,45 +231,4 @@ const createRenderer = (options) => {
     render,
   };
 };
-
-function getSequence(arr) {
-  const p = arr.slice();
-  const result = [0];
-  let i, j, u, v, c;
-  const len = arr.length;
-  for (i = 0; i < len; i++) {
-    const arrI = arr[i];
-    if (arrI !== 0) {
-      j = result[result.length - 1];
-      if (arr[j] < arrI) {
-        p[i] = j;
-        result.push(i);
-        continue;
-      }
-      u = 0;
-      v = result.length - 1;
-      while (u < v) {
-        c = ((u + v) / 2) | 0;
-        if (arr[result[c]] < arrI) {
-          u = c + 1;
-        } else {
-          v = c;
-        }
-      }
-      if (arrI < arr[result[u]]) {
-        if (u > 0) {
-          p[i] = result[u - 1];
-        }
-        result[u] = i;
-      }
-    }
-  }
-  u = result.length;
-  v = result[u - 1];
-  while (u-- > 0) {
-    result[u] = v;
-    v = p[v];
-  }
-  return result;
-}
 export { createRenderer };
