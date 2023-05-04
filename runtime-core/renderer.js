@@ -220,18 +220,61 @@ const createRenderer = (options) => {
       }
     }
   };
-
+  /*
+    resolveProps 接受2个参数 
+    options：组件定义的props选项
+    propsData: 用户传入组件的props的具体数据
+  */
+  const resolveProps = (options,propsData) => {
+    const props = {};
+    const attrs = {};
+    for (let key in propsData) {
+      if (options.hasOwnProperty(key)) {
+        props[key] = propsData[key];
+      } else {
+        attrs[key] = propsData[key];
+      }
+    }
+    return [props, attrs];
+  }
   const mountComponent = (n2, container) => {
-    const componentOptions = n2.type;
-    const { render, data, props: propsOptions, setup } = componentOptions;
+    const vnode = n2;
+    const componentOptions = vnode.type;
+    const { render, data, props: propsOptions, setup ,created} = componentOptions;
+
+    const [props, attrs] = resolveProps(propsOptions, vnode.props);
+    
     const state = reactive(data());
-    //const vnode = render(state);
     const instance = {
       state,
       subTree: null,
       isMounted: false,
+      props,
     };
     n2.component = instance;
+
+    const renderContext = new Proxy(instance, {
+      //直接通过instance.key访问state或者props;
+      get(target, key, receiver) {
+        const { props, state } = target;
+        if (state && key in state) {
+          return state[key];
+        }
+        if (props && key in props) {
+          return props[key];
+        }
+      },
+      set(target, key, value, receiver) {
+        const { props, state } = target;
+        if (state && key in state) {
+          state[key] = value;
+        }
+        if (props && key in props) {
+          console.warn("pops is readonly");
+        }
+      }
+    })
+    created && created.call(renderContext);//或者其他生命周期
     effect(() => {
       const subTree = render.call(state, state);
       if (!instance.isMounted) {
@@ -241,9 +284,34 @@ const createRenderer = (options) => {
         patch(instance.subTree, subTree, container);
       }
       instance.subTree = subTree;
-    });
+    },{});
   };
-  const patchComponent = (n1, n2, container) => {};
+  const hasChangeProps = (oldProps,newProps) => {
+    if (Object.keys(oldProps).length !== Object.keys(newProps).length) {
+      return true;
+    }
+    for (let key in newProps) {
+      if (oldProps[key] !== newProps[key]) {
+        return true;
+      }
+    }
+    return false;
+  }
+  const patchComponent = (n1, n2, container) => {
+    const instance = n2.component = n1.component;
+    const { props } = instance;
+    if (hasChangeProps(n1.props, n2.props)) {
+      const [newProps] = resolveProps(n2.type.props, n2.props);
+      for (const k in newProps) {//更新到最新值;
+        props[k] = newProps[k];
+      }
+      for (const k in props) {//删除旧值
+        if (!(k in newProps)) {
+          delete props[k];
+        }
+      }
+    }
+  };
   return {
     render,
   };
