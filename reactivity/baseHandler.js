@@ -1,7 +1,7 @@
 import {track,trigger } from "./effect.js"
 const createGetter = () => {
   return (target,key,receiver) => {
-    track(target, key);
+    track(target, key);//依赖收集
     return Reflect.get(target, key, receiver);
   }
 }
