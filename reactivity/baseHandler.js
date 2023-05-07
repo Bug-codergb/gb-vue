@@ -8,7 +8,7 @@ const createGetter = () => {
 const createSetter = () => {
   return (target, key, newValue, receiver) => {
    const isSuccess = Reflect.set(target, key, newValue, receiver);
-    trigger(target, key, newValue);
+    trigger(target, key, newValue);//触发依赖
     return isSuccess;
   }
 }
