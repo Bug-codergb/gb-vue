@@ -16,7 +16,7 @@ const get = createGetter();
 const set = createSetter();
 const multableHandler = {
   get,
-  set
+  set,
 }
 export {
   multableHandler
