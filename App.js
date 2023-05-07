@@ -1,7 +1,13 @@
 import { reactive } from "./reactivity/reactive.js";
 import { h } from "./runtime-core/h.js";
 export default {
+  data() {
+    return {
+      name:"mac"
+    }
+  },
   render(context) {
+    console.log(context.user);
     let oldTree = h("ul", {}, [
       h(
         "li",

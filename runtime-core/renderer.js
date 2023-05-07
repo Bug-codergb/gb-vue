@@ -240,7 +240,7 @@ const createRenderer = (options) => {
   const mountComponent = (n2, container) => {
     const vnode = n2;
     const componentOptions = vnode.type;
-    const { render, data, props: propsOptions, setup ,created} = componentOptions;
+    let { render, data, props: propsOptions, setup ,created} = componentOptions;
 
     const [props, attrs] = resolveProps(propsOptions, vnode.props);
     
@@ -252,7 +252,14 @@ const createRenderer = (options) => {
       props,
     };
     n2.component = instance;
-
+    const setupContext = { attrs };
+    let setupState = null;
+    const setupResult = setup(props, setupContext);
+    if (typeof setupResult === "function") {
+      render = setupResult;      
+    } else {
+      setupState = setupResult;
+    }
     const renderContext = new Proxy(instance, {
       //直接通过instance.key访问state或者props;
       get(target, key, receiver) {
@@ -263,6 +270,9 @@ const createRenderer = (options) => {
         if (props && key in props) {
           return props[key];
         }
+        if (setupState && key in setupState) {
+          return setupState[key];
+        }
       },
       set(target, key, value, receiver) {
         const { props, state } = target;
@@ -272,11 +282,14 @@ const createRenderer = (options) => {
         if (props && key in props) {
           console.warn("pops is readonly");
         }
+        if (setupState && key in setupState) {
+          setupState[key] = value;
+        }
       }
     })
     created && created.call(renderContext);//或者其他生命周期
     effect(() => {
-      const subTree = render.call(state, state);
+      const subTree = render.call(renderContext, renderContext);
       if (!instance.isMounted) {
         patch(null, subTree, container);
         instance.isMounted = true;

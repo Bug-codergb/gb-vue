@@ -1,5 +1,6 @@
 import { effect } from "../reactivity/effect.js";
-import { createRenderer } from "./renderer.js";
+import { createRenderer} from "./renderer.js";
+import { h } from "./h.js";
 
 const createApp = (rootComponent) => {
   const { render } = createRenderer({
@@ -17,15 +18,10 @@ const createApp = (rootComponent) => {
       parent.removeChild(vnode.el);
     },
   });
-  const context = rootComponent.setup()
-  
-  let body = document.body;
   return {
     mount(container) {
-      effect(() => {
-        const vnode = rootComponent.render(context);
-        render(vnode, container);
-      });
+      const vnode = h(rootComponent,{});
+      render(vnode, container);
     },
   };
 };
