@@ -1,16 +1,20 @@
 import {
+  createDep
+} from "./dep.js"
+import {
   reactive
-} from "./reactive";
+} from "./reactive.js";
 
 import {
+  isTracking,
   trackEffects,
   triggerEffects
-} from "./effect"
+} from "./effect.js"
 class RefImpl{
   constructor(raw) {
     this._rawValue = raw;
     this._v_is_ref = true;
-    this.dep = [];
+    this.dep = createDep();
     this._value = covert(raw);
   }
   get value() {
@@ -18,8 +22,9 @@ class RefImpl{
     return this._value;
   }
   set value(newValue) {
-    triggerRefValue(this);
     this._value = covert(newValue);
+    this._rawValue = newValue;
+    triggerRefValue(this);
   }
 }
 const isObject = (value) => {
@@ -30,8 +35,27 @@ const covert = (value) => {
 }
 
 const trackRefValue = (ref) => {
-  trackEffects(ref.dep);
+  if (isTracking()) {
+    trackEffects(ref.dep);
+  }
 }
 const triggerRefValue = (ref) => {
+  console.log(ref);
   triggerEffects(ref.dep);
+}
+const isRef = (value) => {
+  return !!value[`_v_is_ref`];
+}
+const unRef = (ref) => {
+  return isRef(ref) ? ref.value : ref;
+}
+const ref = (raw) => {
+  return new RefImpl(raw);
+}
+export {
+  trackRefValue,
+  triggerEffects,
+  isRef,
+  unRef,
+  ref
 }

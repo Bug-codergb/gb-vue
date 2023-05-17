@@ -1,6 +1,7 @@
 import {
-  baseHandler
-} from "./baseHandler";
+  baseHandler,
+  readonlyHandler
+} from "./baseHandler.js";
 const reactiveMap = new WeakMap();
 const readonlyMap = new WeakMap();
 
@@ -12,14 +13,26 @@ const ReactiveFlags = {
 const reactive = (raw) => {
   return createReactive(raw,reactiveMap,baseHandler);
 }
+const readonly = (raw) => {
+  return createReactive(raw, readonlyMap, readonlyHandler);
+}
+const isReadonly = (value) => {
+  return !!value[ReactiveFlags.READONLY];
+}
 const createReactive = (raw,proxyMap,handler) => {
   let proxy = reactiveMap.get(raw);
+  if (proxy) {
+    return proxy;
+  }
   if (!proxy) {
     proxy = new Proxy(raw, handler);
     proxyMap.set(raw, proxy);
+    return proxy;
   }
-  return proxy;
 }
 export {
-  reactive
+  reactive,
+  readonly,
+  ReactiveFlags,
+  isReadonly
 }

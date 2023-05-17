@@ -1,13 +1,14 @@
 import {
   createDep
-} from "./dep";
+} from "./dep.js";
 const proxyMap = new WeakMap();
 let activeEffect = void 0;
 let shouldTrack = false;
 class ReactiveEffect{
   constructor(fn,) {
     this.fn = fn;
-    this.active = false;
+    this.active = true;
+    this.deps = [];
   }
   run() {
     if (!this.active) {
@@ -21,37 +22,49 @@ class ReactiveEffect{
     return result;
   }
 }
-
-const track = (target, key) => {
-  let depsMap = proxyMap.get(target);
-  if (!depsMap) {
-    proxyMap.set(target,depsMap = new Map());
-  }
-  let deps = depsMap.get(key);
-  if (!deps) {
-    depsMap.set(key,deps = createDep());
-  }
-  trackEffects(deps);
+const isTracking = () => {
+  return activeEffect !== undefined && shouldTrack;
 }
-const trackEffects = (deps) => {
-  if (!deps.has(activeEffect)) {
-    deps.add(activeEffect);
-    activeEffect.deps.push(deps);
+const track = (target, key) => {
+  if (!isTracking()) {
+    return;
+  }
+  let depMap = proxyMap.get(target);
+  if (!depMap) {
+    proxyMap.set(target,depMap = new Map());
+  }
+  let dep = depMap.get(key);
+  if (!dep) {
+    depMap.set(key,dep = createDep());
+  }
+  trackEffects(dep);
+}
+const trackEffects = (dep) => {
+  if (!dep.has(activeEffect)) {
+    dep.add(activeEffect);
+    activeEffect.deps.push(dep);
   }
 }
 const trigger = (target,key,value) => {
-  let depsMap = proxyMap.get(target);
-  if (!depsMap) {
+  let depMap = proxyMap.get(target);
+  if (!depMap) {
     return;
   }
-  let deps = depsMap.get(key);
-  if (!deps) {
+  let dep = depMap.get(key);
+  if (!dep) {
     return;
   }
-  triggerEffects(deps);
+  triggerEffects(dep);
 }
-const triggerEffects = (deps) => {
-  
+const triggerEffects = (dep) => {
+  let execDep = new Set(dep);
+  execDep.forEach((effect) => {
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
+  })
 }
 const cleanupEffect = (effectFn) => {
   for (let i = 0; i < effectFn.deps; i++){
@@ -61,7 +74,7 @@ const cleanupEffect = (effectFn) => {
 }
 const effect = (fn,options) => {
   const _effect = new ReactiveEffect(fn);
-  _effect();
+  _effect.run();
   const runner = _effect.run.bind(_effect);
   return runner;
 }
@@ -70,5 +83,7 @@ export {
   trackEffects,
   trigger,
   triggerEffects,
-  effect
+  effect,
+  ReactiveEffect,
+  isTracking
 }
