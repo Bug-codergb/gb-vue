@@ -54,7 +54,7 @@ const ref = (raw) => {
 }
 export {
   trackRefValue,
-  triggerEffects,
+  triggerRefValue,
   isRef,
   unRef,
   ref

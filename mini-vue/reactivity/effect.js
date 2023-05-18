@@ -5,21 +5,30 @@ const proxyMap = new WeakMap();
 let activeEffect = void 0;
 let shouldTrack = false;
 class ReactiveEffect{
-  constructor(fn,) {
+  constructor(fn,scheduler) {
     this.fn = fn;
     this.active = true;
     this.deps = [];
+    this.parent = undefined;
+    this.scheduler = scheduler;
   }
   run() {
     if (!this.active) {
       return this.fn();
     }
-    shouldTrack = true;
-    activeEffect = this;
-    let result = this.fn();
-    shouldTrack = false;
-    activeEffect = undefined;
-    return result;
+    let lastShouldTrack = false;
+    try {
+      lastShouldTrack = shouldTrack ;
+      this.parent = activeEffect;
+
+      shouldTrack = true;
+      activeEffect = this;
+      let result = this.fn();
+      return result;
+    } finally {
+      activeEffect = this.parent;
+      shouldTrack = lastShouldTrack;
+    }
   }
 }
 const isTracking = () => {
