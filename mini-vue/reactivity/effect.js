@@ -1,9 +1,14 @@
 import {
   createDep
 } from "./dep.js";
+
 const proxyMap = new WeakMap();
 let activeEffect = void 0;
 let shouldTrack = false;
+
+let effectTrackDep = 0;
+let maxMakerBits = 30; //effect最大嵌套层级, 每嵌套一级则左移一位
+
 class ReactiveEffect{
   constructor(fn,scheduler) {
     this.fn = fn;
