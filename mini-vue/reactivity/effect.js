@@ -33,7 +33,6 @@ class ReactiveEffect{
       activeEffect = this;
 
       trackOpBit = 1 << ++effectTrackDepth;
-      console.log(trackOpBit )
 
       if (effectTrackDepth <= maxMakerBits) {
         initDepMakers(this);  
@@ -44,7 +43,6 @@ class ReactiveEffect{
       return result;
     } finally {
       if (effectTrackDepth <= maxMakerBits) {
-        console.log(`执行finalizeDepMakers`)
         finalizeDepMakers(this);
       }
       trackOpBit = 1 << --effectTrackDepth;

@@ -28,14 +28,11 @@ const finalizeDepMakers = (reactiveEffect) => {
     let ptr = 0;
     for (let i = 0; i < deps.length; i++) {
       const dep = deps[i];
-      console.log(dep, wasTracked(dep), newTracked(dep));
       if (wasTracked(dep) && !newTracked(dep)) {
-        console.log("我被删掉了")
         dep.delete(reactiveEffect);
       } else {
         deps[ptr++] = dep;
-      }
-
+      } 
       dep.w = dep.w & ~trackOpBit;
       dep.n = dep.n & ~trackOpBit;
     }
