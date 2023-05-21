@@ -1,13 +1,18 @@
 import {
-  createDep
+  createDep,
+  finalizeDepMakers,
+  initDepMakers,
+  wasTracked,
+  newTracked
 } from "./dep.js";
 
 const proxyMap = new WeakMap();
 let activeEffect = void 0;
 let shouldTrack = false;
 
-let effectTrackDep = 0;
+let effectTrackDepth = 0;
 let maxMakerBits = 30; //effect最大嵌套层级, 每嵌套一级则左移一位
+export let trackOpBit = 1;
 
 class ReactiveEffect{
   constructor(fn,scheduler) {
@@ -21,18 +26,32 @@ class ReactiveEffect{
     if (!this.active) {
       return this.fn();
     }
-    let lastShouldTrack = false;
+    let lastShouldTrack = shouldTrack;
     try {
-      lastShouldTrack = shouldTrack ;
       this.parent = activeEffect;
-
       shouldTrack = true;
       activeEffect = this;
+
+      trackOpBit = 1 << ++effectTrackDepth;
+      console.log(trackOpBit )
+
+      if (effectTrackDepth <= maxMakerBits) {
+        initDepMakers(this);  
+      } else {
+        cleanupEffect(this);
+      }
       let result = this.fn();
       return result;
     } finally {
+      if (effectTrackDepth <= maxMakerBits) {
+        console.log(`执行finalizeDepMakers`)
+        finalizeDepMakers(this);
+      }
+      trackOpBit = 1 << --effectTrackDepth;
+
       activeEffect = this.parent;
       shouldTrack = lastShouldTrack;
+      this.parent = undefined;
     }
   }
 }
@@ -54,7 +73,16 @@ const track = (target, key) => {
   trackEffects(dep);
 }
 const trackEffects = (dep) => {
-  if (!dep.has(activeEffect)) {
+  let shouldTrack = false;
+  if (effectTrackDepth<=maxMakerBits) {
+    if (!newTracked(dep)) {
+      dep.n = dep.n | trackOpBit;
+      shouldTrack = !wasTracked(dep);
+    }
+  } else {
+    shouldTrack = !dep.has(activeEffect);
+  }
+  if (shouldTrack) {
     dep.add(activeEffect);
     activeEffect.deps.push(dep);
   }
@@ -81,9 +109,9 @@ const triggerEffects = (dep) => {
   })
 }
 const cleanupEffect = (effectFn) => {
-  for (let i = 0; i < effectFn.deps; i++){
-    const deps = effectFn.deps[i];
-    deps.delete(effectFn);
+  for (let i = 0; i < effectFn.deps.length; i++){
+    const dep = effectFn.deps[i];
+    dep.delete(effectFn);
   }
 }
 const effect = (fn,options) => {
