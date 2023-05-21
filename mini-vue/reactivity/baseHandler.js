@@ -1,5 +1,6 @@
-import { ReactiveFlags } from "./reactive.js";
-import { track,trigger } from "./effect.js";
+import { ReactiveFlags, reactive } from "./reactive.js";
+import { track, trigger } from "./effect.js";
+import { isObject } from "../shared/src/index.js";
 const get = createGetter();
 const set = createSetter();
 
@@ -15,15 +16,18 @@ function createGetter(isReadonly,isShallow){
 
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {
-      track(target, key);
+      track(target, key,"get");
     }
+    if (isObject(res)) {
+      return reactive(res);
+    }  
     return res;
   }
 }
 function createSetter(){
   return (target,key,newValue,receiver) => {
     const res = Reflect.set(target, key, newValue, receiver);
-    trigger(target, key, newValue);
+    trigger(target, key, "set");
     return res;
   }
 }

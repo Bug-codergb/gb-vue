@@ -1,3 +1,4 @@
+import { isObject } from "../shared/src/index.js";
 import {
   createDep
 } from "./dep.js"
@@ -26,9 +27,6 @@ class RefImpl{
     this._rawValue = newValue;
     triggerRefValue(this);
   }
-}
-const isObject = (value) => {
-  return typeof value === "object" && value !== null;
 }
 const covert = (value) => {
   return isObject(value) ? reactive(value) : value;
