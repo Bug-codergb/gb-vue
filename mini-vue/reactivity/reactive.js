@@ -1,9 +1,13 @@
+import { isObject } from "../shared/src/index.js";
 import {
   baseHandler,
-  readonlyHandler
+  readonlyHandler,
+  shallowReactiveHandler
 } from "./baseHandler.js";
 const reactiveMap = new WeakMap();
 const readonlyMap = new WeakMap();
+
+const shallowReactiveMap = new WeakMap();
 
 const ReactiveFlags = {
   RAW: "_v_is_raw",
@@ -11,15 +15,24 @@ const ReactiveFlags = {
   READONLY:"_v_is_readonly"
 }
 const reactive = (raw) => {
-  return createReactive(raw,reactiveMap,baseHandler);
+  return createReactive(raw,false,reactiveMap,baseHandler);
 }
+
+const shallowReactive = (raw) => {
+  return createReactive(raw,false,shallowReactive,shallowReactiveHandler);
+}
+
 const readonly = (raw) => {
-  return createReactive(raw, readonlyMap, readonlyHandler);
+  return createReactive(raw, false,readonlyMap, readonlyHandler);
 }
 const isReadonly = (value) => {
   return !!value[ReactiveFlags.READONLY];
 }
-const createReactive = (raw,proxyMap,handler) => {
+const createReactive = (raw, isReadonly,proxyMap, handler) => {
+  if (!isObject(raw)) {
+    console.warn("value can not be made reactive");
+    return raw;
+  }
   let proxy = reactiveMap.get(raw);
   if (proxy) {
     return proxy;

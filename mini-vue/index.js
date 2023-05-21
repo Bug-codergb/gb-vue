@@ -20,6 +20,21 @@ window.user = user;
 const counter = ref(0);
 window.counter = counter;
 
+const stu = reactive([
+  {
+    name: "foo",
+    age:10
+  },
+  {
+    name: "bar",
+    age:14
+  },
+  {
+    name: "coder",
+    age:80
+  }
+])
+window.stu = stu;
 effect(() => {
-  console.log(`-----${user.address.alias}----`);
+  console.log(`-----${stu}-----`);
 })
