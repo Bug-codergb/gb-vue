@@ -38,7 +38,6 @@ const trackRefValue = (ref) => {
   }
 }
 const triggerRefValue = (ref) => {
-  console.log(ref);
   triggerEffects(ref.dep);
 }
 const isRef = (value) => {

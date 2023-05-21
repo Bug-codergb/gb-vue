@@ -1,8 +1,8 @@
 import { ReactiveFlags, reactive,readonly } from "./reactive.js";
 import { track, trigger } from "./effect.js";
 import { isObject } from "../shared/src/index.js";
-const get = createGetter();
-const set = createSetter();
+const get = createGetter(false,false);
+const set = createSetter(false,false);
 
 const readonlyGet = createGetter(true,false);
 
