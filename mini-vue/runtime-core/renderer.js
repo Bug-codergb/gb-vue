@@ -1,3 +1,4 @@
+import { effect } from "../reactivity/effect.js";
 import ShapeFlags from "../shared/src/shapeFlags.js";
 import {
   createComponentInstance,
@@ -127,9 +128,17 @@ const createRenderer = (options) => {
     const instance = createComponentInstance(vnode, container);
     vnode.component = instance;
     setupComponent(instance);
+    setupRenderEffect(instance,vnode, container);
   }
   function updateComponent(n1,n2,container,parentComponent) {
     
+  }
+  function setupRenderEffect(instance,vnode,container) {
+    instance.update = effect(() => { }, {
+      scheduler: () => {
+        
+      }
+    })
   }
   return {
     render
