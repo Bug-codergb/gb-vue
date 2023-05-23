@@ -21,7 +21,9 @@ const reactive = (raw) => {
 const shallowReactive = (raw) => {
   return createReactive(raw,false,shallowReactive,shallowReactiveHandler);
 }
-
+const shallowReadonly = (raw) => {
+  
+}
 const readonly = (raw) => {
   return createReactive(raw, false,readonlyMap, readonlyHandler);
 }
@@ -47,5 +49,6 @@ export {
   reactive,
   readonly,
   ReactiveFlags,
-  isReadonly
+  isReadonly,
+  shallowReadonly
 }

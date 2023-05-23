@@ -7,8 +7,9 @@ const setElementText = () => {
 const remove = () => {
   
 }
-const insert = () => {
-  
+//在一个节点的锚点前插入
+const insert = (child,parent,anchor=null) => {
+  parent.insertBefore(child,anchor);
 }
 const createText = () => {
   

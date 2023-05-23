@@ -1,5 +1,9 @@
 import ShapeFlags from "../shared/src/shapeFlags.js";
 import {
+  createComponentInstance,
+  setupComponent
+} from "./component.js"
+import {
   Text,
   Fragment
 } from "./vnode.js";
@@ -9,8 +13,8 @@ const createRenderer = (options) => {
     setElementText:hostSetElementText,
     patchProp:hostPatchProps,
     remove,
-    insert,
-    createText
+    insert:hostInsert,
+    createText:hostCreateText
   } = options;
   const render = (vnode,container) => {
     patch(null, vnode, container);
@@ -28,6 +32,14 @@ const createRenderer = (options) => {
         } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
           processComponent(n1, n2, container, parentComponent);
         }
+    }
+  }
+  //处理文本节点
+  function processText(n1,n2,container) {
+    if (n1 === null) { //挂载阶段
+      const text = n2.children;
+      n2.el = hostCreateText(text);
+      hostInsert(n2.el,container);//直接将n2插入
     }
   }
   function processElement(n1,n2,container,anchor,parentComponent) {
@@ -55,11 +67,12 @@ const createRenderer = (options) => {
   }
   // element -> mount
   function mountElement(vnode,container,anchor){
-    const { shapeFlag, type,props } = vnode;
+    const { shapeFlag, type, props } = vnode;
     const el = createElement(type);
+    //文本节点
     if (shapeFlag && ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el,vnode.children);
-    } else if (shapeFlag && ShapeFlags.ARRAY_CHILDREN) {
+    } else if (shapeFlag && ShapeFlags.ARRAY_CHILDREN) {//数组节点
       mountChildren(vnode.children,el);
     }
     if (props) {
@@ -100,6 +113,22 @@ const createRenderer = (options) => {
     }
   }
   function patchKeyedChildren(c1,c2,container,anchor,parentComponent) {
+    
+  }
+  //组件
+  function processComponent(n1,n2,container,parentComponent) {
+    if (n1 === null) {
+      mountComponent(n2,container,parentComponent);
+    } else {
+      updateComponent(n1, n2, container, parentComponent);
+    }
+  }
+  function mountComponent(vnode,container,parentComponent) {
+    const instance = createComponentInstance(vnode, container);
+    vnode.component = instance;
+    setupComponent(instance);
+  }
+  function updateComponent(n1,n2,container,parentComponent) {
     
   }
   return {
