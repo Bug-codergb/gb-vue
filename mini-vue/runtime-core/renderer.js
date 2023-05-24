@@ -1,4 +1,5 @@
 import { effect } from "../reactivity/effect.js";
+import { isReservedProps } from "../shared/src/general.js";
 import ShapeFlags from "../shared/src/shapeFlags.js";
 import {
   createComponentInstance,
@@ -12,13 +13,21 @@ const createRenderer = (options) => {
   const {
     createElement,
     setElementText:hostSetElementText,
-    patchProp:hostPatchProps,
+    patchProps:hostPatchProps,
     remove,
     insert:hostInsert,
-    createText:hostCreateText
+    createText: hostCreateText,
+    unmount
   } = options;
-  const render = (vnode,container) => {
-    patch(null, vnode, container);
+  const render = (vnode, container) => {
+    if (vnode === null) {
+      if (container._vnode) {
+        unmount(container._vnode);
+      }
+    } else {
+      patch(null, vnode, container);
+    }
+    container._vnode = vnode;
   }
   function patch(n1,n2,container,anchor,parentComponent){
     const { type,shapeFlag } = n2;
@@ -51,18 +60,22 @@ const createRenderer = (options) => {
     }
   }
   //patchProps
-  function patchProps(el,key,oldProps,newProps) {
-    for (let key in newProps) {
-      const prevProps = oldProps[key];
-      const nextProps = newProps[key];
-      if (prevProps !== nextProps) {
-        hostPatchProps(el, key, prevProps,nextProps);
+  function patchProps(el, vnode, oldProps, newProps, parentComponent) {
+    if (oldProps !== newProps) {
+      if (Object.keys(oldProps).length!==0) {
+        for (key in oldProps) {
+          if (!isReservedProps(key) && !(key in newProps)) { //删除旧的key
+            hostPatchProps(el,key,oldProps[key],null,vnode.children,parentComponent);
+          }
+        }
       }
-    }
-    for (let key in oldProps) {
-      const prevPrsop = oldProps[key];
-      if (!(key in newProps)) {
-        hostPatchProps(el, key, prevPrsop, null);
+      for (const key in newProps) {
+        if (isReservedProps(key)) continue;
+        const next = newProps[key];
+        const prev = oldProps[key];
+        if (next !== prev && key !== 'value') {
+          hostPatchProps(el, key, prev, next, vnode.children, parentComponent);
+        }
       }
     }
   }
@@ -94,22 +107,39 @@ const createRenderer = (options) => {
     const oldProps = (n1 && n1.props) || {};
     const newProps = n2.props || {};
     const el = n2.el = n1.el;
-    patchProps(el, oldProps, newProps);
+    patchProps(el,n2, oldProps, newProps,parentComponent);
     patchChildren(n1,n2,el,anchor,parentComponent);
   }
   function patchChildren(n1,n2,container,anchor,parentComponent) {
     const { shapeFlag: prevShapeFlag, children: c1 } = n1;
     const { shapeFlag, children: c2 } = n2;
-    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) { //新节点是文本节点
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 旧节点的字节点是数组，新节点的字节点是文本
+        c1.forEach((c) => {
+          unmount(c);
+        })
+      }
       if (c1 !== c2) {
         hostSetElementText(container,c2);
       }
-    }else {
-      if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
-        hostSetElementText(container, "");
-        mountChildren(c2,container);
-      } else {
-        patchKeyedChildren(c1,c2,container,anchor,parentComponent);    
+    } else {//新节点的字节点是array || null
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) { //新节点是字节点是数组
+          patchKeyedChildren(c1, c2, container, anchor, parentComponent);
+        } else { //新节点是null 旧节点是array
+          c1.forEach((c) => {
+            unmount(c);
+          })
+        }
+      } else { // 旧节点的字节点是text ｜｜ null
+        if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) { //旧节点的字节点是文本
+          hostSetElementText(container, "");
+        } 
+        if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {//新节点是array
+          c2.forEach((c) => {
+            patch(null,c,container,anchor,parentComponent);
+          })
+        }
       }
     }
   }
