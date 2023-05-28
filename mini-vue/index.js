@@ -20,14 +20,7 @@ const user = reactive({
 window.user = user;
 const counter = ref(0);
 window.counter = counter;
-effect(() => {
-  for (let key in user) {
-    console.log(key);
-  }  
-});
-effect(() => {
-  console.log("-----"+user.name+"------");
-})
+
 const stu = reactive([
   {
     name: "foo",
@@ -44,7 +37,10 @@ const stu = reactive([
 ])
 window.stu = stu;
 
-stu[3] = {
-  name: "app",
-  age:10
-}
+let obj = { name: "123" };
+let list = reactive([1,2,3,4,obj,6]);
+effect(() => {
+  console.log(list.includes(obj));
+})
+window.obj = obj;
+window.list = list;

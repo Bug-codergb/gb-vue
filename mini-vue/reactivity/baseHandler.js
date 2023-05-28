@@ -7,7 +7,29 @@ const set = createSetter(false,false);
 const readonlyGet = createGetter(true,false);
 
 const shallowGet = createGetter(false,true);
-const shallowSet = createSetter(false,true);
+const shallowSet = createSetter(false, true);
+
+const arrayInstrumentations = createArrayInstrumentations();
+
+function createArrayInstrumentations() {
+  const instrumentations = {};
+  ["includes", "indexOf", "lastIndexOf"].forEach((key) => {
+    instrumentations[key] = function (...args) {
+      const arr = toRaw(this);
+      for (let i = 0; i < this.length; i++){
+        track(arr,i+'','get'); //执行查找方法时，需要收集依赖，当用户修改arr[index]是触发;
+      }
+      const res = arr[key](...args); // 使用原始参数查找arg中有的可能为proxy,
+      if (res === -1 || res === false) {
+        return arr[key](...(args.map((item)=>toRaw(item)))); // 将参数值设置为原始值，再去查找
+      } else {
+        return res;
+      }
+    }
+  })  
+  return instrumentations;
+}  
+
 function createGetter(isReadonly,isShallow){
   return (target,key,receiver) => {
     if (key === ReactiveFlags.READONLY) {
@@ -20,7 +42,11 @@ function createGetter(isReadonly,isShallow){
 
     //判断是否调用数组方法
     const targetIsArray = Array.isArray(target);
-
+    if (!isReadonly) {
+      if (targetIsArray && arrayInstrumentations.hasOwnProperty(key)) {
+        return Reflect.get(arrayInstrumentations,key,receiver);
+      }  
+    }
 
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {
