@@ -5,6 +5,7 @@ import {
   wasTracked,
   newTracked
 } from "./dep.js";
+export const ITERATE_KEY = Symbol('iterate');
 
 const proxyMap = new WeakMap();
 let activeEffect = void 0;
@@ -85,20 +86,59 @@ const trackEffects = (dep) => {
     activeEffect.deps.push(dep);
   }
 }
-const trigger = (target,key,value) => {
+const trigger = (target, key, newValue,oldValue,type) => {
+  //获取对象的键对应的dep(dep是一个set)
   let depMap = proxyMap.get(target);
   if (!depMap) {
     return;
   }
-  let dep = depMap.get(key);
-  if (!dep) {
-    return;
+  let deps = [];//存储所有需要执行的effect,不一定全是 depMap.get(key),比如数组新增元素需要触发length的dep
+  if (type === "clear") {
+    
+  } else if (key==="length" && Array.isArray(target)) {
+    const newLength = Number(newValue); //如果是修改了数组长度则获取数组最新长度
+    //map遍历时 dep为map的value，key为map的key;
+    depMap.forEach((dep, key) => {
+      //当数组的长度由原来的100变为10，则90个dep需要执行；
+      // 这里有一个key 为迭代器（之后处理）;
+      if (key === 'length' || (typeof key !=="symbol" && key >= newLength)) {
+        deps.push(dep);
+      }
+    })
+  } else {
+    //判断key 不为undefined(void 0 === undefinde 防止undefined被修改)
+    if (key !== void 0) {
+      deps.push(depMap.get(key));
+    }
+
+    switch (type) {
+      case "add":
+        if (!Array.isArray(target)) { //为对象添加一个属性的时候需要触发他的遍历dep
+          deps.push(depMap.get(ITERATE_KEY));
+        } else {
+          //如果是数组添加一个值，则需要触发他length对应的dep;
+          deps.push(depMap.get("length"));
+        }break;
+      case "delete":
+        if (!Array.isArray(target)) {//为对象删除一个属性的时候需要触发他的遍历dep
+          deps.push(depMap.get(ITERATE_KEY));
+        }
+        break;
+      case "set":  //在修改值的时候不需要触发遍历key的操纵，因为key不变 
+        break;
+    }
   }
-  triggerEffects(dep);
+  const effects = [];
+  for (let dep of deps) {
+    if (dep) {
+      effects.push(...dep);
+    }
+  }
+  //做一个拷贝；
+  triggerEffects(createDep(effects));
 }
 const triggerEffects = (dep) => {
-  let execDep = new Set(dep);
-  execDep.forEach((effect) => {
+  dep.forEach((effect) => {
     if (effect.scheduler) {
       effect.scheduler();
     } else {

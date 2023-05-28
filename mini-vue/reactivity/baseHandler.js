@@ -1,6 +1,6 @@
-import { ReactiveFlags, reactive,readonly } from "./reactive.js";
-import { track, trigger } from "./effect.js";
-import { isObject } from "../shared/src/index.js";
+import { ReactiveFlags, reactive,readonly ,reactiveMap,toRaw} from "./reactive.js";
+import { ITERATE_KEY, track, trigger } from "./effect.js";
+import { isObject,hasChanged } from "../shared/src/index.js";
 const get = createGetter(false,false);
 const set = createSetter(false,false);
 
@@ -12,14 +12,19 @@ function createGetter(isReadonly,isShallow){
   return (target,key,receiver) => {
     if (key === ReactiveFlags.READONLY) {
       return isReadonly;
-    }
-    if (key === ReactiveFlags.REACTIVE) {
+    }else if (key === ReactiveFlags.REACTIVE) {
       return !isReadonly;
+    } else if (key === ReactiveFlags.RAW && receiver === reactiveMap.get(target)) {
+      return target;
     }
+
+    //判断是否调用数组方法
+    const targetIsArray = Array.isArray(target);
+
 
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {
-      track(target, key,"get");
+      track(target, key, "get");
     }
 
     if (isShallow) {
@@ -34,9 +39,20 @@ function createGetter(isReadonly,isShallow){
   }
 }
 function createSetter(isReadonly,isShallow){
-  return (target,key,newValue,receiver) => {
+  return (target, key, newValue, receiver) => {
+    let oldValue = target[key];//获取旧值
+    
+    const hadKey = Array.isArray(target) ? Number(key) < target.length : target.hasOwnProperty(key);//判断是添加值还是设置值
     const res = Reflect.set(target, key, newValue, receiver);
-    trigger(target, key, "set");
+    if (target === toRaw(target)) {
+      if (!hadKey) {
+        console.log("新增属性");
+        trigger(target, key,newValue,oldValue, "add");
+      } else if (hasChanged(newValue, oldValue)) { //前后的值没有发生改变则不需要触发依赖
+        console.log("设置属性");
+        trigger(target, key,newValue,oldValue, "set");
+      }
+    }
     return res;
   }
 }
@@ -51,9 +67,29 @@ const readonlyHandler = {
     return true
   }
 }
+function deleteProperty(target,key) {
+  const hadKey = target.hasOwnProperty(key);
+  const oldValue = target[key];
+  const result = Reflect.deleteProperty(target, key);
+  if (hadKey && result) {
+    trigger(target,key,undefined,oldValue,"delete");
+  }
+  return result;
+}
+function ownKeys(target) {
+  track(target, Array.isArray(target) ? 'length' : ITERATE_KEY, 'iterate');
+  return Reflect.ownKeys(target);
+}
+function has(target,key) {
+  console.log(target, key);
+}
+//对象数据handler ( object,array) 
 const baseHandler = {
   get,
-  set
+  set,
+  deleteProperty,
+  ownKeys,
+  has
 }
 const shallowReactiveHandler = {
   shallowGet,

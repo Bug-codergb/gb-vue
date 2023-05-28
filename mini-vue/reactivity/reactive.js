@@ -30,6 +30,11 @@ const readonly = (raw) => {
 const isReadonly = (value) => {
   return !!value[ReactiveFlags.READONLY];
 }
+
+export function toRaw(observed) {
+  const raw = observed && observed[ReactiveFlags.RAW];
+  return raw ? toRaw(raw) : observed;
+}
 const createReactive = (raw, isReadonly,proxyMap, handler) => {
   if (!isObject(raw)) {
     console.warn("value can not be made reactive");
@@ -50,5 +55,6 @@ export {
   readonly,
   ReactiveFlags,
   isReadonly,
-  shallowReadonly
+  shallowReadonly,
+  reactiveMap
 }

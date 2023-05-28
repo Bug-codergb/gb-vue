@@ -16,10 +16,18 @@ const user = reactive({
     alias:"首都"
   }
 })
+
 window.user = user;
 const counter = ref(0);
 window.counter = counter;
-
+effect(() => {
+  for (let key in user) {
+    console.log(key);
+  }  
+});
+effect(() => {
+  console.log("-----"+user.name+"------");
+})
 const stu = reactive([
   {
     name: "foo",
@@ -35,6 +43,8 @@ const stu = reactive([
   }
 ])
 window.stu = stu;
-effect(() => {
-  console.log(`-----${stu}-----`);
-})
+
+stu[3] = {
+  name: "app",
+  age:10
+}

@@ -5,3 +5,6 @@ export const isReservedProps = (key) => {
   ])
   return !!map.get(key);
 }
+export const hasChanged = (newValue,oldValue) => {
+  return !Object.is(newValue, oldValue);
+}
