@@ -1,6 +1,7 @@
 import { ReactiveFlags, reactive,readonly ,reactiveMap,toRaw} from "./reactive.js";
 import { ITERATE_KEY, track, trigger } from "./effect.js";
-import { isObject,hasChanged } from "../shared/src/index.js";
+import { isObject, hasChanged } from "../shared/src/index.js";
+
 const get = createGetter(false,false);
 const set = createSetter(false,false);
 
@@ -17,7 +18,7 @@ function createArrayInstrumentations() {
     instrumentations[key] = function (...args) {
       const arr = toRaw(this);
       for (let i = 0; i < this.length; i++){
-        track(arr,i+'','get'); //执行查找方法时，需要收集依赖，当用户修改arr[index]是触发;
+        track(arr,i+'','get'); //执行查找方法时，需要收集依赖，当用户修改arr[index]时触发;
       }
       const res = arr[key](...args); // 使用原始参数查找arg中有的可能为proxy,
       if (res === -1 || res === false) {
@@ -47,7 +48,7 @@ function createGetter(isReadonly,isShallow){
         return Reflect.get(arrayInstrumentations,key,receiver);
       }  
     }
-
+      
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {
       track(target, key, "get");

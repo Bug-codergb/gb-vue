@@ -5,7 +5,7 @@ import {
   computed
 } from "./reactivity/index.js";
 
-const user = reactive({
+/*const user = reactive({
   name: "foo",
   age: 10,
   gender: "male",
@@ -35,7 +35,7 @@ const stu = reactive([
     age:80
   }
 ])
-window.stu = stu;
+window.stu = stu;*/
 
 let obj = { name: "123" };
 let list = reactive([1,2,3,4,obj,6]);

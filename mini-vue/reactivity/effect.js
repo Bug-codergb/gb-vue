@@ -33,9 +33,10 @@ class ReactiveEffect{
       shouldTrack = true;
       activeEffect = this;
 
-      trackOpBit = 1 << ++effectTrackDepth;
+      trackOpBit = 1 << ++effectTrackDepth; // 每次嵌套一层则左移一位
 
       if (effectTrackDepth <= maxMakerBits) {
+        //初始化的时候这里是不会执行的，因为dep的length1为0，更新的时候每一个dep的w置为trackOpBit
         initDepMakers(this);  
       } else {
         cleanupEffect(this);
