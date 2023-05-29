@@ -19,7 +19,7 @@ const reactive = (raw) => {
 }
 
 const shallowReactive = (raw) => {
-  return createReactive(raw,false,shallowReactive,shallowReactiveHandler);
+  return createReactive(raw,false,shallowReactiveMap,shallowReactiveHandler);
 }
 const shallowReadonly = (raw) => {
   
