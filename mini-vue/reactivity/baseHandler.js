@@ -1,6 +1,6 @@
 import { ReactiveFlags, reactive,readonly ,reactiveMap,toRaw} from "./reactive.js";
 import { ITERATE_KEY, track, trigger } from "./effect.js";
-import { isObject, hasChanged } from "../shared/src/index.js";
+import { isObject, hasChanged ,isIntegerKey} from "../shared/src/index.js";
 
 const get = createGetter(false,false);
 const set = createSetter(false,false);
@@ -32,7 +32,7 @@ function createArrayInstrumentations() {
 }  
 
 function createGetter(isReadonly,isShallow){
-  return (target,key,receiver) => {
+  return (target, key, receiver) => {
     if (key === ReactiveFlags.READONLY) {
       return isReadonly;
     }else if (key === ReactiveFlags.REACTIVE) {
@@ -69,7 +69,7 @@ function createSetter(isReadonly,isShallow){
   return (target, key, newValue, receiver) => {
     let oldValue = target[key];//获取旧值
     
-    const hadKey = Array.isArray(target) ? Number(key) < target.length : target.hasOwnProperty(key);//判断是添加值还是设置值
+    const hadKey = Array.isArray(target) && isIntegerKey(key) ? Number(key) < target.length : target.hasOwnProperty(key);//判断是添加值还是设置值
     const res = Reflect.set(target, key, newValue, receiver);
     if (target === toRaw(receiver)) {
       if (!hadKey) {
@@ -104,6 +104,7 @@ function deleteProperty(target,key) {
   return result;
 }
 function ownKeys(target) {
+  console.log(target);
   track(target, Array.isArray(target) ? 'length' : ITERATE_KEY, 'iterate');
   return Reflect.ownKeys(target);
 }

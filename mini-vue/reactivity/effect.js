@@ -5,6 +5,9 @@ import {
   wasTracked,
   newTracked
 } from "./dep.js";
+import {
+  isIntegerKey
+} from "../shared/src/index.js"
 export const ITERATE_KEY = Symbol('iterate');
 
 const proxyMap = new WeakMap();
@@ -87,7 +90,7 @@ const trackEffects = (dep) => {
     activeEffect.deps.push(dep);
   }
 }
-const trigger = (target, key, newValue,oldValue,type) => {
+const trigger = (target, key, newValue, oldValue, type) => {
   //获取对象的键对应的dep(dep是一个set)
   let depMap = proxyMap.get(target);
   if (!depMap) {
@@ -116,7 +119,7 @@ const trigger = (target, key, newValue,oldValue,type) => {
       case "add":
         if (!Array.isArray(target)) { //为对象添加一个属性的时候需要触发他的遍历dep
           deps.push(depMap.get(ITERATE_KEY));
-        } else {
+        } else if(isIntegerKey(key)){
           //如果是数组添加一个值，则需要触发他length对应的dep;
           deps.push(depMap.get("length"));
         }break;

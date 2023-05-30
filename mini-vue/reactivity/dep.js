@@ -31,6 +31,7 @@ const finalizeDepMakers = (reactiveEffect) => {
       if (wasTracked(dep) && !newTracked(dep)) {
         dep.delete(reactiveEffect);
       } else {
+        //当dep中删除effect时，effect同时也要删除dep(从effect的deps中);
         deps[ptr++] = dep;
       } 
       dep.w = dep.w & ~trackOpBit;

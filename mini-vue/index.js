@@ -37,10 +37,22 @@ const stu = reactive([
 ])
 window.stu = stu;*/
 
-let obj = { name: "123" };
+/*let obj = { name: "123" };
 let list = reactive([1,2,3,4,obj,6]);
 effect(() => {
   console.log(list.includes(obj));
 })
 window.obj = obj;
-window.list = list;
+window.list = list;*/
+const arr = reactive([10, 11, 12, 13, 14, 15]);
+/*effect(() => {
+  for (let key in arr) {
+    console.log(key);//触发ownKeys
+  }
+})*/
+effect(() => {
+  for (let item of arr) {
+    console.log(item);
+  }
+})
+window.arr = arr;
