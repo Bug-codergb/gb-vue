@@ -71,7 +71,7 @@ function createSetter(isReadonly,isShallow){
     
     const hadKey = Array.isArray(target) ? Number(key) < target.length : target.hasOwnProperty(key);//判断是添加值还是设置值
     const res = Reflect.set(target, key, newValue, receiver);
-    if (target === toRaw(target)) {
+    if (target === toRaw(receiver)) {
       if (!hadKey) {
         console.log("新增属性");
         trigger(target, key,newValue,oldValue, "add");
