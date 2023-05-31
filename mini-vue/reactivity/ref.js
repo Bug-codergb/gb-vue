@@ -1,9 +1,9 @@
-import { isObject } from "../shared/src/index.js";
+import { hasChanged, isObject } from "../shared/src/index.js";
 import {
   createDep
 } from "./dep.js"
 import {
-  reactive
+  toRaw, toReactive
 } from "./reactive.js";
 
 import {
@@ -12,24 +12,25 @@ import {
   triggerEffects
 } from "./effect.js"
 class RefImpl{
-  constructor(raw) {
-    this._rawValue = raw;
-    this._v_is_ref = true;
+  constructor(raw,isShallow) {
+    this._v_isRef = true;
+    this._v_isShallow = isShallow;
     this.dep = createDep();
-    this._value = covert(raw);
+    this._rawValue = isShallow ? raw : toRaw(raw);
+    this._value = isShallow ? raw : toReactive(raw);
   }
   get value() {
     trackRefValue(this);
     return this._value;
   }
   set value(newValue) {
-    this._value = covert(newValue);
-    this._rawValue = newValue;
-    triggerRefValue(this);
+    
+    if (hasChanged(newValue,this._rawValue)) {
+      this._value = covert(newValue);
+      this._rawValue = newValue 
+      triggerRefValue(this);
+    }
   }
-}
-const covert = (value) => {
-  return isObject(value) ? reactive(value) : value;
 }
 
 const trackRefValue = (ref) => {
@@ -41,18 +42,28 @@ const triggerRefValue = (ref) => {
   triggerEffects(ref.dep);
 }
 const isRef = (value) => {
-  return !!value[`_v_is_ref`];
+  return !!value[`_v_isRef`];
 }
 const unRef = (ref) => {
   return isRef(ref) ? ref.value : ref;
 }
 const ref = (raw) => {
-  return new RefImpl(raw);
+  return createRef(raw,false);
+}
+const shallowRef = (raw) => {
+  return createRef(raw, true);
+}
+function createRef(rawValue,shallow) {
+  if (isRef(rawValue)) {
+    return rawValue //已经是ref则不需要重新创建 ref传入一个shallowRef 仍然是shallowRef
+  }
+  return new RefImpl(rawValue,shallow);
 }
 export {
   trackRefValue,
   triggerRefValue,
   isRef,
   unRef,
-  ref
+  ref,
+  shallowRef
 }

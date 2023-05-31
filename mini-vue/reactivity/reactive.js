@@ -10,9 +10,10 @@ const readonlyMap = new WeakMap();
 const shallowReactiveMap = new WeakMap();
 
 const ReactiveFlags = {
-  RAW: "_v_is_raw",
-  REACTIVE: "_v_is_reactive",
-  READONLY:"_v_is_readonly"
+  RAW: "raw",
+  REACTIVE: "_v_isReactive",
+  READONLY: "_v_isReadonly",
+  SHALLOW:"_v_isShallow"
 }
 const reactive = (raw) => {
   return createReactive(raw,false,reactiveMap,baseHandler);
@@ -34,6 +35,12 @@ const isReadonly = (value) => {
 export function toRaw(observed) {
   const raw = observed && observed[ReactiveFlags.RAW];
   return raw ? toRaw(raw) : observed;
+}
+export function toReactive(raw) {
+  return isObject(raw) ? reactive(raw) : raw;
+}
+export function toReadonly(raw) {
+  return isObject(raw) ? readonly(raw) : raw;
 }
 const createReactive = (raw, isReadonly,proxyMap, handler) => {
   if (!isObject(raw)) {
