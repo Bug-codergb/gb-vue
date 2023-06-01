@@ -1,5 +1,7 @@
 import {
   reactive,
+  readonly,
+  isReadonly,
   ref,
   effect,
   computed
@@ -44,15 +46,19 @@ effect(() => {
 })
 window.obj = obj;
 window.list = list;*/
-const arr = reactive([10, 11, 12, 13, 14, 15]);
+//const arr = reactive([10, 11, 12, 13, 14, 15]);
 /*effect(() => {
   for (let key in arr) {
     console.log(key);//触发ownKeys
   }
 })*/
-effect(() => {
+/*effect(() => {
   for (let item of arr) {
     console.log(item);
   }
 })
-window.arr = arr;
+window.arr = arr;*/
+const user = readonly({
+  name: "app"
+})
+console.log(isReadonly(user));

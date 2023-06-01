@@ -1,4 +1,4 @@
-import { ReactiveFlags, reactive,readonly ,reactiveMap,toRaw} from "./reactive.js";
+import { ReactiveFlags, reactive,readonly ,reactiveMap,toRaw, readonlyMap, shallowReactiveMap, shallowReadonlyMap} from "./reactive.js";
 import { ITERATE_KEY, track, trigger } from "./effect.js";
 import { isObject, hasChanged ,isIntegerKey} from "../shared/src/index.js";
 
@@ -31,13 +31,19 @@ function createArrayInstrumentations() {
   return instrumentations;
 }  
 
-function createGetter(isReadonly,isShallow){
-  return (target, key, receiver) => {
+function createGetter(isReadonly, isShallow) {
+  return (target, key, receiver)=>{
     if (key === ReactiveFlags.READONLY) {
       return isReadonly;
     }else if (key === ReactiveFlags.REACTIVE) {
       return !isReadonly;
-    } else if (key === ReactiveFlags.RAW && receiver === reactiveMap.get(target)) {
+    } else if (key === ReactiveFlags.RAW && !isShallow && !isReadonly && receiver === reactiveMap.get(target)) {//这里先分开写
+      return target;
+    } else if (key === ReactiveFlags.RAW && isReadonly && !isShallow && receiver === readonlyMap.get(target)) {
+      return target;
+    } else if (key === ReactiveFlags.RAW && !isReadonly && isShallow && receiver === shallowReactiveMap.get(target)) {
+      return target;
+    } else if (key === ReactiveFlags.RAW && isShallow && isReadonly && receiver===shallowReadonlyMap(target)) {
       return target;
     }
 
@@ -57,11 +63,11 @@ function createGetter(isReadonly,isShallow){
     if (isShallow) {
       return res;
     }
-
+    console.log(res);
     if (isObject(res)) {
+      console.log(res)
       return isReadonly ? readonly(res) : reactive(res);
     }  
-
     return res;
   }
 }
@@ -84,13 +90,13 @@ function createSetter(isReadonly,isShallow){
   }
 }
 const readonlyHandler = {
-  readonlyGet,
+  get:readonlyGet,
   set(target,key,newValue,receiver) {
-    console.warn("it is readonly");
+    console.warn("target is readonly");
     return true;
   },
   deleteProperty(target, key) {
-    console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`,target)
+    console.warn(`target is readonly.`);
     return true
   }
 }
@@ -120,8 +126,8 @@ const baseHandler = {
   has
 }
 const shallowReactiveHandler = {
-  shallowGet,
-  shallowSet
+  get:shallowGet,
+  set:shallowSet
 }
 export {
   baseHandler,
