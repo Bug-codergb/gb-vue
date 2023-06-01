@@ -37,6 +37,8 @@ function createGetter(isReadonly, isShallow) {
       return isReadonly;
     }else if (key === ReactiveFlags.REACTIVE) {
       return !isReadonly;
+    } else if (key === ReactiveFlags.SHALLOW) {
+      return isShallow;
     } else if (key === ReactiveFlags.RAW && !isShallow && !isReadonly && receiver === reactiveMap.get(target)) {//这里先分开写
       return target;
     } else if (key === ReactiveFlags.RAW && isReadonly && !isShallow && receiver === readonlyMap.get(target)) {
