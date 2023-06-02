@@ -4,7 +4,8 @@ import {
   isReadonly,
   ref,
   effect,
-  computed
+  computed,
+  shallowReadonly
 } from "./reactivity/index.js";
 
 /*const user = reactive({
@@ -58,7 +59,15 @@ window.list = list;*/
   }
 })
 window.arr = arr;*/
-const user = readonly({
+/*const user = readonly({
   name: "app"
 })
-console.log(isReadonly(user));
+console.log(isReadonly(user));*/
+
+const user = shallowReadonly({
+  name: "app",
+  address: {
+    name: "rn"
+  }
+})
+window.user = user;

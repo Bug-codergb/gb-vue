@@ -10,6 +10,8 @@ const readonlyGet = createGetter(true,false);
 const shallowGet = createGetter(false,true);
 const shallowSet = createSetter(false, true);
 
+const shallowReadonlyGet = createGetter(true, true);
+
 const arrayInstrumentations = createArrayInstrumentations();
 
 function createArrayInstrumentations() {
@@ -45,7 +47,7 @@ function createGetter(isReadonly, isShallow) {
       return target;
     } else if (key === ReactiveFlags.RAW && !isReadonly && isShallow && receiver === shallowReactiveMap.get(target)) {
       return target;
-    } else if (key === ReactiveFlags.RAW && isShallow && isReadonly && receiver===shallowReadonlyMap(target)) {
+    } else if (key === ReactiveFlags.RAW && isShallow && isReadonly && receiver === shallowReadonlyMap.get(target)) {
       return target;
     }
 
@@ -131,8 +133,16 @@ const shallowReactiveHandler = {
   get:shallowGet,
   set:shallowSet
 }
+const shallowReadonlyHandlers = Object.assign(
+  {},
+  readonlyHandler,
+  {
+    get:shallowReadonlyGet
+  }
+)
 export {
   baseHandler,
   readonlyHandler,
-  shallowReactiveHandler
+  shallowReactiveHandler,
+  shallowReadonlyHandlers
 }

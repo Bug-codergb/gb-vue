@@ -2,7 +2,8 @@ import { isObject } from "../shared/src/index.js";
 import {
   baseHandler,
   readonlyHandler,
-  shallowReactiveHandler
+  shallowReactiveHandler,
+  shallowReadonlyHandlers
 } from "./baseHandler.js";
 
 const reactiveMap = new WeakMap();
@@ -10,6 +11,8 @@ const readonlyMap = new WeakMap();
 
 const shallowReactiveMap = new WeakMap();
 const shallowReadonlyMap = new WeakMap();
+
+
 
 const ReactiveFlags = {
   RAW: "raw",
@@ -33,7 +36,7 @@ const isShallow = (value) => {
   return !!value[ReactiveFlags.SHALLOW];
 }
 const shallowReadonly = (raw) => {
-  
+  return createReactive(raw,true,shallowReadonlyMap,shallowReadonlyHandlers);
 }
 const readonly = (raw) => {
   return createReactive(raw, true,readonlyMap, readonlyHandler);
@@ -75,6 +78,7 @@ const createReactive = (raw, isReadonly,proxyMap, handler) => {
 export {
   reactive,
   readonly,
+  shallowReactive,
   ReactiveFlags,
   isReadonly,
   isShallow,

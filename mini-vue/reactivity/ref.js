@@ -24,7 +24,6 @@ class RefImpl{
     return this._value;
   }
   set value(newValue) {
-    
     if (hasChanged(newValue,this._rawValue)) {
       this._value = covert(newValue);
       this._rawValue = newValue 
