@@ -8,6 +8,8 @@ import {
   shallowReadonly
 } from "./reactivity/index.js";
 
+import { patchProp } from "./runtime-dom/src/patchProp.js"
+import { hyphenate } from "./shared/src/general.js";
 /*const user = reactive({
   name: "foo",
   age: 10,
@@ -64,10 +66,12 @@ window.arr = arr;*/
 })
 console.log(isReadonly(user));*/
 
-const user = shallowReadonly({
+/*const user = shallowReadonly({
   name: "app",
   address: {
     name: "rn"
   }
 })
-window.user = user;
+window.user = user;*/
+
+console.log(hyphenate("fontSSizeDdr"));

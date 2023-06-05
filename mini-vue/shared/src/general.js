@@ -14,3 +14,23 @@ export const isString = (value) => {
 export const isIntegerKey = (key) => {
   return isString(key) && key !== NaN && '' + parseInt(key, 10) === key;
 }
+//缓存函数
+const cacheStringFunction = (fn) => {
+  const cache = Object.create(null);
+  return (str) => {
+    const hit = cache[str];
+    return hit || (cache[str] = fn(str));
+  }
+}
+const camelizeRE = /-(\w)/g
+export const camelize = cacheStringFunction((str) => {
+  return str.replace(camelizeRE, (c) => (c ? c.toUpperCase() : ''));
+})
+export const capitalize = cacheStringFunction((str) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+})
+
+const hyphenateRE = /\B([A-Z])/g
+export const hyphenate = cacheStringFunction((str) => {
+  return str.replace(hyphenateRE,"-$1").toLowerCase();//这里匹配第一个大写字母(不在开头)
+})

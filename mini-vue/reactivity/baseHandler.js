@@ -140,6 +140,7 @@ const shallowReadonlyHandlers = Object.assign(
     get:shallowReadonlyGet
   }
 )
+console.log(shallowReadonlyHandlers)
 export {
   baseHandler,
   readonlyHandler,
