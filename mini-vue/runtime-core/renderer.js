@@ -1,3 +1,4 @@
+import { createAppAPI } from "./apiCreateApp.js";
 import { effect } from "../reactivity/effect.js";
 import { isReservedProps } from "../shared/src/general.js";
 import ShapeFlags from "../shared/src/shapeFlags.js";
@@ -9,7 +10,12 @@ import {
   Text,
   Fragment
 } from "./vnode.js";
-const createRenderer = (options) => {
+
+function createRenderer(rendererOptions){
+  return baseCreateRenderer(rendererOptions);
+}
+
+function baseCreateRenderer(options){
   const {
     createElement,
     setElementText:hostSetElementText,
@@ -171,7 +177,8 @@ const createRenderer = (options) => {
     })
   }
   return {
-    render
+    render,
+    createApp:createAppAPI(render)
   }
 }
 export {

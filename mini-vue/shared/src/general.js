@@ -14,6 +14,9 @@ export const isString = (value) => {
 export const isIntegerKey = (key) => {
   return isString(key) && key !== NaN && '' + parseInt(key, 10) === key;
 }
+export const isFunction = (value) => {
+  return typeof value === "function";
+}
 //缓存函数
 const cacheStringFunction = (fn) => {
   const cache = Object.create(null);

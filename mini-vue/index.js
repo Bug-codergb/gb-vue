@@ -74,4 +74,4 @@ console.log(isReadonly(user));*/
 })
 window.user = user;*/
 
-console.log(hyphenate("fontSSizeDdr"));
+console.log(hyphenate("fontSize"));
