@@ -12,8 +12,6 @@ const readonlyMap = new WeakMap();
 const shallowReactiveMap = new WeakMap();
 const shallowReadonlyMap = new WeakMap();
 
-
-
 const ReactiveFlags = {
   RAW: "raw",
   REACTIVE: "_v_isReactive",

@@ -1,4 +1,13 @@
-import { ReactiveFlags, reactive,readonly ,reactiveMap,toRaw, readonlyMap, shallowReactiveMap, shallowReadonlyMap} from "./reactive.js";
+import {
+  ReactiveFlags,
+  reactive,
+  readonly,
+  reactiveMap,
+  toRaw,
+  readonlyMap,
+  shallowReactiveMap,
+  shallowReadonlyMap
+} from "./reactive.js";
 import { ITERATE_KEY, track, trigger } from "./effect.js";
 import { isObject, hasChanged ,isIntegerKey} from "../shared/src/index.js";
 
@@ -67,9 +76,7 @@ function createGetter(isReadonly, isShallow) {
     if (isShallow) {
       return res;
     }
-    console.log(res);
     if (isObject(res)) {
-      console.log(res)
       return isReadonly ? readonly(res) : reactive(res);
     }  
     return res;
@@ -140,7 +147,6 @@ const shallowReadonlyHandlers = Object.assign(
     get:shallowReadonlyGet
   }
 )
-console.log(shallowReadonlyHandlers)
 export {
   baseHandler,
   readonlyHandler,
