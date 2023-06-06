@@ -1,4 +1,4 @@
-import { shallowReadonly } from "../reactivity.js";
+import { shallowReadonly } from "../reactivity/index.js";
 export function createComponentInstance(vnode, parent) {
   const instance = {
     type: vnode.type,

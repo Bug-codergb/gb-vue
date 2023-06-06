@@ -6,10 +6,12 @@ import {
   effect,
   computed,
   shallowReadonly
-} from "./reactivity/index.js";
+} from "./packages/reactivity/index.js";
 
-import { patchProp } from "./runtime-dom/src/patchProp.js"
-import { hyphenate } from "./shared/src/general.js";
+import { patchProp } from "./packages/runtime-dom/src/patchProp.js"
+import { hyphenate } from "./packages/shared/src/general.js";
+
+import { createApp } from "./packages/runtime-dom/src/index.js";
 /*const user = reactive({
   name: "foo",
   age: 10,
@@ -74,4 +76,3 @@ console.log(isReadonly(user));*/
 })
 window.user = user;*/
 
-console.log(hyphenate("fontSize"));

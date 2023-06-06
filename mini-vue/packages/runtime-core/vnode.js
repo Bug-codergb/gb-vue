@@ -1,4 +1,4 @@
-import ShapeFlags from "../shared/src/shapeFlags";
+import ShapeFlags from "../shared/src/shapeFlags.js";
 const createVode = (type, props, children) => {
   const vnode = {
     el: null,
@@ -15,6 +15,7 @@ const createVode = (type, props, children) => {
   } else if (typeof children ==="string") {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   }
+  return vnode;
 }
 function getShapeFlag(type) {
   return typeof type === "string"
