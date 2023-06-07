@@ -1,3 +1,5 @@
+export const NO = () => false
+
 export const isReservedProps = (key) => {
   let map = new Map([
     ['key', true],
