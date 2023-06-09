@@ -38,3 +38,28 @@ export const ElementTypes ={
   SLOT:'slot',
   TEMPLATE:'template'
 }
+
+export const Namespaces ={
+  HTML:0
+}
+export const ConstantTypes = {
+  NOT_CONSTANT : 0,
+  CAN_SKIP_PATCH : 1,
+  CAN_HOIST : 2,
+  CAN_STRINGIFY : 3
+}
+export function createRoot(children,loc) {
+  return {
+    type: NodeTypes.ROOT,
+    children,
+    helpers: new Set(),
+    components: [],
+    directives: [],
+    hoists: [],
+    imports: [],
+    cached: 0,
+    temps: 0,
+    codegenNode: undefined,
+    loc
+  }
+}
