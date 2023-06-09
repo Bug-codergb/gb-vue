@@ -51,6 +51,7 @@ function parseChildren(context, mode, ancestors) {
     const s = context.source;
     let node;
     if (mode === TextModes.DATA) {
+      console.log(s)
       if (!context.inVPrev && s.startsWith(context.options.delimiters[0])) {
         node = parseInterpolation(context,mode);
       } else if (mode === TextModes.DATA && s[0] === '<') {
@@ -74,7 +75,7 @@ function parseChildren(context, mode, ancestors) {
     }
     if (!node) {
       node = parseText(context, mode);
-      console.log(node);
+      //console.log(node);
     }
     if (Array.isArray(node)) {
       for (let i = 0; i < node.length; i++){
