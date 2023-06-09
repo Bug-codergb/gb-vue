@@ -42,11 +42,12 @@ export function baseParser(content,options) {
     getSelection(context,start)
   );
 }
-function parseChildren(context,mode,ancestors) {
+function parseChildren(context, mode, ancestors) {
+  console.log(context.source);
   const parent = last(ancestors);
   const ns = parent ? parent.ns : Namespaces.HTML;
   const nodes = [];
-  while (!isEnd(context,mode,ancestors)) {
+  while (!isEnd(context, mode, ancestors)) {
     const s = context.source;
     let node;
     if (mode === TextModes.DATA) {
@@ -72,14 +73,17 @@ function parseChildren(context,mode,ancestors) {
       }
     }
     if (!node) {
-      node = parseText(context,mode);
+      node = parseText(context, mode);
+      console.log(node);
     }
     if (Array.isArray(node)) {
       for (let i = 0; i < node.length; i++){
-        pushNode(nodes, node[i]);
+        //pushNode(nodes, node[i]);
+        nodes.push(node[i])
       }
     } else {
-      pushNode(nodes, node);
+      nodes.push(node);
+      //pushNode(nodes, node);
     }
   }
   return nodes;
@@ -146,7 +150,6 @@ function parseElement(context,ancestors) {
   const wasInVPre = context.inVPrev;
   const parent = last(ancestors);
   const element = parseTag(context, TagType.Start, parent);
-  
   const isPreBoundary = context.inPre && !wasInPre;
   const isVPreBoundary = context.inVPre && !wasInVPre;
 
@@ -162,6 +165,7 @@ function parseElement(context,ancestors) {
 
   ancestors.push(element);
   let mode = {}
+  console.log(context.source);
   const children = parseChildren(context, mode, ancestors);
   ancestors.pop();
 
@@ -189,7 +193,8 @@ function parseTag(context,type,parent) {
   }
   let props = parseAttributes(context, type);
 
-  let isSelfClosing = false
+  let isSelfClosing = false;
+  advanceBy(context, isSelfClosing ? 2 : 1);
   if (type === TagType.End) {
     return
   }

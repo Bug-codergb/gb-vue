@@ -5,7 +5,7 @@ export const NodeTypes= {
   COMMENT:'comment',
   SIMPLE_EXPRESSION:'simple_expression',
   INTERPOLATION:'interpolation',
-  ATTRIBUTE:'attronite',
+  ATTRIBUTE:'attribute',
   DIRECTIVE:'directive',
   // containers
   COMPOUND_EXPRESSION:'compound_expression',
