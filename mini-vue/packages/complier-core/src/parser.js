@@ -1,5 +1,7 @@
 import { NO } from "../../shared/src/general.js";
-import { Namespaces, createRoot ,NodeTypes,ElementTypes} from "./ast.js";
+import {
+  Namespaces, createRoot, NodeTypes, ElementTypes, ConstantTypes
+} from "./ast.js";
 import { advancePositionWithMutation } from "./utils.js";
 function last(xs) {
   return xs[xs.length - 1]
@@ -33,7 +35,6 @@ export const defaultParserOptions = {
   isPreTag: NO,
 }
 
-
 export function baseParser(content,options) {
   const context = createParserContext(content, options);
   const start = getCursor(context);
@@ -43,30 +44,32 @@ export function baseParser(content,options) {
   );
 }
 function parseChildren(context, mode, ancestors) {
-  console.log(context.source);
   const parent = last(ancestors);
   const ns = parent ? parent.ns : Namespaces.HTML;
   const nodes = [];
   while (!isEnd(context, mode, ancestors)) {
     const s = context.source;
     let node;
-    if (mode === TextModes.DATA) {
+    if (mode === TextModes.DATA || mode === TextModes.RCDATA) {
       console.log(s)
       if (!context.inVPrev && s.startsWith(context.options.delimiters[0])) {
         node = parseInterpolation(context,mode);
       } else if (mode === TextModes.DATA && s[0] === '<') {
         if (s.length === 1) {
-          
+          console.error('error');
         } else if (s[1] === "!") {
           
         } else if (s[1] === "/") {
           if (s.length === 2) {
-            
+            console.error("error");
           } else if (s[2] === '>') {
             advanceBy(context, 3);
+            continue;
           } else if (/[a-z]/i.test(s[2])) {
             parseTag(context, TagType.End, parent);
             continue;
+          } else {
+            
           }
         } else if (/[a-z]/i.test(s[1])){
           node = parseElement(context,ancestors);
@@ -79,15 +82,51 @@ function parseChildren(context, mode, ancestors) {
     }
     if (Array.isArray(node)) {
       for (let i = 0; i < node.length; i++){
-        //pushNode(nodes, node[i]);
-        nodes.push(node[i])
+        pushNode(nodes, node[i]);
+        //nodes.push(node[i])
       }
     } else {
-      nodes.push(node);
-      //pushNode(nodes, node);
+      //nodes.push(node);
+      pushNode(nodes, node);
     }
   }
-  return nodes;
+  let removedWhitespace = false;
+  if (mode!==TextModes.RAWTEXT && mode!== TextModes.RCDATA) {
+    const shouldCondense = context.options.whitespace !== 'preserve';
+    for (let i = 0; i < nodes.length; i++){
+      const node = nodes[i];
+      if (node.type === NodeTypes.TEXT) {
+        if (!context.inPre) {
+          if (!/[^\t\r\n\f ]/.test(node.content)) {
+            const prev = nodes[i - 1];
+            const next = nodes[i + 1];
+            if (!prev || !next ||(
+              shouldCondense && (
+                (prev.type === NodeTypes.COMMENT && next.type === NodeTypes.COMMENT) ||
+                (prev.type === NodeTypes.COMMENT && next.type === NodeTypes.ELEMENT) ||
+                (prev.type === NodeTypes.ELEMENT && next.type === NodeTypes.COMMENT) ||
+                (prev.type === NodeTypes.ELEMENT && next.type === NodeTypes.ELEMENT && /\r\n/.test(node.content))
+              )
+            )) {
+              removedWhitespace = true;
+              node[i] = null;
+            } else {
+              node.content = "";
+            }  
+          } else if (shouldCondense) {
+            node.content = node.content.replace(/[\t\r\n\f ]+/g, ' ');
+          }
+        } else {
+          node.content = node.content.reaplce(/\r\n/g,'\n');
+        }
+      }
+      else if (node.type === NodeTypes.COMMENT && !context.options.comments) {
+        removedWhitespace = true
+        nodes[i] = null 
+      }
+    }
+  }
+  return removedWhitespace ? nodes.filter(Boolean) : nodes;
 }
 function createParserContext(content,rawOptions) {
   const options = Object.assign({}, defaultParserOptions);
@@ -146,7 +185,8 @@ function parseInterpolation(context,mode) {
   }
 
 }
-function parseElement(context,ancestors) {
+function parseElement(context, ancestors) {
+  
   const wasInPre = context.inPre;
   const wasInVPre = context.inVPrev;
   const parent = last(ancestors);
@@ -165,7 +205,8 @@ function parseElement(context,ancestors) {
   }
 
   ancestors.push(element);
-  let mode = {}
+  let mode = context.options.getTextMode(element, parent);
+  console.log(mode);
   console.log(context.source);
   const children = parseChildren(context, mode, ancestors);
   ancestors.pop();
@@ -272,7 +313,7 @@ function parseAttribute(context,nameSet) {
         name
       );
     let isPropShorthand = name.startsWith('.');
-    let dirName = match[1] || (isPropShorthand || name.startsWith(':') ? 'bind' : name.startsWidth('@') ? 'on' : 'slot');
+    let dirName = match[1] || (isPropShorthand || name.startsWith(':') ? 'bind' : name.startsWith('@') ? 'on' : 'slot');
     let arg;
     if (match[2]) {
       const isSlot = dirName === 'slot';
@@ -387,12 +428,21 @@ function isEnd(context, mode, ancestors) {
   switch (mode) {
     case TextModes.DATA:
       if (s.startsWith('</')) {
-        for (let i = ancestors.length - 1; i >= 0; i--){
-          if (startsWidthEndTagOpen(s,ancestors[i].tag)) {
+        for (let i = ancestors.length - 1; i >= 0; i--) {
+          if (startsWidthEndTagOpen(s, ancestors[i].tag)) {
             return true;
           }
         }
       }
+      break;
+    case TextModes.RCDATA:
+    case TextModes.RAWTEXT: {
+      const parent = last(ancestors);
+      if (parent && startsWidthEndTagOpen(s, parent.tag)) {
+        return true;
+      }
+      break; 
+    }
   }
   return !s;
 }
@@ -407,11 +457,13 @@ function getSelection(context,start,end) {
 }
 function startsWidthEndTagOpen(source,tag) {
   return (
-    source.startWidths('</') &&
-    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase());
+    source.startsWith('</') &&
+    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase() &&
+    /[\t\r\n\f />]/.test(source[2+tag.length] || '>'));
 }
 function advanceBy(context,numberOfChar) {
   const { source } = context;
+  advancePositionWithMutation(context, source, numberOfChar);
   context.source = source.slice(numberOfChar);
 }
 function advanceSpaces(context) {
