@@ -7,9 +7,9 @@ function last(xs) {
   return xs[xs.length - 1]
 }
 export const TextModes= {
-  DATA:0, 
-  RCDATA:1,   
-  RAWTEXT:2, 
+  DATA:0, // element component
+  RCDATA:1, // textarea ,title  
+  RAWTEXT:2, // style,iframe,script,noscript
   CDATA:3,
   ATTRIBUTE_VALUE:4
 }
@@ -31,8 +31,8 @@ export const defaultParserOptions = {
   decodeEntities: (rawText) => {
     return rawText.replace(decodeRE,(_,p1)=>decodeMap[p1])
   },
-  isVoidTag:NO,
-  isPreTag: NO,
+  isVoidTag:NO, // <img/> <link/>
+  isPreTag: NO, // <pre>
 }
 
 export function baseParser(content,options) {
@@ -43,6 +43,24 @@ export function baseParser(content,options) {
     getSelection(context,start)
   );
 }
+//创建编译上下文
+function createParserContext(content,rawOptions) {
+  const options = Object.assign({}, defaultParserOptions);
+  for (let key in rawOptions) {
+    options[key] = rawOptions[key] === undefined ? defaultParserOptions[key] : rawOptions[key];
+  }
+  return {
+    options,
+    column: 1,
+    line: 0,
+    offset: 0,
+    originalSource: content,
+    source: content,
+    inPre: false,//是否为pre标签
+    inVPrev:false//是否为 v-pre
+  }
+}
+//核心
 function parseChildren(context, mode, ancestors) {
   const parent = last(ancestors);
   const ns = parent ? parent.ns : Namespaces.HTML;
@@ -51,13 +69,14 @@ function parseChildren(context, mode, ancestors) {
     const s = context.source;
     let node;
     if (mode === TextModes.DATA || mode === TextModes.RCDATA) {
-      console.log(s)
       if (!context.inVPrev && s.startsWith(context.options.delimiters[0])) {
-        node = parseInterpolation(context,mode);
+
+        node = parseInterpolation(context, mode); // 解析大括号语法
+        
       } else if (mode === TextModes.DATA && s[0] === '<') {
         if (s.length === 1) {
           console.error('error');
-        } else if (s[1] === "!") {
+        } else if (s[1] === "!") { //注释以及文档声明暂不实现
           
         } else if (s[1] === "/") {
           if (s.length === 2) {
@@ -128,22 +147,7 @@ function parseChildren(context, mode, ancestors) {
   }
   return removedWhitespace ? nodes.filter(Boolean) : nodes;
 }
-function createParserContext(content,rawOptions) {
-  const options = Object.assign({}, defaultParserOptions);
-  for (let key in rawOptions) {
-    options[key] = rawOptions[key] === undefined ? defaultParserOptions[key] : rawOptions[key];
-  }
-  return {
-    options,
-    column: 1,
-    line: 0,
-    offset: 0,
-    originalSource: content,
-    source: content,
-    inPre: false,//是否为pre标签
-    inVPrev:false//是否为 v-pre
-  }
-}
+
 function parseInterpolation(context,mode) {
   const [open, close] = context.options.delimiters;
   const closeIndex = context.source.indexOf(close, open.length);
@@ -176,7 +180,6 @@ function parseInterpolation(context,mode) {
     content: {
       type: NodeTypes.SIMPLE_EXPRESSION,
       isStatic: false,
-      // Set `isConstant` to false by default and will decide in transformExpression
       constType: ConstantTypes.NOT_CONSTANT,
       content,
       loc: getSelection(context, innerStart, innerEnd)
@@ -206,8 +209,6 @@ function parseElement(context, ancestors) {
 
   ancestors.push(element);
   let mode = context.options.getTextMode(element, parent);
-  console.log(mode);
-  console.log(context.source);
   const children = parseChildren(context, mode, ancestors);
   ancestors.pop();
 
