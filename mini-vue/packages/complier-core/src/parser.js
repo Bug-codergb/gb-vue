@@ -371,7 +371,7 @@ function parseAttribute(context,nameSet) {
     }
     const modifiers = match[3] ? match[3].slice(1).split('.'):[];
     return {
-      type: '',
+      type: NodeTypes.DIRECTIVE,
       name: dirName,
       exp: value && {
         type: NodeTypes.SIMPLE_EXPRESSION,

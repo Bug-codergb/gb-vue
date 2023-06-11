@@ -5,8 +5,8 @@ export function createComponentInstance(vnode, parent) {
     vnode,
     next: null,
     parent,
-    proxy,
-    isMounted
+    proxy:null,
+    isMounted:false
   }
   return instance
 }

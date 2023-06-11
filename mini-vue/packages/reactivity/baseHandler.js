@@ -77,6 +77,7 @@ function createGetter(isReadonly, isShallow) {
       return res;
     }
     if (isObject(res)) {
+      console.log(res)
       return isReadonly ? readonly(res) : reactive(res);
     }  
     return res;
