@@ -33,6 +33,8 @@ export const defaultParserOptions = {
   },
   isVoidTag:NO, // <img/> <link/>
   isPreTag: NO, // <pre>
+  getNamespace: () => Namespaces.HTML,
+  getTextMode: () => TextModes.DATA,
 }
 
 export function baseParser(content,options) {
@@ -97,21 +99,19 @@ function parseChildren(context, mode, ancestors) {
     }
     if (!node) {
       node = parseText(context, mode);
-      //console.log(node);
     }
     if (Array.isArray(node)) {
       for (let i = 0; i < node.length; i++){
         pushNode(nodes, node[i]);
-        //nodes.push(node[i])
       }
     } else {
-      //nodes.push(node);
       pushNode(nodes, node);
     }
   }
+  
   let removedWhitespace = false;
   if (mode!==TextModes.RAWTEXT && mode!== TextModes.RCDATA) {
-    const shouldCondense = context.options.whitespace !== 'preserve';
+    const shouldCondense = context.options.whitespace !== 'preserve'; //是否应该压缩
     for (let i = 0; i < nodes.length; i++){
       const node = nodes[i];
       if (node.type === NodeTypes.TEXT) {
@@ -124,11 +124,11 @@ function parseChildren(context, mode, ancestors) {
                 (prev.type === NodeTypes.COMMENT && next.type === NodeTypes.COMMENT) ||
                 (prev.type === NodeTypes.COMMENT && next.type === NodeTypes.ELEMENT) ||
                 (prev.type === NodeTypes.ELEMENT && next.type === NodeTypes.COMMENT) ||
-                (prev.type === NodeTypes.ELEMENT && next.type === NodeTypes.ELEMENT && /\r\n/.test(node.content))
+                (prev.type === NodeTypes.ELEMENT && next.type === NodeTypes.ELEMENT && /[\r\n]/.test(node.content))
               )
             )) {
               removedWhitespace = true;
-              node[i] = null;
+              nodes[i] = null;
             } else {
               node.content = "";
             }  
@@ -214,6 +214,12 @@ function parseElement(context, ancestors) {
 
   element.children = children;
 
+  if (startsWidthEndTagOpen(context.source, element.tag)) {
+    parseTag(context, TagType.End, parent);
+  }
+
+  element.loc = getSelection(context, element.loc.start);
+  
   if (isPreBoundary) {
     context.inPre = false
   }
@@ -226,7 +232,7 @@ function parseTag(context,type,parent) {
   const start = getCursor(context);
   const match = /^<\/?([a-z][^\t\r\n\f />]*)/i.exec(context.source);
   const tag = match[1];
-  const ns = "";
+  const ns = ""; // 待修改
   advanceBy(context, match[0].length);
   advanceSpaces(context);
   const cursor = getCursor(context);
@@ -236,13 +242,24 @@ function parseTag(context,type,parent) {
   }
   let props = parseAttributes(context, type);
 
+  if (type == TagType.Start && !context.inVPre) {
+    
+  }
+
   let isSelfClosing = false;
+
+  isSelfClosing = context.source.startsWith('/>');
+
   advanceBy(context, isSelfClosing ? 2 : 1);
   if (type === TagType.End) {
     return
   }
 
   let tagType = ElementTypes.ELEMENT  
+
+  if (!context.inVPre) {
+    
+  }
   return {
     type: NodeTypes.ELEMENT,
     ns,
@@ -297,6 +314,7 @@ function parseAttribute(context,nameSet) {
   nameSet.add(name);
   advanceBy(context, name.length);
   let value;
+  
   //处理value
   if (/^[\t\r\n\f ]*=/.test(context.source)) {
     advanceSpaces(context)
@@ -307,6 +325,9 @@ function parseAttribute(context,nameSet) {
       console.error("error");
     }
   }
+
+  const loc = getSelection(context,start);
+
   //处理name
   if (!context.inVPre && /^(v-[A-Za-z0-9-]|:|\.|@|#)/.test(name)) { 
     const match =
@@ -321,7 +342,7 @@ function parseAttribute(context,nameSet) {
       const content = match[2];
       let isStatic = true;
       if (content.startsWith('[')) {
-        isStatic = true;
+        isStatic = false;
 
         if (!content.endsWith(']')) {
           console.error("error");
@@ -333,16 +354,22 @@ function parseAttribute(context,nameSet) {
         content += match[3] || ''
       }
       arg = {
-        type: '',
+        type: NodeTypes.SIMPLE_EXPRESSION,
         content,
         isStatic,
-        constType: '',
-        loc:{}
+        constType: isStatic
+        ? ConstantTypes.CAN_STRINGIFY
+        : ConstantTypes.NOT_CONSTANT,
+        loc
       }
     }
     if (value && value.isQuoted) {
-      
+      const valueLoc = value.loc;
+      valueLoc.start.offset++;
+      valueLoc.start.column++;
+
     }
+    const modifiers = match[3] ? match[3].slice(1).split('.'):[];
     return {
       type: '',
       name: dirName,
@@ -356,8 +383,8 @@ function parseAttribute(context,nameSet) {
         loc: value.loc
       },
       arg,
-      modifiers:[],
-      loc:{}
+      modifiers,
+      loc
     }
   }
   if (!context.inVPre && name.startsWith('v-')) {
@@ -371,7 +398,7 @@ function parseAttribute(context,nameSet) {
       content: value.content,
       loc: value.loc
     },
-    loc:{}
+    loc
   }
 }
 function parseAttributeValue(context) {
@@ -400,7 +427,7 @@ function parseAttributeValue(context) {
   return {
     content,
     isQuoted,
-    loc:{}
+    loc:getSelection(context,start)
   }
 }
 function parseTextData(context, length, mode) {
@@ -410,6 +437,7 @@ function parseTextData(context, length, mode) {
   if (mode === TextModes.RAWTEXT || mode === TextModes.CDATA || !rawText.includes("&")) {
     return rawText;
   } else {
+    //文本节点需要处理特殊字符<,>,
     return context.options.decodeEntities(
       rawText,
       mode === TextModes.ATTRIBUTE_VALUE
@@ -497,7 +525,7 @@ function parseText(context, mode) {
   
   const endTokens =
     mode === TextModes.CDATA ? [']]>'] : ['<', context.options.delimiters[0]]
-
+  //如果是element则文本节点的结束应该是<或者是{{
   let endIndex = context.source.length
   for (let i = 0; i < endTokens.length; i++) {
     const index = context.source.indexOf(endTokens[i], 1)
