@@ -63,3 +63,12 @@ export function createRoot(children,loc) {
     loc
   }
 }
+export function createSimpleExpression(content,isStatic,loc,constType) {
+  return {
+    type: NodeTypes.SIMPLE_EXPRESSION,
+    loc,
+    content,
+    isStatic,
+    constType : isStatic ? ConstantTypes.CAN_STRINGIFY :constType
+  }
+}

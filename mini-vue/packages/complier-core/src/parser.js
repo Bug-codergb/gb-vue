@@ -343,7 +343,6 @@ function parseAttribute(context,nameSet) {
       let isStatic = true;
       if (content.startsWith('[')) {
         isStatic = false;
-
         if (!content.endsWith(']')) {
           console.error("error");
           content = content.slice(1)
