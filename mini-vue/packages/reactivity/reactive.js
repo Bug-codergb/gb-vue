@@ -19,7 +19,6 @@ const ReactiveFlags = {
   SHALLOW:"_v_isShallow"
 }
 const reactive = (raw) => {
-  console.log(raw)
   return createReactive(raw,false,reactiveMap,baseHandler);
 }
 const isReactive = (value) => {
