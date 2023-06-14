@@ -1,10 +1,27 @@
 import { ElementTypes, NodeTypes, createSimpleExpression } from "../ast.js";
 import { 
-  createStructuralDirectiveTransform
+  createStructuralDirectiveTransform, traverseNode
 } from "../transform.js";
 export const transformIf = createStructuralDirectiveTransform(/^(if|else|else-if)$/, (node, dir, context) => {
-  //返回processIf的调用
-  return processIf();
+  return processIf(node, dir, context, (ifNode,branch,isRoot) => {
+    const siblings = context.parent.children;
+    let i = siblings.indexOf(ifNode);
+    let key = 0;
+    while (i-- >= 0) {
+      const sibling = siblings[i];
+      if (sibling && sibling.type === NodeTypes.IF) {
+        key += sibling.branches.length;
+      }
+    }
+
+    return () => {
+      if (isRoot) {
+        
+      } else {
+        
+      }
+    }
+  });
 });
 export function processIf(node, dir, context, processCodegen) {
   // v-if 或者 v-else-if 没有value, v-if = undefined,v-else-if=undefined
@@ -25,6 +42,7 @@ export function processIf(node, dir, context, processCodegen) {
       branches:[branch]
     }
 
+    context.replaceNode(ifNode);
     if (processCodegen) {
       return processCodegen(ifNode, branch, true);
     }
@@ -35,9 +53,11 @@ export function processIf(node, dir, context, processCodegen) {
       const sibling = siblings[i];
 
       if (sibling && sibling.type === NodeTypes.COMMENT) {//如果是注释节点，直接跳过
+        context.removeNode(sibling);
         continue;
       }
       if (sibling && sibling.type === NodeTypes.TEXT && !sibling.content.trim().length) {
+        context.removeNode(sibling);
         continue;
       }
       
@@ -54,7 +74,8 @@ export function processIf(node, dir, context, processCodegen) {
         //创建分支节点后，不需要创建ifNode，直接将当前分支节点插入到最近的ifNode中去
         sibling.branches.push(branch);
         const onExit = processCodegen && processCodegen(sibling, branch, false);
-
+        
+        traverseNode(branch, context);
         if (onExit) {
           onExit();
         }

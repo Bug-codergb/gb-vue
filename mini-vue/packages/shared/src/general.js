@@ -1,3 +1,4 @@
+export const NOOP=()=>{}
 export const NO = () => false
 
 export const isReservedProps = (key) => {
