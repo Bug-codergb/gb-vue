@@ -81,7 +81,7 @@ export function processIf(node, dir, context, processCodegen) {
         }
         context.currentNode = null;
       } else {
-        console.log("不匹配")
+        console.error("不匹配")
       }
       break;
     }

@@ -138,6 +138,11 @@ export function traverseNode(node, context) {
       traverseChildren(node, context);
       break;
   }
+  context.currentNode = node;
+  let i = exitFns.length;
+  while (i--) {
+    exitFns[i]();
+  }
 }
 export function traverseChildren(parent,context) {
   let i = 0;

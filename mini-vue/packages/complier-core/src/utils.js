@@ -1,3 +1,5 @@
+import { NodeTypes } from "./ast.js";
+
 export function advancePositionWithMutation(
   pos,
   source,
@@ -20,4 +22,7 @@ export function advancePositionWithMutation(
       : numberOfCharacters - lastNewLinePos
 
   return pos
+}
+export function isText(node) {
+  return node.type === NodeTypes.INTERPOLATION || node.type === NodeTypes.TEXT;
 }

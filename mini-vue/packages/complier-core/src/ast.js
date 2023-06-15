@@ -72,3 +72,18 @@ export function createSimpleExpression(content,isStatic,loc,constType) {
     constType : isStatic ? ConstantTypes.CAN_STRINGIFY :constType
   }
 }
+export function createCompoundExpression(children,loc) {
+  return {
+    type: NodeTypes.COMPOUND_EXPRESSION,
+    loc,
+    children
+  }
+}
+export function createCallExpression(callee,args,loc) {
+  return {
+    type: NodeTypes.JS_CACHE_EXPRESSION,
+    loc,
+    callee,
+    arguments:args
+  }
+}
