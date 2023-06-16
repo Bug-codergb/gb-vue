@@ -11,7 +11,7 @@ window.json = json;
 
 let temp = `
    <ul>
-    <li>
+    <li v-bind:app="app">
      {{ app }}
     </li>
     <li>

@@ -26,3 +26,22 @@ export function advancePositionWithMutation(
 export function isText(node) {
   return node.type === NodeTypes.INTERPOLATION || node.type === NodeTypes.TEXT;
 }
+export function findProp(node,name,dynamicOnly,allowEmpty) {
+  for (let i = 0; i < node.props.length; i++){
+    const p = node.props[i];
+    if (p.type === NodeTypes.ATTRIBUTE) {
+      if (dynamicOnly) continue;
+      if (p.name === name && (p.value || allowEmpty)) {
+        return p;
+      }
+    } else if (p.name === 'bind' && (p.exp || allowEmpty) && isStaticArgOf(p.arg,name)) {
+      return p;
+    }
+  }
+}
+export const isStaticExp = (p) => {
+  return p.type === NodeTypes.SIMPLE_EXPRESSION && p.isStatic;
+}
+export function isStaticArgOf(arg,name) {
+  return !!(arg && isStaticExp(arg) && arg.content === name);
+}
