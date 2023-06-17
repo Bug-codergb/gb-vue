@@ -1,6 +1,9 @@
 export const NOOP=()=>{}
 export const NO = () => false
 
+const onRE = /^on[^a-z]/
+export const isOn = (key) => onRE.test(key)
+
 export const isReservedProps = (key) => {
   let map = new Map([
     ['key', true],

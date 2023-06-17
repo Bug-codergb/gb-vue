@@ -1,3 +1,5 @@
+import { isString } from "../../shared/src/general.js";
+
 export const NodeTypes= {
   ROOT:'root',
   ELEMENT:'element',
@@ -79,11 +81,38 @@ export function createCompoundExpression(children,loc) {
     children
   }
 }
+
+export function createObjectExpression(
+  properties,
+  loc={}
+) {
+  return {
+    type: NodeTypes.JS_OBJECT_EXPRESSION,
+    loc,
+    properties
+  }
+}
+
+export function createObjectProperty(key,value) {
+  return {
+    type: NodeTypes.JS_PROPERTY,
+    loc: {},
+    key: isString(key) ? createSimpleExpression(key, true) : key,
+    value
+  }
+}
 export function createCallExpression(callee,args,loc) {
   return {
     type: NodeTypes.JS_CACHE_EXPRESSION,
     loc,
     callee,
     arguments:args
+  }
+}
+export function createArrayExpression(elements,loc){
+  return {
+    type: NodeTypes.JS_ARRAY_EXPRESSION,
+    loc,
+    elements
   }
 }
