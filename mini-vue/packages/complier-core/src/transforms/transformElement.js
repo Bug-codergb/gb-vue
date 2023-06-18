@@ -58,7 +58,7 @@ export const transformElement = (node, context) => {
       const propsBuildResult = buildProps(
         node,
         context,
-        undefined,
+        undefined, //直接使用默认参数
         isComponent,
         isDynamicComponent
       );
@@ -170,6 +170,7 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
 
   const pushMergeArg = (arg) => {
     if (properties.length) {
+      json(properties);
       mergeArgs.push(
         createObjectExpression(
           dedupeProperties(properties),
@@ -320,7 +321,6 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
       }
     }
   }
-
   let propsExpression;
   if (mergeArgs.length) {
     pushMergeArg();
@@ -442,6 +442,7 @@ function dedupeProperties(properties) {
     }
 
     const name = prop.key.content;
+    console.log(name)
     const existing = knownProps.get(name);
     if (existing) {
       if (name === 'style' || name === 'class' || isOn(name)) {
