@@ -286,7 +286,6 @@ function parseAttributes(context,type) {
       continue;
     }
     const attr = parseAttribute(context, attributeNames);
-    
     if (
       attr.type === NodeTypes.ATTRIBUTE &&
       attr.value &&
@@ -300,7 +299,7 @@ function parseAttributes(context,type) {
     }
 
     if (/^[^\t\r\n\f />]/.test(context.source)) {
-      emitError(context, ErrorCodes.MISSING_WHITESPACE_BETWEEN_ATTRIBUTES)
+      console.error("不明确的语法")  
     }
     advanceSpaces(context)
   }

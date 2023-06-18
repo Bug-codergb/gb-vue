@@ -1,4 +1,5 @@
 import { isString } from "../../shared/src/general.js";
+import { CREATE_BLOCK, CREATE_ELEMENT_BLOCK, OPEN_BLOCK,WITH_DIRECTIVES ,CREATE_VNODE,CREATE_ELEMENT_VNODE} from "./runtimeHelpers.js";
 
 export const NodeTypes= {
   ROOT:'root',
@@ -121,4 +122,51 @@ export function createArrayExpression(elements,loc){
     loc,
     elements
   }
+}
+
+export function createVNodeCall(
+  context,
+  tag,
+  props,
+  children,
+  patchFlag,
+  dynamicProps,
+  directives,
+  isBlock,
+  disableTracking,
+  isComponent,
+  loc = {}
+) {
+  if (context) {
+    if (isBlock) {
+      context.helper(OPEN_BLOCK)
+      context.helper(getVNodeBlockHelper(context.inSSR, isComponent))
+    } else {
+      context.helper(getVNodeHelper(context.inSSR, isComponent))
+    }
+    if (directives) {
+      context.helper(WITH_DIRECTIVES)
+    }
+  }
+
+  return {
+    type: NodeTypes.VNODE_CALL,
+    tag,
+    props,
+    children,
+    patchFlag,
+    dynamicProps,
+    directives,
+    isBlock,
+    disableTracking,
+    isComponent,
+    loc
+  }
+}
+export function getVNodeHelper(ssr, isComponent) {
+  return ssr || isComponent ? CREATE_VNODE : CREATE_ELEMENT_VNODE
+}
+
+export function getVNodeBlockHelper(ssr,isComponent) {
+  return ssr || isComponent ? CREATE_BLOCK : CREATE_ELEMENT_BLOCK;
 }
