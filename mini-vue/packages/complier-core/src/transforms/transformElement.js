@@ -6,7 +6,7 @@ import { RESOLVE_COMPONENT, RESOLVE_DYNAMIC_COMPONENT } from "../runtimeHelpers.
 import {
   NodeTypes, ElementTypes, createCallExpression,createObjectExpression, createArrayExpression, createObjectProperty, createSimpleExpression
 } from "../ast.js";
-import { findProp, isStaticExp } from "../utils.js";
+import { findProp, isStaticArgOf, isStaticExp } from "../utils.js";
 export const transformElement = (node, context) => {
   return function postTransformElement() {
     node = context.currentNode;
@@ -68,7 +68,7 @@ function isComponentTag(tag) {
 }
 
 export function buildProps(node,context,props,isComponent,isDynamicComponent,ssr=false) {
-  const { tag, loc, children } = node;
+  const { tag, loc:elementLoc, children } = node; //获取当前节点的标签名称,位置信息,子元素
   
   let properties = [];
   const mergeArgs = [];
@@ -89,7 +89,10 @@ export function buildProps(node,context,props,isComponent,isDynamicComponent,ssr
   const pushMergeArg = (agr) => {
     if (properties.length) {
       mergeArgs.push(
-        createObjectExpression()
+        createObjectExpression(
+          dedupeProperties(properties),
+          elementLoc
+        )
       )
       properties = [];
     }
@@ -137,22 +140,89 @@ export function buildProps(node,context,props,isComponent,isDynamicComponent,ssr
 
   for (let i = 0; i < props.length; i++){
     const prop = props[i];
-    if (prop.type === NodeTypes.ATTRIBUTE) {
-      const { loc, name, value } = prop;
-      let isStatic = true;
+    if (prop.type === NodeTypes.ATTRIBUTE) { //静态属性
+      const { loc, name, value } = prop; // 获取 prop的位置信息,prop为静态属性时，name为字符串，value为对象，其中value的content为属性之
+      let isStatic = true;//静态标识为true
       if (name === 'ref') {
         hasRef = true;
-        if (context.scoped.vFor > 0) {
+        if (context.scoped.vFor > 0) { //存在vFor
           properties.push(
             createObjectProperty(
-              createSimpleExpression('ref_for', true),
-              createSimpleExpression('true')
+              createSimpleExpression('ref_for', true), // key
+              createSimpleExpression('true') //value
             )
           )
         }
       }
+      // 跳过component上的is
+      if (name === "is" && (isComponentTag(tag) || (value && value.content.startsWith('vue:')))) {
+        continue;
+      }
 
+      properties.push(
+        createObjectProperty(
+          createSimpleExpression(
+            name,
+            true, // 带括号的属性名则为false
+            {l:1}
+          ),
+          createSimpleExpression(
+            value ? value.content : '',
+            isStatic,
+            value? value.loc:loc
+          )
+        )
+      )
+    } else { // 指令
+      
+      const { name, arg, exp, loc } = prop;
+      const isVBind = name === "bind";
+      const isVOn = name === 'on'
+      if (name === 'slot') {
+        if (!isComponent) {
+          console.error("error");
+        }
+        continue;
+      }
+      //跳过，通过ditecriveTransforms处理
+      if (name === 'once' || name === 'memo') {
+        continue;
+      }
+      if (name === 'is' || (isVBind && isStaticArgOf(arg,'is') && (isComponentTag(tag)))) {
+        continue;
+      }
+
+      if (isVOn && ssr) {
+        continue;
+      }
+
+      if (
+        (isVBind && isStaticArgOf(arg, 'key')) || 
+        (isVOn && hasChildren && isStaticArgOf(arg,'vue":before-update'))
+      ) {
+        shouldUseBlock = true;
+      }
+
+      if (isVBind && isStaticArgOf(arg, 'ref') && context.scopes.vFor > 0) {
+        properties.push(
+          createObjectProperty(
+            createSimpleExpression('ref_for', true),
+            createSimpleExpression('true')
+          )
+        )
+      }
+      // v-bind={},v-on={}//同时绑定多个值
+      if (!arg && (isVBind || isVOn)) {
+        
+      }
     }
+  }
+
+  let propsExpression;
+  if (mergeArgs.length) {
+    
+  } else if (properties.length) {
+    
   }
 }
 

@@ -14,11 +14,12 @@ let temp = `
     <li v-bind:app="app">
      {{ app }}
     </li>
-    <li>
+    <li class="bar">
       {{ foo }}
       <span>床前明月光</span>
       {{ bar }}
     </li>
+    <li @click.stop="foo"></li>
    </ul>
 `
 complie(temp);

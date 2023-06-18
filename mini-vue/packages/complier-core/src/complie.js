@@ -10,8 +10,8 @@ export function getBaseTransformPreset() {
   return [
     [
       //transformIf,
-      //transformText,
-      transformElement
+      transformText,
+      //transformElement
     ],
     {
       on: () => { },

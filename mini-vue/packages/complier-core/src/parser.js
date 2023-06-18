@@ -258,7 +258,9 @@ function parseTag(context,type,parent) {
   let tagType = ElementTypes.ELEMENT  
 
   if (!context.inVPre) {
-    
+    if (tag === 'slot') {
+      tagType === ElementTypes.SLOT;
+    }
   }
   return {
     type: NodeTypes.ELEMENT,

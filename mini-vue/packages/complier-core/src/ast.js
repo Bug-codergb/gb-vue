@@ -50,6 +50,12 @@ export const ConstantTypes = {
   CAN_HOIST : 2,
   CAN_STRINGIFY : 3
 }
+//当不需要和模板关联时，位置信息只做一个存根，无实际意义（如条件表达式）
+export const locSub = {
+  source: '',
+  start: { line: 1, column: 1, offset: 0 },
+  end: { line: 1, column: 1, offset: 0 }
+}
 export function createRoot(children,loc) {
   return {
     type: NodeTypes.ROOT,
