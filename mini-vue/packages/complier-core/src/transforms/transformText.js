@@ -31,6 +31,7 @@ export const transformText = (node, context) => {
                   [child],
                   child.loc
                 );
+                
               }
               currentContainer.children.push(` + `, next);
               children.splice(j, 1);
@@ -42,26 +43,29 @@ export const transformText = (node, context) => {
           }
         }
       }
-      
+      console.log(json(children))
       if (
         !hasText ||
-        children.length===1 && (node.type === NodeTypes.ROOT ||
+        (children.length===1 && (node.type === NodeTypes.ROOT ||
         (node.type === NodeTypes.ELEMENT &&
-          node.tagType === ElementTypes.ELEMENT && node.props&&
+          node.tagType === ElementTypes.ELEMENT&&
           !node.props.find(
             (p) =>
               p.type === NodeTypes.DIRECTIVE &&
               !context.directiveTransforms[p.name]
-          )))
+          ) && !(node.tag==='template'))))
       ) {
+        debugger
         return;
       }  
+      
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
         if (isText(child) || child.type === NodeTypes.COMPOUND_EXPRESSION) {
           const callArgs = [];
           if (child.type !== NodeTypes.TEXT || child.content !== " ") {
             callArgs.push(child);
+          
           }
   
           if (!context.ssr) {
@@ -69,6 +73,7 @@ export const transformText = (node, context) => {
               PatchFlags.TEXT + ` ${PatchFlagNames[PatchFlags.TEXT]} `
             );
           }
+          
           children[i] = {
             type: NodeTypes.TEXT_CALL,
             content: child,

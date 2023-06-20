@@ -12,8 +12,8 @@ export function getBaseTransformPreset() {
   return [
     [
       //transformIf,
-      //transformText,
-      transformElement
+      transformText,
+      //transformElement
     ],
     {
       on: () => { },
@@ -29,7 +29,7 @@ export function baseComplie(template, options) {
   
   const [nodeTransforms, directiveTransforms] = getBaseTransformPreset()
 
-
+console.log(directiveTransforms)
   transform(
     ast,
     Object.assign(
@@ -37,9 +37,9 @@ export function baseComplie(template, options) {
       options,
       {
         nodeTransforms: [...nodeTransforms],
-        directiveTransform: Object.assign(
+        directiveTransforms: Object.assign(
           {},
-          
+          directiveTransforms
         )
       }
     )

@@ -11,11 +11,7 @@ window.json = json;
 
 let temp = `
    <ul>
-    <li v-bind="{app,bar,app}" v-on="{click:clickHandler}"></li>
-    <li v-on="{click:clickHandler,mouseup:mouseupHandler}"></li>
-    <li :style="{ color:flag ? '#bfa' : 'pink' }"></li>
-    <li :class="{active:bar}"></li>
-    <li> {{ app }} </li>
+    <li> {{ app }}{{ foo }}</li>
     <li style="width:100px,backgroundColor:#bfa"  :class="{active:inner}">123</li>
    </ul>
 `
