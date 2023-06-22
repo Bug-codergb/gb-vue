@@ -11,8 +11,8 @@ import { transformBind } from "./transforms/vBind.js";
 export function getBaseTransformPreset() {
   return [
     [
-      //transformIf,
-      transformText,
+      transformIf,
+      //transformText,
       //transformElement
     ],
     {

@@ -1,7 +1,21 @@
-import { ElementTypes, NodeTypes, createSimpleExpression } from "../ast.js";
+import {
+  ConstantTypes,
+  ElementTypes,
+  NodeTypes,
+  createCallExpression,
+  createConditionalExpression,
+  createObjectExpression,
+  createObjectProperty,
+  createSimpleExpression,
+  createVNodeCall
+} from "../ast.js";
+import { CREATE_COMMENT, FRAGMENT } from "../runtimeHelpers.js";
 import { 
   createStructuralDirectiveTransform, traverseNode
 } from "../transform.js";
+import {  PatchFlags  } from "../../../shared/src/index.js";
+import { PatchFlagNames } from "../../../shared/src/patchFlags.js";
+let __DEV__ = true;
 export const transformIf = createStructuralDirectiveTransform(/^(if|else|else-if)$/, (node, dir, context) => {
   return processIf(node, dir, context, (ifNode,branch,isRoot) => {
     const siblings = context.parent.children;
@@ -16,9 +30,18 @@ export const transformIf = createStructuralDirectiveTransform(/^(if|else|else-if
 
     return () => {
       if (isRoot) {
-        
+        ifNode.codegenNode = createCodegenNodeForBranch(
+          branch,
+          key,
+          context
+        )
       } else {
-        
+        const parentCondition = getParentCondition(ifNode.codegenNode);
+        parentCondition.alternate = createCodegenNodeForBranch(
+          branch,
+          key + ifNode.branches.length - 1,
+          context
+        )
       }
     }
   });
@@ -41,7 +64,6 @@ export function processIf(node, dir, context, processCodegen) {
       loc: node.loc,
       branches:[branch]
     }
-
     context.replaceNode(ifNode);
     if (processCodegen) {
       return processCodegen(ifNode, branch, true);
@@ -95,5 +117,83 @@ function createIfBranch(node,dir) {
     condition: dir.name === 'else' ? undefined : dir.exp,
     children: [node],
     isTemplate,
+  }
+}
+//为分支创建 codegenCode
+function createCodegenNodeForBranch(branch, keyIndex, context) {
+  if (branch.condition) {
+    return createConditionalExpression(
+      branch.condition,
+      createChildrenCodegenNode(branch, keyIndex, context),
+      createCallExpression(
+        context.helper(CREATE_COMMENT),
+        [
+          'v-if',
+          'true'
+        ]
+      )
+    )
+  } else {
+    return createChildrenCodegenNode(branch,keyIndex,context)
+  }
+}
+function createChildrenCodegenNode(branch,keyIndex,context) {
+  const { helper } = context;
+  const keyProperty = createObjectProperty(
+    'key',
+    createSimpleExpression(
+      `${keyIndex}`,
+      false,
+      {},
+      ConstantTypes.CAN_HOIST
+    )
+  )
+  const { children } = branch;
+  
+  const firstChild = children[0];
+  const needFragmentWrapper = children.length !== 1 || firstChild.type !== NodeTypes.ELEMENT;
+  
+  if (needFragmentWrapper) {
+    if (children.length === 1 || firstChild.type !== NodeTypes.FOR) {
+      const vnodeCall = firstChild.codegenNode;
+      return vnodeCall;
+    } else {
+      debugger
+      let patchFlag = PatchFlags.STABLE_FRAGMENT;
+      let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT];
+      if (__DEV__ && !branch.isTemplateIf && children.filter(c => c.type !== NodeTypes.COMMENT).length === 1) {
+        patchFlag |= PatchFlags.DEV_ROOT_FRAGMENT;
+        patchFlagText += `, ${PatchFlagNames[PatchFlags.DEV_ROOT_FRAGMENT]}`;
+      }
+      return createVNodeCall(
+        context,
+        helper(FRAGMENT),
+        createObjectExpression([keyProperty]),
+        children,
+        patchFlag + (__DEV__ ? ` /* ${patchFlagText} */ ` : ''),
+        undefined,
+        undefined,
+        true,
+        false,
+        false,
+        branch.loc
+      )
+    }
+  } else {
+    const ret = firstChild.codegenNode;
+    return ret;
+  }
+}
+function getParentCondition(node) {
+  while (true) {
+    if (node.type === NodeTypes.JS_CONDITIONAL_EXPRESSION) {
+      if (node.alternate.type == NodeTypes.JS_CONDITIONAL_EXPRESSION) {
+        node = node.alternate;
+      } else {
+        return node;
+      }
+    } else if(node.type === NodeTypes.JS_CACHE_EXPRESSION) {
+      node = node.value;
+    }
   }
 }

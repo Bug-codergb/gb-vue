@@ -123,7 +123,27 @@ export function createArrayExpression(elements,loc){
     elements
   }
 }
-
+//创建分支节点
+/* 
+  test:条件，
+  consequent:条件满足时执行，
+  alternate:条件不满足时执行
+*/
+export function createConditionalExpression(
+  test,
+  consequent,
+  alternate,
+  newline=true
+) {
+  return {
+    type: NodeTypes.JS_CONDITIONAL_EXPRESSION,
+    test,
+    consequent,
+    alternate,
+    newline,
+    loc:{}
+  }
+}
 export function createVNodeCall(
   context,
   tag,
