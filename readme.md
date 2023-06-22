@@ -36,6 +36,12 @@ vue3通过位运算实现依赖的收集与清除，相比较于直接cleanuEffe
 ```
 - [x] ast
 - [x] transform
+  - [x] transformElement
+  - [x] transformText
+  - [x] transformIf
+  - [x] transformFor
+  - [x] transformOn
+  - [x] transformBind
 - [x] generate
 
 
