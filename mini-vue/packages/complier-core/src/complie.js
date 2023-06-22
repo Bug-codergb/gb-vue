@@ -11,9 +11,9 @@ import { transformBind } from "./transforms/vBind.js";
 export function getBaseTransformPreset() {
   return [
     [
-      transformIf,
+      // transformIf,
       //transformText,
-      //transformElement
+      transformElement
     ],
     {
       on: () => { },
@@ -28,8 +28,7 @@ export function baseComplie(template, options) {
   const ast = isString(template) ? baseParser(template, options) : template;
   
   const [nodeTransforms, directiveTransforms] = getBaseTransformPreset()
-
-console.log(directiveTransforms)
+  
   transform(
     ast,
     Object.assign(

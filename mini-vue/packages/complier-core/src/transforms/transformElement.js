@@ -37,12 +37,12 @@ export const transformElement = (node, context) => {
       return;
     }
 
-    const { tag, props } = node;
-    const isComponent = node.tagType === ElementTypes.COMPONENT;
+    const { tag, props } = node; //获取当前节点的标签名称，props
+    const isComponent = node.tagType === ElementTypes.COMPONENT; // 判断是否为组件
 
     let vnodeTag = isComponent ? resolveComponentType(node, context) : `"${tag}"`;
     
-    const isDynamicComponent = isObject(vnodeTag) && vnodeTag.callee === RESOLVE_DYNAMIC_COMPONENT;
+    const isDynamicComponent = isObject(vnodeTag) && vnodeTag.callee === RESOLVE_DYNAMIC_COMPONENT;//是否为动态组件<component is="App"/>
 
     let vnodeProps;
     let vnodeChildren;
@@ -62,6 +62,7 @@ export const transformElement = (node, context) => {
         isComponent,
         isDynamicComponent
       );
+       console.log(json(propsBuildResult));
       vnodeProps = propsBuildResult.props;
       patchFlag = propsBuildResult.patchFlag;
       dynamicPropNames = propsBuildResult.dynamicPropames;
@@ -149,10 +150,18 @@ function isComponentTag(tag) {
   return tag === 'component' || tag === 'Component';
 }
 
-export function buildProps(node,context,props = node.props,isComponent,isDynamicComponent,ssr=false) {
+export function buildProps(
+  node,
+  context,
+  props = node.props,
+  isComponent,
+  isDynamicComponent,
+  ssr = false
+) {
+
   const { tag, loc:elementLoc, children } = node; //获取当前节点的标签名称,位置信息,子元素
   
-  let properties = [];
+  let properties = []; // objectProperty{ key:simpleExpression,value:simpleExpression }
   const mergeArgs = [];
   const runtimeDirectives = [];
   const hasChildren = children.length > 0;
@@ -170,7 +179,6 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
 
   const pushMergeArg = (arg) => {
     if (properties.length) {
-      json(properties);
       mergeArgs.push(
         createObjectExpression(
           dedupeProperties(properties),
@@ -198,8 +206,8 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
       if (
         value.type === NodeTypes.JS_CACHE_EXPRESSION || 
         ((value.type === NodeTypes.SIMPLE_EXPRESSION ||
-          value.type === NodeTypes.COMPOUND_EXPRESSION) &&
-          getConstantType(value,context) >0)
+          value.type === NodeTypes.COMPOUND_EXPRESSION) /* &&
+          getConstantType(value,context) >0*/)
       ) {
         return;
       }
@@ -257,7 +265,7 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
       )
     } else { // 指令
       
-      const { name, arg, exp, loc } = prop;
+      const { name, arg, exp, loc } = prop; // name:指令的名称，bind,model,if,else-if,else,show,for,on  
       const isVBind = name === "bind";
       const isVOn = name === 'on'
       if (name === 'slot') {
@@ -317,10 +325,17 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
       const directiveTransform = context.directiveTransforms[name];
 
       if (directiveTransform) {
-        
+        const { props,needRuntime } = directiveTransform(prop, node, context);     
+        !ssr && props.forEach(analyzePatchFlag);
+        if (isVOn && arg && !isStaticExp(arg)) {
+          
+        } else {
+          properties.push(...props);
+        }
       }
     }
   }
+  //console.log(properties)
   let propsExpression;
   if (mergeArgs.length) {
     pushMergeArg();
@@ -334,6 +349,8 @@ export function buildProps(node,context,props = node.props,isComponent,isDynamic
       propsExpression = mergeArgs[0];
     }
   } else if (properties.length) {
+    //console.log(properties);
+    debugger;
     propsExpression = createObjectExpression(
       dedupeProperties(properties),
       elementLoc
@@ -442,7 +459,7 @@ function dedupeProperties(properties) {
     }
 
     const name = prop.key.content;
-    console.log(name)
+    //console.log(name)
     const existing = knownProps.get(name);
     if (existing) {
       if (name === 'style' || name === 'class' || isOn(name)) {

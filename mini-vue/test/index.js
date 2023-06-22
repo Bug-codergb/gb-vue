@@ -11,9 +11,7 @@ window.json = json;
 
 let temp = `
    <ul>
-    <li v-if="app">今天是个好日子</li>
-    <li v-else-if="foo">明天</li>
-    <li v-else>后天</li>
+    <li v-bind="{id:idProp,name:nameProp}" :class="{active:flag}" :style="{color:flag?'#bfa':'pink' }">今天是个好日子</li>
    </ul>
 `
 complie(temp);

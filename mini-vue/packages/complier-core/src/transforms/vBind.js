@@ -1,5 +1,6 @@
 import { NodeTypes, createObjectProperty, createSimpleExpression } from "../ast.js";
 export const transformBind = (dir, _node, context) => {
+  console.log(dir)
   const { exp, modifiers, loc } = dir;
   const arg = dir.arg;
   if (arg.type !== NodeTypes.SIMPLE_EXPRESSION) {//为什么不是simple_expression
