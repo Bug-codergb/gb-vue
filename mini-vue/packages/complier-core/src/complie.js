@@ -9,6 +9,9 @@ import { transformElement } from "./transforms/transformElement.js";
 
 import { transformBind } from "./transforms/vBind.js";
 import { transformOn } from "./transforms/vOn.js";
+
+import { generate} from "./codegen.js";
+import { createObjectExpression } from "./ast.js";
 export function getBaseTransformPreset() {
   return [
     [
@@ -45,4 +48,11 @@ export function baseComplie(template, options) {
     )
   );
   console.log(ast);
+
+  return generate(
+    ast,
+    Object.assign({}, options, {
+      
+    })
+  );
 }
