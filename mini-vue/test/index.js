@@ -10,8 +10,17 @@ function json(value) {
 window.json = json;
 
 let temp = `
-   <ul>
+   <ul v-bind="{app:appProp}">
     <li @click="handler(app)">今天是个好日子</li>
+    <li v-if="app">今天</li>
+    <li v-else-if="bar">明天</li>
+    <li v-else="foo">后天</li>
+    <li :class="{actvie:flag}">{{ app }}{{ foo }}</li>
+    <li>
+      {{ app }}
+      <span>郭斌</span>
+      {{ foo }}
+    </li>
    </ul>
 `
 complie(temp);

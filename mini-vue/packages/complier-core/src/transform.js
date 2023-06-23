@@ -1,9 +1,14 @@
 import {
+  isSingleElementRoot
+} from "./transforms/hoistStatic.js";
+import {
   NOOP,
-  isString
+  isString,
+  EMPTY_OBJ
 } from "../../shared/src/general.js";
-import { NodeTypes, ElementTypes } from "./ast.js";
-import { helperNameMap } from "./runtimeHelpers.js";
+import { PatchFlagNames, PatchFlags } from "../../shared/src/patchFlags.js";
+import { NodeTypes, ElementTypes,ConstantTypes ,createVNodeCall} from "./ast.js";
+import { FRAGMENT, helperNameMap } from "./runtimeHelpers.js";
 
 export function createTransformContext(root,{
   filename = '',
@@ -23,16 +28,48 @@ export function createTransformContext(root,{
   ssrCssVars = ``,
   inline = false,
   isTS = false,
+  bindingMetadata = EMPTY_OBJ
 }) {
+  const nameMatch = filename.replace(/\?.*$/, '').match(/([^/\\]+)\.\w+$/)
   const context = {
+    selfName: nameMatch && capitalize(camelize(nameMatch[1])),
+    prefixIdentifiers,
+    hoistStatic,
+    cacheHandlers,
     nodeTransforms,
     directiveTransforms,
+    transformHoist,
+    isBuiltInComponent,
+    isCustomElement,
+    expressionPlugins,
+    scopeId,
+    slotted,
+    ssr,
+    inSSR,
+    ssrCssVars,
+    bindingMetadata,
+    inline,
+    isTS,
+    
     root,
     helpers: new Map(),
+    components: new Set(),
     directives: new Map(),
     currentNode: root,
     parent: null,
     childIndex: 0,
+    hoists: [],
+    imports: [],
+    constantCache: new Map(),
+    temps: 0,
+    cached: 0,
+    identifiers: Object.create(null),
+    scopes: {
+      vFor: 0,
+      vSlot: 0,
+      vPre: 0,
+      vOnce: 0
+    },
     helper(name) {
       const count = context.helpers.get(name) || 0;
       context.helpers.set(name, count + 1);
@@ -71,6 +108,21 @@ export function createTransformContext(root,{
     },
     onNodeRemoved() {
       
+    },
+    hoist(exp) {
+      if (isString(exp)) exp = createSimpleExpression(exp)
+      context.hoists.push(exp)
+      const identifier = createSimpleExpression(
+        `_hoisted_${context.hoists.length}`,
+        false,
+        exp.loc,
+        ConstantTypes.CAN_HOIST
+      )
+      identifier.hoisted = exp
+      return identifier
+    },
+    cache(exp, isVNode = false) {
+      return createCacheExpression(context.cached++, exp, isVNode)
     }
   }
   return context;
@@ -78,8 +130,59 @@ export function createTransformContext(root,{
 //这里开始
 export function transform(root, options) {
   const context = createTransformContext(root, options);
-  traverseNode(root,context);
+  traverseNode(root, context);
+
+  // console.log(context.hoistStatic); false
+
+  if (!options.ssr) {
+    createRootCodegen(root, context);
+  }
+
+  root.helpers = new Set([...context.helpers.keys()]);
+  root.conpoments = [...context.components];
+  root.directives = [...context.directives];
+  root.imports = context.imports;
+  root.hoists = context.hoists;
+  root.temps = context.temps;
+  root.cached = context.cached;
 }
+
+function createRootCodegen(root, context) {
+  const { helper } = context;
+  const { children } = root;
+  if (children.length === 1) {
+    const child = children[0];
+    if (isSingleElementRoot(root,child) && child.codegenNode) {
+      const codegenNode = child.codegenNode;
+      if (codegenNode.type === NodeTypes.VNODE_CALL) {
+        
+      }
+      root.codegenNode = codegenNode;
+    } else {
+      root.codegenNode = child;
+    }
+  } else if (children.length > 1) {
+    let patchFlag = PatchFlags.STABLE_FRAGMENT;
+    let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT]
+    if (children.filter(c => c.type !== NodeTypes.COMMENT).length === 1) {
+      patchFlag |= PatchFlags.DEV_ROOT_FRAGMENT;
+      patchFlagText += ` ${PatchFlagNames[PatchFlags.DEV_ROOT_FRAGMENT]} `
+    }
+    root.codegenNode = createVNodeCall(
+      context,
+      helper(FRAGMENT),
+      undefined,
+      root.children,
+      patchFlag + ` /* ${patchFlagText} */`,
+      undefined,
+      undefined,
+      true,
+      undefined,
+      false
+    )
+  }
+}
+
 export function createStructuralDirectiveTransform(name,fn) {
   const matches = isString(name) ? (n) => n === name : (n) => name.test(n);
   return (node,context) => {

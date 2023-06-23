@@ -62,7 +62,7 @@ export const transformElement = (node, context) => {
         isComponent,
         isDynamicComponent
       );
-       console.log(json(propsBuildResult));
+      // console.log(json(propsBuildResult));
       vnodeProps = propsBuildResult.props;
       patchFlag = propsBuildResult.patchFlag;
       dynamicPropNames = propsBuildResult.dynamicPropames;
@@ -354,7 +354,7 @@ export function buildProps(
       elementLoc
     )
   }
-  console.log(json(propsExpression))
+
   if (hasDynamicKey) {
     patchFlag |= PatchFlags.FULL_PROPS;
   } else {

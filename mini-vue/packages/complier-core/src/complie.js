@@ -12,9 +12,9 @@ import { transformOn } from "./transforms/vOn.js";
 export function getBaseTransformPreset() {
   return [
     [
-      // transformIf,
-      //transformText,
-      transformElement
+      transformIf,
+      transformElement,
+      transformText,
     ],
     {
       on: transformOn,

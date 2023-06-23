@@ -43,7 +43,6 @@ export const transformText = (node, context) => {
           }
         }
       }
-      console.log(json(children))
       if (
         !hasText ||
         (children.length===1 && (node.type === NodeTypes.ROOT ||
@@ -55,7 +54,6 @@ export const transformText = (node, context) => {
               !context.directiveTransforms[p.name]
           ) && !(node.tag==='template'))))
       ) {
-        debugger
         return;
       }  
       
