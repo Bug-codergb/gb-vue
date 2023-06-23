@@ -3,6 +3,7 @@ import {
   isString
 } from "../../shared/src/general.js";
 import { NodeTypes, ElementTypes } from "./ast.js";
+import { helperNameMap } from "./runtimeHelpers.js";
 
 export function createTransformContext(root,{
   filename = '',
@@ -47,6 +48,9 @@ export function createTransformContext(root,{
           context.helpers.set(name, currentCount);
         }
       }
+    },
+    helperString(name) {
+      returnn `_${helperNameMap[context.helper(name)]}`
     },
     replaceNode(node) {
       context.parent.children[context.childIndex] = context.currentNode = node;

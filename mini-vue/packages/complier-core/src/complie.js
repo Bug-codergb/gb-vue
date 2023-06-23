@@ -8,6 +8,7 @@ import { transformText } from "./transforms/transformText.js";
 import { transformElement } from "./transforms/transformElement.js";
 
 import { transformBind } from "./transforms/vBind.js";
+import { transformOn } from "./transforms/vOn.js";
 export function getBaseTransformPreset() {
   return [
     [
@@ -16,7 +17,7 @@ export function getBaseTransformPreset() {
       transformElement
     ],
     {
-      on: () => { },
+      on: transformOn,
       bind: transformBind,
       model: () => { }
       

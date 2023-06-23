@@ -11,7 +11,7 @@ window.json = json;
 
 let temp = `
    <ul>
-    <li v-bind="{id:idProp,name:nameProp}" :class="{active:flag}" :style="{color:flag?'#bfa':'pink' }">今天是个好日子</li>
+    <li @click="handler(app)">今天是个好日子</li>
    </ul>
 `
 complie(temp);

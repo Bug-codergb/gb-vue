@@ -39,6 +39,10 @@ export const capitalize = cacheStringFunction((str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 })
 
+export const toHandlerKey = cacheStringFunction((str) => {
+  return str ? `on${capitalize(str)}`:''
+})
+
 const hyphenateRE = /\B([A-Z])/g
 export const hyphenate = cacheStringFunction((str) => {
   return str.replace(hyphenateRE,"-$1").toLowerCase();//这里匹配第一个大写字母(不在开头)

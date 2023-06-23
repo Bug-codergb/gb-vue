@@ -325,7 +325,7 @@ export function buildProps(
       const directiveTransform = context.directiveTransforms[name];
 
       if (directiveTransform) {
-        const { props,needRuntime } = directiveTransform(prop, node, context);     
+        const { props, needRuntime } = directiveTransform(prop, node, context);    
         !ssr && props.forEach(analyzePatchFlag);
         if (isVOn && arg && !isStaticExp(arg)) {
           
@@ -335,7 +335,7 @@ export function buildProps(
       }
     }
   }
-  //console.log(properties)
+  
   let propsExpression;
   if (mergeArgs.length) {
     pushMergeArg();
@@ -349,14 +349,12 @@ export function buildProps(
       propsExpression = mergeArgs[0];
     }
   } else if (properties.length) {
-    //console.log(properties);
-    debugger;
     propsExpression = createObjectExpression(
       dedupeProperties(properties),
       elementLoc
     )
   }
-
+  console.log(json(propsExpression))
   if (hasDynamicKey) {
     patchFlag |= PatchFlags.FULL_PROPS;
   } else {
