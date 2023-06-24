@@ -152,7 +152,8 @@ function createRootCodegen(root, context) {
   const { children } = root;
   if (children.length === 1) {
     const child = children[0];
-    if (isSingleElementRoot(root,child) && child.codegenNode) {
+    if (isSingleElementRoot(root, child) && child.codegenNode) {
+      
       const codegenNode = child.codegenNode;
       if (codegenNode.type === NodeTypes.VNODE_CALL) {
         
@@ -162,6 +163,7 @@ function createRootCodegen(root, context) {
       root.codegenNode = child;
     }
   } else if (children.length > 1) {
+    debugger
     let patchFlag = PatchFlags.STABLE_FRAGMENT;
     let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT]
     if (children.filter(c => c.type !== NodeTypes.COMMENT).length === 1) {

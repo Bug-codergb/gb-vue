@@ -49,10 +49,12 @@ export function baseComplie(template, options) {
   );
   console.log(ast);
 
-  return generate(
+  const generateCode = generate(
     ast,
     Object.assign({}, options, {
       
     })
   );
+  console.log(generateCode.code);
+  return generateCode;
 }

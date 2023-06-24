@@ -17,6 +17,9 @@ export const hasChanged = (newValue,oldValue) => {
 export const isString = (value) => {
   return typeof value === "string";
 }
+export const isSymbol = (value) => {
+  return typeof value === 'symbol';
+}
 export const isIntegerKey = (key) => {
   return isString(key) && key !== NaN && '' + parseInt(key, 10) === key;
 }

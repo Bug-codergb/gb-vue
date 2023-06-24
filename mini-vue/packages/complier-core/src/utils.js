@@ -1,4 +1,7 @@
 import { NodeTypes } from "./ast.js";
+const nonIdentifierRE = /^\d|[^\$\w]/
+export const isSimpleIdentifier = (name) =>
+  !nonIdentifierRE.test(name)
 
 export function advancePositionWithMutation(
   pos,

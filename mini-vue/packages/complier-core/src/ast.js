@@ -110,7 +110,7 @@ export function createObjectProperty(key,value) {
 }
 export function createCallExpression(callee,args,loc) {
   return {
-    type: NodeTypes.JS_CACHE_EXPRESSION,
+    type: NodeTypes.JS_CALL_EXPRESSION,
     loc,
     callee,
     arguments:args
