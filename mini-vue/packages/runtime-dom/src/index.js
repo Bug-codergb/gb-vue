@@ -32,6 +32,4 @@ function normalizeContainer(container) {
   }
   return container;
 }
-export {
-  registerRuntimeCompiler
-} from "../../runtime-core/src/index.js";
+export * from "../../runtime-core/src/index.js";

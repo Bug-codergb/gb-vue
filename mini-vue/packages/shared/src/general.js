@@ -4,6 +4,10 @@ export const EMPTY_OBJ = Object.freeze({})
 const onRE = /^on[^a-z]/
 export const isOn = (key) => onRE.test(key)
 
+export const objectToString = Object.prototype.toString
+export const toTypeString = (value) =>
+  objectToString.call(value)
+
 export const isReservedProps = (key) => {
   let map = new Map([
     ['key', true],
@@ -20,6 +24,17 @@ export const isString = (value) => {
 export const isSymbol = (value) => {
   return typeof value === 'symbol';
 }
+export const isArray=(value)=>{
+  return Array.isArray(value);
+}
+
+export const isMap = (val) =>
+  toTypeString(val) === '[object Map]'
+export const isSet = (val) =>
+  toTypeString(val) === '[object Set]'
+  export const isPlainObject = (val) =>
+    toTypeString(val) === '[object Object]'
+  
 export const isIntegerKey = (key) => {
   return isString(key) && key !== NaN && '' + parseInt(key, 10) === key;
 }
