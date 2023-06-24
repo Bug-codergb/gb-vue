@@ -20,7 +20,6 @@ export function complieToFunction(template, options) {
     },
     options
   )
-  console.log(runtimDom.toDisplayString)
   const { code } = complie(template, opts);
   const render = new Function('Vue',code)(runtimDom);
   return complieCache[key] = render;

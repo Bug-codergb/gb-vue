@@ -37,7 +37,6 @@ function baseCreateRenderer(options){
     container._vnode = vnode;
   }
   function patch(n1, n2, container, anchor, parentComponent) {
-    console.log(n1,n2)
     const { type,shapeFlag } = n2;
     switch (type) {
       case Text:
@@ -89,7 +88,7 @@ function baseCreateRenderer(options){
   }
   // element -> mount
   function mountElement(vnode, container, anchor) {
-    console.log(vnode.children)
+  
     const { shapeFlag, type, props } = vnode;
     const el = createElement(type);
     //文本节点
@@ -104,12 +103,10 @@ function baseCreateRenderer(options){
         hostPatchProps(el,key,null,nextVal);
       }
     }
-    console.log(el,container)
     insert(el,container,anchor);
   }
   function mountChildren(children,container) {
     children.forEach((child) => {
-      console.log(child)
       patch(null, child, container);
     })
   }
@@ -175,9 +172,7 @@ function baseCreateRenderer(options){
     
   }
   function setupRenderEffect(instance, vnode, container) {
-    console.log(instance, container)
     const subTree = instance.render.call(instance.setupState, instance.setupState);
-    console.log(subTree,container)
     patch(null, subTree, container, null, instance);
     instance.update = effect(() => { }, {
       scheduler: () => {

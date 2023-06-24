@@ -70,6 +70,5 @@ export function setCurrentInstance(instance) {
   currentInstance = instance;
 }
 export function registerRuntimeCompiler(_complie) {
-  console.log(_complie)
   complie = _complie;
 }
