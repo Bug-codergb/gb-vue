@@ -19,11 +19,12 @@ function baseCreateRenderer(options){
   const {
     createElement,
     setElementText:hostSetElementText,
-    patchProps:hostPatchProps,
+    patchProp:hostPatchProps,
     remove,
     insert:hostInsert,
     createText: hostCreateText,
-    unmount
+    unmount,
+    insert
   } = options;
   const render = (vnode, container) => {
     if (vnode === null) {
@@ -35,7 +36,8 @@ function baseCreateRenderer(options){
     }
     container._vnode = vnode;
   }
-  function patch(n1,n2,container,anchor,parentComponent){
+  function patch(n1, n2, container, anchor, parentComponent) {
+    console.log(n1,n2)
     const { type,shapeFlag } = n2;
     switch (type) {
       case Text:
@@ -43,7 +45,7 @@ function baseCreateRenderer(options){
       case Fragment:
         processFragment(n1, n2, container); break;
       default:
-        if (shapeFlag & ShapeFlags.ELEMENT) {
+        if (typeof type==="string"||shapeFlag & ShapeFlags.ELEMENT) {
           processElement(n1,n2,container,anchor,parentComponent);
         } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
           processComponent(n1, n2, container, parentComponent);
@@ -86,13 +88,14 @@ function baseCreateRenderer(options){
     }
   }
   // element -> mount
-  function mountElement(vnode,container,anchor){
+  function mountElement(vnode, container, anchor) {
+    console.log(vnode.children)
     const { shapeFlag, type, props } = vnode;
     const el = createElement(type);
     //文本节点
-    if (shapeFlag && ShapeFlags.TEXT_CHILDREN) {
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el,vnode.children);
-    } else if (shapeFlag && ShapeFlags.ARRAY_CHILDREN) {//数组节点
+    } else if (Array.isArray(vnode.children)||shapeFlag && ShapeFlags.ARRAY_CHILDREN) {//数组节点
       mountChildren(vnode.children,el);
     }
     if (props) {
@@ -101,10 +104,12 @@ function baseCreateRenderer(options){
         hostPatchProps(el,key,null,nextVal);
       }
     }
+    console.log(el,container)
     insert(el,container,anchor);
   }
   function mountChildren(children,container) {
     children.forEach((child) => {
+      console.log(child)
       patch(null, child, container);
     })
   }
@@ -169,7 +174,11 @@ function baseCreateRenderer(options){
   function updateComponent(n1,n2,container,parentComponent) {
     
   }
-  function setupRenderEffect(instance,vnode,container) {
+  function setupRenderEffect(instance, vnode, container) {
+    console.log(instance, container)
+    const subTree = instance.render.call(instance.setupState, instance.setupState);
+    console.log(subTree,container)
+    patch(null, subTree, container, null, instance);
     instance.update = effect(() => { }, {
       scheduler: () => {
         

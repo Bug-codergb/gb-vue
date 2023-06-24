@@ -1,4 +1,5 @@
 import { shallowReadonly } from "../../reactivity/index.js";
+import {PublicInstanceProxyHandlers } from "./componentPublicInstance.js";
 let complie = void 0;
 export function createComponentInstance(vnode, parent) {
   const instance = {
@@ -7,7 +8,8 @@ export function createComponentInstance(vnode, parent) {
     next: null,
     parent,
     proxy:null,
-    isMounted:false
+    isMounted: false,
+    ctx:{}
   }
   return instance
 }
@@ -16,6 +18,9 @@ export function setupComponent(instance) {
   setupStatefulComponent(instance);
 }
 function setupStatefulComponent(instance) {
+
+  instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers);
+
   const Component = instance.type;
   const { setup } = Component;
   if (setup) {
@@ -41,7 +46,7 @@ function handleSetupResult(instance,setupResult) {
   if (typeof setupResult === "function") {
     instance.render = setupResult;
   } else if (typeof setupResult === "object") {
-    
+    instance.setupState = setupResult;
   }
   finishComponentSetup(instance);
 }
@@ -49,6 +54,12 @@ function finishComponentSetup(instance) {
   const Component = instance.type;
   if (!instance.render) {
     //模板编译
+    if (complie && !Component.render) {
+      if (Component.template) {
+        Component.render = complie(Component.template);
+      }
+    }
+    instance.render = Component.render;
   }
 }
 let currentInstance = {};

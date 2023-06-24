@@ -8,7 +8,7 @@ import {
 } from "../../shared/src/general.js";
 import { PatchFlagNames, PatchFlags } from "../../shared/src/patchFlags.js";
 import { NodeTypes, ElementTypes,ConstantTypes ,createVNodeCall} from "./ast.js";
-import { FRAGMENT, helperNameMap } from "./runtimeHelpers.js";
+import { FRAGMENT, helperNameMap,TO_DISPLAY_STRING } from "./runtimeHelpers.js";
 
 export function createTransformContext(root,{
   filename = '',
@@ -235,6 +235,11 @@ export function traverseNode(node, context) {
   }
   
   switch (node.type) {
+    case NodeTypes.INTERPOLATION:
+      if (!context.ssr) {
+        context.helper(TO_DISPLAY_STRING)
+      }
+      break;
     case NodeTypes.IF:
       for (let i = 0; i < node.branches.length; i++) {
         traverseNode(node.branches[i], context);

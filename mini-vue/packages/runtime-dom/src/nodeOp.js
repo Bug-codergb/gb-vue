@@ -1,7 +1,8 @@
 const doc = typeof document !== 'undefined' ? document : null;
 export const nodeOps = {
-  insert: (child,parent,anchor) => {
-    parent.insertBefore(child,anchor);
+  insert: (child, parent, anchor) => {
+    console.log(child,"---------------------")
+    if(child) parent.insertBefore(child,anchor);
   },
   remove: (child) => {
     const parent = child.parentNode;
@@ -17,7 +18,7 @@ export const nodeOps = {
     doc.createTextNode(text);
   },
   setElementText: (el,text) => {
-    el.textContent = tex;
+    el.textContent = text;
   },
   parentNode: (node) => {
     return node.parentNode || null

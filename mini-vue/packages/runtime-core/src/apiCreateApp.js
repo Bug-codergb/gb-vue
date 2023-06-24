@@ -24,7 +24,7 @@ export function createAppAPI(render, hydrate) {
       },
       mount(rootContainer) {
         if (!isMounted) {
-          const vnode = createVode(rootComponent, rootProps);
+          const vnode = createVNode(rootComponent, rootProps);
           console.log(vnode);
           render(vnode, rootContainer);
           isMounted = true;

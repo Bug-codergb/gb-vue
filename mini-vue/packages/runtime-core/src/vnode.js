@@ -1,6 +1,38 @@
 import ShapeFlags from "../../shared/src/shapeFlags.js";
-import { isString } from "../../shared/src/general.js";
+import { isRef} from "../../reactivity/index.js";
+import {
+  isString, isFunction
+} from "../../shared/src/general.js";
+import {isObject} from "../../shared/src/index.js"
+const isSuspense = () => false;
+const isTeleport=()=>false
+const currentScopeId=""
+
 export const createVNode = _createVNode;
+const __FEATURE_SUSPENSE__ = false;
+
+const normalizeKey = ({ key }) =>key != null ? key : null
+const currentRenderingInstance = {};
+const normalizeRef = ({
+  ref,
+  ref_key,
+  ref_for
+})=> {
+  if (typeof ref === 'number') {
+    ref = '' + ref
+  }
+  return (
+    ref != null
+      ? isString(ref) || isRef(ref) || isFunction(ref)
+        ? { i: currentRenderingInstance, r: ref, k: ref_key, f: !!ref_for }
+        : ref
+      : null
+  )
+}
+export function guardReactiveProps(props) {
+  if (!props) return null
+  return props;
+}
 function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNode) {
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT

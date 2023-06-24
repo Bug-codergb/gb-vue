@@ -135,6 +135,7 @@ export function generate(
     indent();
 
     if (hasHelpers) {
+      console.log(helpers)
       push(`const { ${helpers.map(aliasHelper).join(", ")} } = _Vue`);
       push('\n');
       newline();
@@ -343,10 +344,13 @@ function genExpression(node, context) {
 }
 function genInterpolation(node, context) {
   const { push, helper, pure } = context;
+  console.log(helper);
   if (pure) {
     push('');
   }
   push(`${helper(TO_DISPLAY_STRING)}(`);
+
+  console.log(context.code);
   genNode(node.content, context);
   push(`)`)
 }
