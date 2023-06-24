@@ -1,4 +1,4 @@
-import ShapeFlags from "../shared/src/shapeFlags.js";
+import ShapeFlags from "../../shared/src/shapeFlags.js";
 const createVode = (type, props, children) => {
   const vnode = {
     el: null,

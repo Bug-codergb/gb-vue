@@ -1,4 +1,5 @@
-import { shallowReadonly } from "../reactivity/index.js";
+import { shallowReadonly } from "../../reactivity/index.js";
+let complie = void 0;
 export function createComponentInstance(vnode, parent) {
   const instance = {
     type: vnode.type,
@@ -56,4 +57,8 @@ export function getCurrentInstance() {
 }
 export function setCurrentInstance(instance) {
   currentInstance = instance;
+}
+export function registerRuntimeCompiler(_complie) {
+  console.log(_complie)
+  complie = _complie;
 }

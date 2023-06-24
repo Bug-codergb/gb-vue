@@ -12,3 +12,5 @@ export function complie(template, options) {
     ]
   }));
 }
+
+export * from "../../complier-core/src/index.js";

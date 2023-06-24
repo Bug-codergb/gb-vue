@@ -1,6 +1,6 @@
 import { patchProp } from "./patchProp.js";
 import { nodeOps } from "./nodeOp.js";
-import { createRenderer } from "../../runtime-core/renderer.js";
+import { createRenderer } from "../../runtime-core/src/renderer.js";
 import { isString } from "../../shared/src/general.js";
 const renderOptions = Object.assign({ patchProp }, nodeOps);
 
@@ -32,3 +32,6 @@ function normalizeContainer(container) {
   }
   return container;
 }
+export {
+  registerRuntimeCompiler
+} from "../../runtime-core/src/index.js";

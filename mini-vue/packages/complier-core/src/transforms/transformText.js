@@ -68,7 +68,7 @@ export const transformText = (node, context) => {
   
           if (!context.ssr) {
             callArgs.push(
-              PatchFlags.TEXT + ` ${PatchFlagNames[PatchFlags.TEXT]} `
+              PatchFlags.TEXT + ` /*${PatchFlagNames[PatchFlags.TEXT]}*/ `
             );
           }
           

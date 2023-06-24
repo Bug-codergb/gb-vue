@@ -1,5 +1,5 @@
-import { isFunction } from "../shared/src/general.js";
-import { isObject } from "../shared/src/index.js";
+import { isFunction } from "../../shared/src/general.js";
+import { isObject } from "../../shared/src/index.js";
 import { createVode } from "./vnode.js";
 
 export function createAppAPI(render, hydrate) {
