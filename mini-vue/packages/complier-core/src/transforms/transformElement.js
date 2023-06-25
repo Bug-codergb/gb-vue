@@ -23,7 +23,7 @@ import {
   createObjectProperty,
   createSimpleExpression
 } from "../ast.js";
-import { findProp, isStaticArgOf, isStaticExp } from "../utils.js";
+import { findProp, isStaticArgOf, isStaticExp, toValidateId } from "../utils.js";
 import { PatchFlagNames } from "../../../shared/src/patchFlags.js";
 
 let __DEV__ = true;
@@ -32,8 +32,11 @@ export const transformElement = (node, context) => {
     node = context.currentNode;
     if (
       !(node.type === NodeTypes.ELEMENT &&
-        (node.tagType === ElementTypes.ELEMENT || node.tagType === ElementTypes.COMPONENT))
+        (node.tagType === ElementTypes.ELEMENT ||
+          node.tagType === ElementTypes.COMPONENT)
+      )
     ) {
+      //如果不是 **组件类型** 或者 **元素类型** 则直接返回
       return;
     }
 
@@ -125,26 +128,35 @@ export const transformElement = (node, context) => {
 export function resolveComponentType(node,context,ssr) {
   let { tag } = node;
   //动态组件
-  const isExplicitDynamic = isComponentTag(tag);
+  const isExplicitDynamic = isComponentTag(tag); // 标签名称是否为 <component/>
   const isProp = findProp(node, 'is'); // <component is="app"/>
 
-  if (isProp) {
-    if (isComponentTag) {
+  if (isProp) { //存在 is
+    if (isExplicitDynamic) { // 动态组件
       const exp = isProp.type === NodeTypes.ATTRIBUTE ? isProp.value && createSimpleExpression(
         isProp.value.content, true
-      ) : isProp.value;
+      ) : isProp.exp;
 
-      if (exp) {
-        return createCallExpression(context.helper(RESOLVE_DYNAMIC_COMPONENT), exp);
+      if (exp) { // is存在值，
+        return createCallExpression(context.helper(RESOLVE_DYNAMIC_COMPONENT), [exp]);
       }
     } else if (isProp.type === NodeTypes.ATTRIBUTE && isProp.value.content.startsWith('vue:')) {
       tag = isProp.value.content.slice(4);
     }
   }
 
+  const isDir = !isExplicitDynamic && findProp(node, 'is');
+  if (isDir && isDir.exp) {
+    console.error("v-is='component - name'已经被废弃了. 使用 is='vue:component - name'替代");
+
+    return createCallExpression(
+      context.helper(RESOLVE_DYNAMIC_COMPONENT,[isDir.exp])
+    )
+  }
+
   context.helper(RESOLVE_COMPONENT);
   context.components.add(tag);
-  return {}
+  return toValidateId(tag,'component');
 }
 function isComponentTag(tag) {
   return tag === 'component' || tag === 'Component';
@@ -230,7 +242,7 @@ export function buildProps(
   }
   for (let i = 0; i < props.length; i++){
     const prop = props[i];
-    if (prop.type === NodeTypes.ATTRIBUTE) { //静态属性
+    if (prop.type === NodeTypes.ATTRIBUTE) { //静态属性直接push到properties
       const { loc, name, value } = prop; // 获取 prop的位置信息,prop为静态属性时，name为字符串，value为对象，其中value的content为属性之
       let isStatic = true;//静态标识为true
       if (name === 'ref') {
@@ -244,17 +256,17 @@ export function buildProps(
           )
         }
       }
-      // 跳过component上的is
+      // 跳过component上的is(vue 3.1 在 普通元素上可以添加is属性 value为 ** <tr is="vue:my-row-component" /> **)
       if (name === "is" && (isComponentTag(tag) || (value && value.content.startsWith('vue:')))) {
         continue;
       }
-
+      //直接push
       properties.push(
         createObjectProperty(
           createSimpleExpression(
             name,
             true, // 带括号的属性名则为false
-            {l:1}
+            {offset:1,limit:10000000} // 临时变量
           ),
           createSimpleExpression(
             value ? value.content : '',
@@ -268,6 +280,7 @@ export function buildProps(
       const { name, arg, exp, loc } = prop; // name:指令的名称，bind,model,if,else-if,else,show,for,on  
       const isVBind = name === "bind";
       const isVOn = name === 'on'
+      
       if (name === 'slot') {
         if (!isComponent) {
           console.error("error");
@@ -304,11 +317,15 @@ export function buildProps(
       // v-bind={},v-on={}//同时绑定多个值
       if (!arg && (isVBind || isVOn)) {
         hasDynamicKey = true;
+        console.log(json(mergeArgs),json(properties))
         if (exp) {
           if (isVBind) {
             pushMergeArg();
+            
             mergeArgs.push(exp);
+          
           } else {
+            
             pushMergeArg({
               type: NodeTypes.JS_CALL_EXPRESSION,
               loc,
@@ -317,7 +334,7 @@ export function buildProps(
             })
           }
         } else {
-          console.log("error");
+          console.log(`${isVBind?'v-bind':'v-on'}指令没有表达式`);
         }
         continue;
       }
@@ -327,7 +344,7 @@ export function buildProps(
       if (directiveTransform) {
         const { props, needRuntime } = directiveTransform(prop, node, context);    
         !ssr && props.forEach(analyzePatchFlag);
-        if (isVOn && arg && !isStaticExp(arg)) {
+        if (isVOn && arg && !isStaticExp(arg)) {//非静态arg :[app]= app v-on:[event] = handler
           
         } else {
           properties.push(...props);
@@ -335,9 +352,10 @@ export function buildProps(
       }
     }
   }
+  console.log(json(mergeArgs), json(properties));
   
   let propsExpression;
-  if (mergeArgs.length) {
+  if (mergeArgs.length) { //mergeArgs.length > 0 则存在v-bind={},或者v-on={} 需要mergeProps包裹，详情在runtime-core/vnode
     pushMergeArg();
     if (mergeArgs.length > 1) {
       propsExpression = createCallExpression(
@@ -354,7 +372,7 @@ export function buildProps(
       elementLoc
     )
   }
-
+  console.log(json(propsExpression))
   if (hasDynamicKey) {
     patchFlag |= PatchFlags.FULL_PROPS;
   } else {
@@ -446,6 +464,7 @@ export function buildProps(
 }
 
 function dedupeProperties(properties) {
+  console.log(json(properties))
   const knownProps = new Map();
   const deduped = [];
 
@@ -457,7 +476,7 @@ function dedupeProperties(properties) {
     }
 
     const name = prop.key.content;
-    //console.log(name)
+    // console.log(name) // onClick, class,style
     const existing = knownProps.get(name);
     if (existing) {
       if (name === 'style' || name === 'class' || isOn(name)) {
@@ -474,7 +493,7 @@ function mergeAsArray(existing,incoming) {
   if (existing.value.type === NodeTypes.JS_ARRAY_EXPRESSION) {
     existing.value.elements.push(incoming.value);
   } else {
-    existing, value = createArrayExpression(
+    existing.value = createArrayExpression(
       [existing.value, incoming.value],
       existing.loc
     )

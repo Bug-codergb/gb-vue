@@ -29,12 +29,14 @@ export function advancePositionWithMutation(
 export function isText(node) {
   return node.type === NodeTypes.INTERPOLATION || node.type === NodeTypes.TEXT;
 }
+
+// 根据名称返回对应的prop
 export function findProp(node,name,dynamicOnly,allowEmpty) {
   for (let i = 0; i < node.props.length; i++){
     const p = node.props[i];
-    if (p.type === NodeTypes.ATTRIBUTE) {
+    if (p.type === NodeTypes.ATTRIBUTE) { // 普通attribute
       if (dynamicOnly) continue;
-      if (p.name === name && (p.value || allowEmpty)) {
+      if (p.name === name && (p.value || allowEmpty)) { // 普通attribute 的值为value对象，value.content为名称
         return p;
       }
     } else if (p.name === 'bind' && (p.exp || allowEmpty) && isStaticArgOf(p.arg,name)) {
@@ -47,4 +49,10 @@ export const isStaticExp = (p) => {
 }
 export function isStaticArgOf(arg,name) {
   return !!(arg && isStaticExp(arg) && arg.content === name);
+}
+
+export function toValidateId(name,type) {
+  return `_${type}_${name.replace(/[^\w]/g, (searchValue, replaceValue) => {
+    return searchValue === '-' ? '_' : name.charCodeAt(replaceValue).toString()
+  })}`
 }
