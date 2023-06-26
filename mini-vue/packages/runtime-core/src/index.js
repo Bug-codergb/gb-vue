@@ -4,5 +4,6 @@ export { toDisplayString } from "../../shared/src/toDisplayString.js"
 export {
   createTextVNode,
   createElementVNode,
-  guardReactiveProps
+  guardReactiveProps,
+  mergeProps
 } from './vnode.js'

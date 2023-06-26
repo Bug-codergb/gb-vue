@@ -65,7 +65,9 @@ export const transformElement = (node, context) => {
         isComponent,
         isDynamicComponent
       );
-      // console.log(json(propsBuildResult));
+      
+      console.log(propsBuildResult);
+
       vnodeProps = propsBuildResult.props;
       patchFlag = propsBuildResult.patchFlag;
       dynamicPropNames = propsBuildResult.dynamicPropames;
@@ -352,27 +354,25 @@ export function buildProps(
       }
     }
   }
-  console.log(json(mergeArgs), json(properties));
-  
   let propsExpression;
   if (mergeArgs.length) { //mergeArgs.length > 0 则存在v-bind={},或者v-on={} 需要mergeProps包裹，详情在runtime-core/vnode
-    pushMergeArg();
+    pushMergeArg();//如果需要合并，则第一步先将style:{},class:{}等属性通过dedupeProperties去重合并后，再将style:{},class:{}添加进去实现合并
     if (mergeArgs.length > 1) {
       propsExpression = createCallExpression(
-        context.helper(MERGE_PROPS),
+        context.helper(MERGE_PROPS),//调用mergProps合并
         mergeArgs,
         elementLoc
       )
     } else {
       propsExpression = mergeArgs[0];
     }
-  } else if (properties.length) {
+  } else if (properties.length) {//不需要合并则直接将style,class去重后添加进去
     propsExpression = createObjectExpression(
       dedupeProperties(properties),
       elementLoc
     )
   }
-  console.log(json(propsExpression))
+
   if (hasDynamicKey) {
     patchFlag |= PatchFlags.FULL_PROPS;
   } else {
@@ -464,7 +464,7 @@ export function buildProps(
 }
 
 function dedupeProperties(properties) {
-  console.log(json(properties))
+  //console.log(json(properties))
   const knownProps = new Map();
   const deduped = [];
 

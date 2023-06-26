@@ -4,6 +4,7 @@ import {
   isString, isFunction
 } from "../../shared/src/general.js";
 import {isObject} from "../../shared/src/index.js"
+import { normalizeClass, normalizeStyle } from "../../shared/src/normalizeProp.js";
 const isSuspense = () => false;
 const isTeleport=()=>false
 const currentScopeId=""
@@ -114,6 +115,24 @@ export const Fragment = Symbol("Fragment");
 
 export function createTextVNode(text,flag) {
   return createVNode(Text, null, text, flag);
+}
+export function mergeProps(...args) {
+  const ret = {};
+  for (let i = 0; i < args.length; i++){
+    const toMerge = args[i];
+    for (const key in toMerge) {
+      if (key === 'class') {
+        if (ret.class !== toMerge.class) {
+          ret.class = normalizeClass([ret.class,toMerge.class]);
+        }
+      } else if (key === "style") {
+        ret.style = normalizeStyle([ret.style,toMerge.style])
+      } else if (key !== '') {
+        ret[key] = toMerge[key];
+      }
+    }
+  }
+  return ret;
 }
 export {
   createBaseVNode as createElementVNode
