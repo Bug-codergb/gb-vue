@@ -66,7 +66,7 @@ export const transformElement = (node, context) => {
         isDynamicComponent
       );
       
-      console.log(propsBuildResult);
+      // console.log(propsBuildResult);
 
       vnodeProps = propsBuildResult.props;
       patchFlag = propsBuildResult.patchFlag;
@@ -319,7 +319,6 @@ export function buildProps(
       // v-bind={},v-on={}//同时绑定多个值
       if (!arg && (isVBind || isVOn)) {
         hasDynamicKey = true;
-        console.log(json(mergeArgs),json(properties))
         if (exp) {
           if (isVBind) {
             pushMergeArg();
@@ -359,7 +358,7 @@ export function buildProps(
     pushMergeArg();//如果需要合并，则第一步先将style:{},class:{}等属性通过dedupeProperties去重合并后，再将style:{},class:{}添加进去实现合并
     if (mergeArgs.length > 1) {
       propsExpression = createCallExpression(
-        context.helper(MERGE_PROPS),//调用mergProps合并
+        context.helper(MERGE_PROPS),//调用mergProps合并(详情见runtime-core下的vnode)
         mergeArgs,
         elementLoc
       )
@@ -394,17 +393,20 @@ export function buildProps(
     (hasRef || hasVnodeHook)) {
     patchFlag |= PatchFlags.NEED_PATCH;
   }
-  
+
+  console.log(json(propsExpression));
+
   if (!context.inSSR && propsExpression) {
     switch (propsExpression.type) {
+      // 当节点的类型为js_object_expression时，需要去normalizeProps,如class=[{active:flag},{bar:false},'container']
       case NodeTypes.JS_OBJECT_EXPRESSION:
         let classKeyIndex = -1;
         let styleKeyIndex = -1;
         let hasDynamicKey = false;
         for (let i = 0; i < propsExpression.properties.length; i++) {
           const key = propsExpression.properties[i].key;
-          if (isStaticExp(key)) {
-            if (key.content === 'class') {
+          if (isStaticExp(key)) { //静态类型的属性名称，class="",:class="{}",都为静态类型，:[key]="app"为动态类型
+            if (key.content === 'class') { //由于做过合并在dedupeProperties中，每一个properties的key都不一致，在遍历时不会覆盖classKeyIndex
               classKeyIndex = i;
             } else if (key.content === 'style') {
               styleKeyIndex = i;
@@ -415,14 +417,14 @@ export function buildProps(
         }
         const classProp = propsExpression.properties[classKeyIndex];
         const styleProp = propsExpression.properties[styleKeyIndex];
-        if (!hasDynamicKey) {
+        if (!hasDynamicKey) { // 通过normalize_class处理class(详情见shared下的normalizeProp)
           if (classProp && !isStaticExp(classProp.value)) {
             classProp.value = createCallExpression(
               context.helper(NORMALIZE_CLASS),
               [classProp.value]
             )
           }
-          if (
+          if (//处理style(详情见shared下的normalizeProp)
             styleProp &&
             (hasStyleBinding ||
               (styleProp.value.type === NodeTypes.SIMPLE_EXPRESSION &&

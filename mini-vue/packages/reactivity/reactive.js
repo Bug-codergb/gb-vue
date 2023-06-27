@@ -54,7 +54,6 @@ export function toReadonly(raw) {
   return isObject(raw) ? readonly(raw) : raw;
 }
 const createReactive = (raw, isReadonly, proxyMap, handler) => {
-  console.log(raw)
   if (!isObject(raw)) {
     console.warn("this is not a object ,cant not be reactive");
     return raw;

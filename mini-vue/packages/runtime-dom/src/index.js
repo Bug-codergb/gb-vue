@@ -16,7 +16,7 @@ export const createApp = ((...args) => {
   const { mount } = app;
   app.mount = (containerOrSelector) => {
     const container = normalizeContainer(containerOrSelector);
-    console.log(container)
+    
     if (!container) return;
     const component = app._component;
     container.innerHTML = "";
