@@ -1,5 +1,5 @@
 import { createAppAPI } from "./apiCreateApp.js";
-import { effect } from "../../reactivity/effect.js";
+import { effect } from "../../reactivity/src/effect.js";
 import { isReservedProps } from "../../shared/src/general.js";
 import ShapeFlags from "../../shared/src/shapeFlags.js";
 import {
