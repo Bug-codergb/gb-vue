@@ -1,6 +1,6 @@
-## gb-vue
+## gb-mini-vue(记录学习vue3源码过程)
 
-huochunyang-mini-vue对于《Vuejs设计与实现》实现思路,在mini-vue中是对于另一个库《mini-vue》+ vue3源码的实现,将vue3源码逻辑抽离出来但又保证主要实现逻辑。
+huochunyang-mini-vue对于《Vuejs设计与实现》实现思路,在mini-vue中是对于另一个库《mini-vue》+ vue3源码的实现,将vue3源码逻辑抽离出来但又保证主要实现逻辑。目前正在实现不同模块，实现过程中的注释
 
 ##
 
@@ -48,4 +48,7 @@ vue3通过位运算实现依赖的收集与清除，相比较于直接cleanuEffe
 - 渲染器
 ```
 vue3使用快速diff算法实现dom最小化更新
+- [x] 简单diff
+- [x] 双端diff
+- [x] 快速diff
 ```
