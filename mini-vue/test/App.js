@@ -1,4 +1,4 @@
-import { reactive, ref } from "../packages/reactivity/index.js";
+import { reactive, ref } from "../packages/vue/src/index.js";
 import { complieToFunction} from "../packages/vue/src/index.js";
 let temp = `
    <ul class="container" style="color:#bfa" :class="[{classProp1:flag},{classProps2:flag}]">

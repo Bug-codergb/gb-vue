@@ -7,3 +7,13 @@ export {
   guardReactiveProps,
   mergeProps
 } from './vnode.js'
+
+export {
+  reactive,
+  ref,
+  readonly,
+  isRef,
+  unRef,
+  isReadonly,
+  shallowReadonly,
+} from "../../reactivity/src/index.js"

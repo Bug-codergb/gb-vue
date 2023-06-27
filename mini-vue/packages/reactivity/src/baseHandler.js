@@ -9,7 +9,7 @@ import {
   shallowReadonlyMap
 } from "./reactive.js";
 import { ITERATE_KEY, track, trigger } from "./effect.js";
-import { isObject, hasChanged ,isIntegerKey} from "../shared/src/index.js";
+import { isObject, hasChanged ,isIntegerKey} from "../../shared/src/index.js";
 
 const get = createGetter(false,false);
 const set = createSetter(false,false);

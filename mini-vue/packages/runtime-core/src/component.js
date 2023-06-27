@@ -1,4 +1,4 @@
-import { shallowReadonly } from "../../reactivity/index.js";
+import { shallowReadonly } from "../../reactivity/src/index.js";
 import {PublicInstanceProxyHandlers } from "./componentPublicInstance.js";
 let complie = void 0;
 export function createComponentInstance(vnode, parent) {

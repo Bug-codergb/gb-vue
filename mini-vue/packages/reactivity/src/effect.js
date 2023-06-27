@@ -7,7 +7,7 @@ import {
 } from "./dep.js";
 import {
   isIntegerKey
-} from "../shared/src/index.js"
+} from "../../shared/src/index.js"
 export const ITERATE_KEY = Symbol('iterate');
 
 const proxyMap = new WeakMap();

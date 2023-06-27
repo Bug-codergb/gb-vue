@@ -25,3 +25,4 @@ export function complieToFunction(template, options) {
   return complieCache[key] = render;
 }
 registerRuntimeCompiler(complieToFunction);
+export * from '../../runtime-dom/src/index.js'

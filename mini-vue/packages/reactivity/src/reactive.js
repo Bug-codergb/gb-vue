@@ -1,4 +1,4 @@
-import { isObject } from "../shared/src/index.js";
+import { isObject } from "../../shared/src/index.js";
 import {
   baseHandler,
   readonlyHandler,

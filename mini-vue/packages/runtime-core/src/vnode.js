@@ -1,5 +1,5 @@
 import ShapeFlags from "../../shared/src/shapeFlags.js";
-import { isRef} from "../../reactivity/index.js";
+import { isRef} from "../../reactivity/src/index.js";
 import {
   isString, isFunction
 } from "../../shared/src/general.js";

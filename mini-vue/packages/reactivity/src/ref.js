@@ -1,4 +1,4 @@
-import { hasChanged, isObject } from "../shared/src/index.js";
+import { hasChanged, isObject } from "../../shared/src/index.js";
 import {
   createDep
 } from "./dep.js"
