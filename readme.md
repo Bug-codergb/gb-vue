@@ -6,7 +6,7 @@ huochunyang-mini-vue对于《Vuejs设计与实现》实现思路,在mini-vue中�
 
 - 响应式
 ```
-响应式是vue3的核心，是我门学习vue3的一个重点，相比较于vue2，vue3通过proxy实现数据劫持。
+响应式是vue3的核心，是学习vue3的一个重点，相比较于vue2，vue3通过proxy实现数据劫持。
 ```
 - [x] dep
 - [x] initDepMakers
@@ -48,7 +48,7 @@ vue3通过位运算实现依赖的收集与清除，相比较于直接cleanuEffe
 - 渲染器
 ```
 vue3使用快速diff算法实现dom最小化更新
+```
 - [x] 简单diff
 - [x] 双端diff
 - [x] 快速diff
-```
