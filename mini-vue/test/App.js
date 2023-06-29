@@ -1,9 +1,9 @@
 import { reactive, ref } from "../packages/vue/src/index.js";
 import { complieToFunction} from "../packages/vue/src/index.js";
 let temp = `
-   <ul class="container" style="color:#bfa" :class="[{classProp1:flag},{classProps2:flag}]">
-    今天是个好日子
-   </ul>
+   <div>
+     <input v-model="foo"/>
+   </div>
 `
 const App = {
   template:temp,
