@@ -24,7 +24,6 @@ export function getBaseTransformPreset() {
       on: transformOn,
       bind: transformBind,
       model: transformModel
-      
     }
   ]
 }
@@ -43,7 +42,8 @@ export function baseComplie(template, options) {
         nodeTransforms: [...nodeTransforms],
         directiveTransforms: Object.assign(
           {},
-          directiveTransforms
+          directiveTransforms,
+          options.directiveTransforms||{}
         )
       }
     )

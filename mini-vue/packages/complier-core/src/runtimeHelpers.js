@@ -84,3 +84,8 @@ export const helperNameMap = {
   [WITH_MEMO]: `withMemo`,
   [IS_MEMO_SAME]: `isMemoSame`
 }
+export function registerRuntimeHelpers(helpers) {
+  Object.getOwnPropertySymbols(helpers).forEach(s => {
+    helperNameMap[s] = helpers[s]
+  })
+}

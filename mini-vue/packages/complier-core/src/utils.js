@@ -56,3 +56,12 @@ export function toValidateId(name,type) {
     return searchValue === '-' ? '_' : name.charCodeAt(replaceValue).toString()
   })}`
 }
+
+export function hasDynamicKeyVBind(node) {
+  return node.props.some(
+    p => p.type === NodeTypes.DIRECTIVE &&
+      p.name === 'bind' && (
+      !p.arg || p.arg.type !== NodeTypes.SIMPLE_EXPRESSION || !p.arg.isStatic
+      )
+  )
+}

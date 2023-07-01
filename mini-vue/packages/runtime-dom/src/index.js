@@ -2,6 +2,11 @@ import { patchProp } from "./patchProp.js";
 import { nodeOps } from "./nodeOp.js";
 import { createRenderer } from "../../runtime-core/src/renderer.js";
 import { isString } from "../../shared/src/general.js";
+
+export {
+  vModelText
+} from "./directives/vModel.js"
+
 const renderOptions = Object.assign({ patchProp }, nodeOps);
 
 let renderer;

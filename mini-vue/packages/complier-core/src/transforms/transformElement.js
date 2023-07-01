@@ -1,7 +1,7 @@
 import { PatchFlags, isObject } from "../../../shared/src/index.js";
 import { createVNodeCall } from "../ast.js"
 import {
-  isOn, isReservedProps
+  isOn, isReservedProps, isSymbol
 } from "../../../shared/src/general.js";
 import {
   GUARD_REACTIVE_PROPS,
@@ -10,6 +10,7 @@ import {
   NORMALIZE_PROPS,
   NORMALIZE_STYLE,
   RESOLVE_COMPONENT,
+  RESOLVE_DIRECTIVE,
   RESOLVE_DYNAMIC_COMPONENT,
   TELEPORT,
   TO_HANDLERS
@@ -26,6 +27,7 @@ import {
 import { findProp, isStaticArgOf, isStaticExp, toValidateId } from "../utils.js";
 import { PatchFlagNames } from "../../../shared/src/patchFlags.js";
 
+const directiveImportMap = new WeakMap();
 let __DEV__ = true;
 export const transformElement = (node, context) => {
   return function postTransformElement() {
@@ -72,7 +74,13 @@ export const transformElement = (node, context) => {
       patchFlag = propsBuildResult.patchFlag;
       dynamicPropNames = propsBuildResult.dynamicPropames;
       const directives = propsBuildResult.directives;
-      vnodeDirectives = directives && directives.length ? {} : undefined;
+      
+      vnodeDirectives = directives && directives.length ? (createArrayExpression(
+        directives.map(dir=>buildDirectiveArgs(dir,context))
+      )) : undefined;
+      
+//      console.log(vnodeDirectives)
+      
       if (propsBuildResult.shouldUseBlock) {
         shouldUseBolck = true;
       }
@@ -344,11 +352,18 @@ export function buildProps(
 
       if (directiveTransform) {
         const { props, needRuntime } = directiveTransform(prop, node, context);    
+      
         !ssr && props.forEach(analyzePatchFlag);
         if (isVOn && arg && !isStaticExp(arg)) {//非静态arg :[app]= app v-on:[event] = handler
           
         } else {
           properties.push(...props);
+        }
+        if (needRuntime) {
+          runtimeDirectives.push(prop);
+          if (isSymbol(needRuntime)) {
+            directiveImportMap.set(prop, needRuntime);
+          }
         }
       }
     }
@@ -394,7 +409,6 @@ export function buildProps(
     patchFlag |= PatchFlags.NEED_PATCH;
   }
 
-  console.log(json(propsExpression));
 
   if (!context.inSSR && propsExpression) {
     switch (propsExpression.type) {
@@ -458,7 +472,7 @@ export function buildProps(
   }
   return {
     props: propsExpression,
-    directives: [],
+    directives: runtimeDirectives,
     patchFlag,
     dynamicPropames,
     shouldUseBlock
@@ -508,4 +522,44 @@ function stringifyDynamicPropNames(props) {
     if (i < l - 1) propsNamesString += ', '
   }
   return propsNamesString + `]`
+}
+
+export function buildDirectiveArgs(dir, context) {
+  const dirArgs = [];
+  const runtim = directiveImportMap.get(dir);
+  if (runtim) {
+    dirArgs.push(context.helperString(runtim));
+  } else {
+    context.helper(RESOLVE_DIRECTIVE);
+    context.directives.add(dir.name);
+    dirArgs.push(toValidateId(dir.name, 'directive'));
+  }
+  const { loc } = dir;
+  if (dir.exp) {
+    dirArgs.push(dir.exp);
+  }
+  if (dir.arg) {
+    if (!dir.exp) {
+      dirArgs.push("void 0")
+    }
+    dirArgs.push(dir.arg);
+  }
+  if (Object.keys(dir.modifiers).length) {
+    if (!dir.arg) {
+      if (!dir.exp) {
+        dirArgs.push(`void 0`)
+      }
+      dirArgs.push(`void 0`)
+    }
+    const trueExpression = createSimpleExpression(`true`, false, loc)
+    dirArgs.push(
+      createObjectExpression(
+        dir.modifiers.map(modifier =>
+          createObjectProperty(modifier, trueExpression)
+        ),
+        loc
+      )
+    )
+  }
+  return createArrayExpression(dirArgs,dir.loc);
 }

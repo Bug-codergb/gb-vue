@@ -8,6 +8,8 @@ export {
   mergeProps
 } from './vnode.js'
 
+export { withDirectives } from "./directives.js";
+
 export {
   reactive,
   ref,

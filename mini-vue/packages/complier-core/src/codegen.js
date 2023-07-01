@@ -9,7 +9,8 @@ import {
   CREATE_TEXT,
   CREATE_VNODE,
   TO_DISPLAY_STRING,
-  helperNameMap
+  helperNameMap,
+  WITH_DIRECTIVES
 } from "./runtimeHelpers.js";
 import {
   NodeTypes,
@@ -491,6 +492,7 @@ function genVNodeCall(node, context) {
   const callHelper = isBlock
     ? getVNodeBlockHelper(context.inSSR, isComponent)
     : getVNodeHelper(context.inSSR, isComponent)
+  
   push(helper(callHelper) + `(`, node)
 
   genNodeList(
@@ -502,6 +504,7 @@ function genVNodeCall(node, context) {
     push(`)`)
   }
   if (directives) {
+    console.log(directives)
     push(`, `)
     genNode(directives, context)
     push(`)`)

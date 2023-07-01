@@ -87,7 +87,7 @@ export function createTransformContext(root,{
       }
     },
     helperString(name) {
-      returnn `_${helperNameMap[context.helper(name)]}`
+      return `_${helperNameMap[context.helper(name)]}`
     },
     replaceNode(node) {
       context.parent.children[context.childIndex] = context.currentNode = node;
