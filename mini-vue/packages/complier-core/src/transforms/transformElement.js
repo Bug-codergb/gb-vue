@@ -55,7 +55,7 @@ export const transformElement = (node, context) => {
     let patchFlag = 0;
     let vnodeDynamicProps;
     let dynamicPropNames;
-    let vnodeDirectives;
+    let vnodeDirectives; // 当前节点上的指令，当指令存在时，且当前节点为vnode_call时需要调用withDirectives(runtiem-core)
 
     let shouldUseBolck = false;
 
@@ -75,11 +75,10 @@ export const transformElement = (node, context) => {
       dynamicPropNames = propsBuildResult.dynamicPropames;
       const directives = propsBuildResult.directives;
       
+      //js_array_expression节点属性为elements[vModelText,{content:foo}]
       vnodeDirectives = directives && directives.length ? (createArrayExpression(
         directives.map(dir=>buildDirectiveArgs(dir,context))
       )) : undefined;
-      
-//      console.log(vnodeDirectives)
       
       if (propsBuildResult.shouldUseBlock) {
         shouldUseBolck = true;
