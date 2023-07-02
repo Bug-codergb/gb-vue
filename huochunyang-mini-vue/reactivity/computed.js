@@ -1,33 +1,32 @@
-import { effect } from "./effect.js";
-import { trigger ,track} from "./effect.js";
+import { effect, trigger, track } from './effect.js';
+
 const computed = (getter) => {
   let value;
   let dirty = true;
-  let effectFn = effect(getter, {
+  const effectFn = effect(getter, {
     lazy: true,
-    scheduler(fn) {//悬念
+    scheduler(fn) { // 悬念
       if (!dirty) {
         dirty = true;
-        trigger(obj,'value');
+        trigger(obj, 'value');
       }
-    }
-  })
+    },
+  });
 
   let obj = {
     get value() {
       if (dirty) {
-        let result = effectFn();
+        const result = effectFn();
         value = result;
         dirty = false;
-        track(obj,'value');
+        track(obj, 'value');
         return result;
-      } else {
-        return value;
       }
-    }
-  }
+      return value;
+    },
+  };
   return obj;
-}
+};
 export {
-  computed
-}
+  computed,
+};

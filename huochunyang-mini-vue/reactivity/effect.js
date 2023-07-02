@@ -1,7 +1,7 @@
-import { createDep } from "./dep.js";
+import { createDep } from './dep.js';
 
 let activeEffect = void 0;
-let effectStack = [];
+const effectStack = [];
 const targetMap = new WeakMap();
 
 const track = (target, key) => {
@@ -14,16 +14,16 @@ const track = (target, key) => {
     map.set(key, dep = createDep());
   }
   trackEffects(dep);
-}
+};
 const trackEffects = (dep) => {
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect);
-    if(activeEffect) activeEffect.deps.push(dep);
+    if (activeEffect) activeEffect.deps.push(dep);
   }
-} 
+};
 
 const trigger = (target, key, value) => {
-  let map = targetMap.get(target, key);
+  const map = targetMap.get(target, key);
   if (!map) {
     return;
   }
@@ -31,53 +31,53 @@ const trigger = (target, key, value) => {
   if (!dep) {
     return;
   }
-  //防止死循环
+  // 防止死循环
   const effectToRun = new Set();
-  for (let item of dep) {
+  for (const item of dep) {
     if (item !== activeEffect) {
-      effectToRun.add(item)
+      effectToRun.add(item);
     }
   }
   effectToRun.forEach((fn) => {
     if (fn.options && fn.options.scheduler) {
       fn.options.scheduler(fn);
     } else {
-      fn(); 
+      fn();
     }
-  })
-}
+  });
+};
 
 const cleanup = (effect) => {
-  for (let dep of effect.deps) {
+  for (const dep of effect.deps) {
     dep.delete(effect);
   }
   effect.deps = [];
-}
+};
 
-const effect = (effect,options) => {
+const effect = (effect, options) => {
   const effectFn = () => {
     cleanup(effectFn);
     activeEffect = effectFn;
     effectStack.push(effectFn);
 
-    let result = effect();
-    
+    const result = effect();
+
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
     return result;
-  }
+  };
 
-  if(options) effectFn.options = options;
+  if (options) effectFn.options = options;
   effectFn.deps = [];
-  
+
   if ((!options) || !options.lazy) {
-    effectFn(); //是否立即执行
-  } 
+    effectFn(); // 是否立即执行
+  }
   return effectFn;
-}
+};
 
 export {
   track,
   trigger,
-  effect
-}
+  effect,
+};

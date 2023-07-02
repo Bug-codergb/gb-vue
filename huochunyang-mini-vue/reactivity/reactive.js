@@ -1,9 +1,8 @@
 import {
-  createReactive
-} from "./createReactive.js";
-const reactive = (raw) => {
-  return createReactive(raw);
-}
+  createReactive,
+} from './createReactive.js';
+
+const reactive = (raw) => createReactive(raw);
 export {
-  reactive
-}
+  reactive,
+};

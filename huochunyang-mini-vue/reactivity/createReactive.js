@@ -1,5 +1,6 @@
-import { multableHandler } from "./baseHandler.js";
-const proxyWeakMap = new WeakMap(); 
+import { multableHandler } from './baseHandler.js';
+
+const proxyWeakMap = new WeakMap();
 const createReactive = (raw) => {
   if (!raw) {
     return raw;
@@ -12,7 +13,7 @@ const createReactive = (raw) => {
   proxyWeakMap.set(raw, proxy);
 
   return proxy;
-}
+};
 export {
-  createReactive
-}
+  createReactive,
+};

@@ -1,7 +1,10 @@
-import { reactive } from "../reactivity/reactive.js";
-import { effect } from "../reactivity/effect.js";
+import { reactive } from '../reactivity/reactive.js';
+import { effect } from '../reactivity/effect.js';
+
 const createRenderer = (options) => {
-  const { unmount, createElement, remove, setElementText, insert } = options;
+  const {
+    unmount, createElement, remove, setElementText, insert,
+  } = options;
   const render = (vnode, container) => {
     /*
       如果vnode不存在但是container._vnode存在则是卸载操作
@@ -20,13 +23,13 @@ const createRenderer = (options) => {
       unmount(n1);
       n1 = null;
     }
-    if (typeof type === "string") {
+    if (typeof type === 'string') {
       if (!n1) {
         mountElement(n2, container, anchor);
       } else {
         patchElement(n1, n2, container);
       }
-    } else if (typeof type === "object") {
+    } else if (typeof type === 'object') {
       if (!n1) {
         mountComponent(n2, container);
       } else {
@@ -39,7 +42,7 @@ const createRenderer = (options) => {
     const el = createElement(type);
     n2.el = el;
     const childrenType = typeof children;
-    if (childrenType === "string") {
+    if (childrenType === 'string') {
       setElementText(n2.el, children);
     } else if (Array.isArray(children)) {
       children.forEach((child) => {
@@ -47,7 +50,7 @@ const createRenderer = (options) => {
       });
     }
     if (props && Object.keys(props)) {
-      for (let key of Object.keys(props)) {
+      for (const key of Object.keys(props)) {
         const value = props[key];
         patchProps(el, key, null, value);
       }
@@ -58,12 +61,12 @@ const createRenderer = (options) => {
     if (/^on/.test(key)) {
       const eventName = key.slice(2).toLowerCase();
       el.addEventListener(eventName, nextValue);
-    } else if (key === "class") {
+    } else if (key === 'class') {
       el.className = nextValue;
     } else {
       const type = typeof el[key];
-      if (type === "boolean") {
-        if (nextValue === "") {
+      if (type === 'boolean') {
+        if (nextValue === '') {
           el[key] = true;
         } else {
           el[key] = prevValue;
@@ -79,20 +82,20 @@ const createRenderer = (options) => {
     const oldProps = n1.props;
     const newProps = n2.props;
 
-    for (let newKey in newProps) {
+    for (const newKey in newProps) {
       if (newProps[newKey] !== oldProps[newKey]) {
-        //找到新增的key
+        // 找到新增的key
         patchProps(el, newKey, oldProps[newKey], newProps[newKey]);
       }
     }
     for (const oldKey in oldProps) {
       if (!newProps.hasOwnProperty(oldKey)) {
-        //找到要删除的旧的key
+        // 找到要删除的旧的key
         patchProps(el, oldKey, oldProps[oldKey], null);
       }
     }
 
-    if (typeof n2.children === "string") {
+    if (typeof n2.children === 'string') {
       if (Array.isArray(n1.children)) {
         n1.children.forEach((child) => {
           unmount(child);
@@ -100,13 +103,13 @@ const createRenderer = (options) => {
       }
       setElementText(el, n2.children);
     } else if (Array.isArray(n2.children)) {
-      if (typeof n1.children === "string") {
-        setElementText(el, "");
+      if (typeof n1.children === 'string') {
+        setElementText(el, '');
         n2.children.forEach((child) => {
           patch(null, child, el);
         });
       } else if (Array.isArray(n1.children)) {
-        //diff
+        // diff
         const oldChildren = n1.children;
         const newChildren = n2.children;
 
@@ -116,26 +119,24 @@ const createRenderer = (options) => {
           j++;
         }
 
-        let newEndIndex = newChildren.length - 1,
-          oldEndIndex = oldChildren.length - 1;
+        let newEndIndex = newChildren.length - 1;
+        let oldEndIndex = oldChildren.length - 1;
         while (newChildren[newEndIndex].key === oldChildren[oldEndIndex].key) {
           patch(oldChildren[oldEndIndex], newChildren[newEndIndex], el);
           newEndIndex--;
           oldEndIndex--;
         }
-        //挂载新节点
+        // 挂载新节点
         if (j > oldEndIndex && j <= newEndIndex) {
           const anchorIndex = newEndIndex + 1;
-          const anchor =
-            anchorIndex < newChildren.length
-              ? newChildren[anchorIndex].el
-              : null;
+          const anchor = anchorIndex < newChildren.length
+            ? newChildren[anchorIndex].el
+            : null;
           while (j <= newEndIndex) {
-            
             patch(null, newChildren[j], el, anchor);
           }
         }
-        //删除旧节点
+        // 删除旧节点
         else if (j > newEndIndex && j <= oldEndIndex) {
           while (j <= oldEndIndex) {
             unmount(oldChildren[j]);
@@ -153,13 +154,13 @@ const createRenderer = (options) => {
           for (let i = newStartIndex; i <= newEndIndex; i++) {
             keyIndex[newChildren[i].key] = i;
           }
-          console.log(keyIndex)
+          console.log(keyIndex);
           let patched = 0;
           for (let i = oldStartIndex; i <= oldEndIndex; i++) {
             const k = keyIndex[oldChildren[i].key];
             console.log(oldChildren[i].key, k);
             if (patched <= count) {
-              if (typeof k !== "undefined") {
+              if (typeof k !== 'undefined') {
                 patch(oldChildren[i], newChildren[k], el);
                 patched++;
                 source[k - newStartIndex] = i;
@@ -176,9 +177,9 @@ const createRenderer = (options) => {
             }
           }
           if (moved) {
-            console.log(source)
+            console.log(source);
             const seq = getSequence(source);
-            console.log(seq)
+            console.log(seq);
             let s = seq.length - 1;
             let i = count - 1;
             for (i; i >= 0; i--) {
@@ -186,15 +187,13 @@ const createRenderer = (options) => {
                 const pos = i + newStartIndex;
                 const newVNode = newChildren[pos];
                 const nextPos = pos + 1;
-                const anchor =
-                  nextPos < newChildren.length ? newChildren[nextPos].el : null;
+                const anchor = nextPos < newChildren.length ? newChildren[nextPos].el : null;
                 patch(null, newVNode, el, anchor);
               } else if (i !== seq[s]) {
                 const pos = i + newStartIndex;
                 const newVNode = newChildren[pos];
                 const nextPos = pos + 1;
-                const anchor =
-                  nextPos < newChildren.length ? newChildren[nextPos].el : null;
+                const anchor = nextPos < newChildren.length ? newChildren[nextPos].el : null;
                 insert(newVNode.el, el, anchor);
               } else {
                 s--;
@@ -203,16 +202,16 @@ const createRenderer = (options) => {
           }
         }
       } else {
-        //n1为null则直接挂载n2
-        setElementText(el, "");
+        // n1为null则直接挂载n2
+        setElementText(el, '');
         n2.children.forEach((child) => {
           patch(null, child, el);
         });
       }
     } else {
-      //新节点为null,
-      if (typeof n1Type === "string") {
-        setElementText(el, "");
+      // 新节点为null,
+      if (typeof n1Type === 'string') {
+        setElementText(el, '');
       } else if (Array.isArray(n1.children)) {
         n1.children.forEach((child) => {
           unmount(child);
@@ -221,14 +220,14 @@ const createRenderer = (options) => {
     }
   };
   /*
-    resolveProps 接受2个参数 
+    resolveProps 接受2个参数
     options：组件定义的props选项
     propsData: 用户传入组件的props的具体数据
   */
-  const resolveProps = (options,propsData) => {
+  const resolveProps = (options, propsData) => {
     const props = {};
     const attrs = {};
-    for (let key in propsData) {
+    for (const key in propsData) {
       if (options.hasOwnProperty(key)) {
         props[key] = propsData[key];
       } else {
@@ -236,14 +235,16 @@ const createRenderer = (options) => {
       }
     }
     return [props, attrs];
-  }
+  };
   const mountComponent = (n2, container) => {
     const vnode = n2;
     const componentOptions = vnode.type;
-    let { render, data, props: propsOptions, setup ,created} = componentOptions;
+    let {
+      render, data, props: propsOptions, setup, created,
+    } = componentOptions;
 
     const [props, attrs] = resolveProps(propsOptions, vnode.props);
-    
+
     const state = reactive(data());
     const instance = {
       state,
@@ -255,13 +256,13 @@ const createRenderer = (options) => {
     const setupContext = { attrs };
     let setupState = null;
     const setupResult = setup(props, setupContext);
-    if (typeof setupResult === "function") {
-      render = setupResult;      
+    if (typeof setupResult === 'function') {
+      render = setupResult;
     } else {
       setupState = setupResult;
     }
     const renderContext = new Proxy(instance, {
-      //直接通过instance.key访问state或者props;
+      // 直接通过instance.key访问state或者props;
       get(target, key, receiver) {
         const { props, state } = target;
         if (state && key in state) {
@@ -280,14 +281,14 @@ const createRenderer = (options) => {
           state[key] = value;
         }
         if (props && key in props) {
-          console.warn("pops is readonly");
+          console.warn('pops is readonly');
         }
         if (setupState && key in setupState) {
           setupState[key] = value;
         }
-      }
-    })
-    created && created.call(renderContext);//或者其他生命周期
+      },
+    });
+    created && created.call(renderContext);// 或者其他生命周期
     effect(() => {
       const subTree = render.call(renderContext, renderContext);
       if (!instance.isMounted) {
@@ -297,28 +298,28 @@ const createRenderer = (options) => {
         patch(instance.subTree, subTree, container);
       }
       instance.subTree = subTree;
-    },{});
+    }, {});
   };
-  const hasChangeProps = (oldProps,newProps) => {
+  const hasChangeProps = (oldProps, newProps) => {
     if (Object.keys(oldProps).length !== Object.keys(newProps).length) {
       return true;
     }
-    for (let key in newProps) {
+    for (const key in newProps) {
       if (oldProps[key] !== newProps[key]) {
         return true;
       }
     }
     return false;
-  }
+  };
   const patchComponent = (n1, n2, container) => {
     const instance = n2.component = n1.component;
     const { props } = instance;
     if (hasChangeProps(n1.props, n2.props)) {
       const [newProps] = resolveProps(n2.type.props, n2.props);
-      for (const k in newProps) {//更新到最新值;
+      for (const k in newProps) { // 更新到最新值;
         props[k] = newProps[k];
       }
-      for (const k in props) {//删除旧值
+      for (const k in props) { // 删除旧值
         if (!(k in newProps)) {
           delete props[k];
         }
@@ -333,7 +334,8 @@ const createRenderer = (options) => {
 function getSequence(arr) {
   const p = arr.slice();
   const result = [0];
-  let i, j, u, v, c;
+  let i; let j; let u; let v; let
+    c;
   const len = arr.length;
   for (i = 0; i < len; i++) {
     const arrI = arr[i];
