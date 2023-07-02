@@ -1,15 +1,17 @@
-import { createDep } from "./dep.js";
-import { ReactiveEffect } from "./effect.js";
-import { trackRefValue,triggerRefValue } from "./ref.js";
-class ComputedRefImpl{
+import { createDep } from './dep.js';
+import { ReactiveEffect } from './effect.js';
+import { trackRefValue, triggerRefValue } from './ref.js';
+
+class ComputedRefImpl {
   constructor(getter) {
     this._dirty = true;
     this.dep = createDep();
     this._effect = new ReactiveEffect(getter, () => {
       this._dirty = true;
       triggerRefValue(this);
-    }); 
+    });
   }
+
   get value() {
     if (this._dirty) {
       trackRefValue(this);
@@ -19,9 +21,7 @@ class ComputedRefImpl{
     return this._value;
   }
 }
-const computed = (getter) => {
-  return new ComputedRefImpl(getter);
-}
+const computed = (getter) => new ComputedRefImpl(getter);
 export {
-  computed
-}
+  computed,
+};

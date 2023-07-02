@@ -1,11 +1,11 @@
-import { NO, isFunction } from "../../shared/src/general.js";
-import { isObject } from "../../shared/src/index.js";
-import { createVNode } from "./vnode.js";
+import { NO, isFunction } from '../../shared/src/general.js';
+import { isObject } from '../../shared/src/index.js';
+import { createVNode } from './vnode.js';
 
 export function createAppAPI(render, hydrate) {
   return function createApp(rootComponent, rootProps = null) {
     if (!isFunction(rootComponent)) {
-      rootComponent = Object.assign({},rootComponent);
+      rootComponent = { ...rootComponent };
     }
     if (rootProps != null && !isObject(rootProps)) {
       rootProps = null;
@@ -14,18 +14,18 @@ export function createAppAPI(render, hydrate) {
 
     const app = {
       use() {
-        
+
       },
       component() {
-        
+
       },
       directive() {
-        
+
       },
       mount(rootContainer) {
         if (!isMounted) {
           const vnode = createVNode(rootComponent, rootProps);
-          
+
           render(vnode, rootContainer);
           isMounted = true;
           app._container = rootContainer;
@@ -34,14 +34,14 @@ export function createAppAPI(render, hydrate) {
         }
       },
       unmount() {
-        
+
       },
       provide() {
-        
-      }
-    }
+
+      },
+    };
     return app;
-  }
+  };
 }
 export function createAppContext() {
   return {
@@ -53,7 +53,7 @@ export function createAppContext() {
       optionMergeStrategies: {},
       errorHandler: undefined,
       warnHandler: undefined,
-      complierOptions:{}
+      complierOptions: {},
     },
     mixins: [],
     components: {},
@@ -61,6 +61,6 @@ export function createAppContext() {
     provides: Object.create(null),
     optionsCache: new WeakMap(),
     propsCache: new WeakMap(),
-    emitsCache:new WeakMap
-  }
+    emitsCache: new WeakMap(),
+  };
 }

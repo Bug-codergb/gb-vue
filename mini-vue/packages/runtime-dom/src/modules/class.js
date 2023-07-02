@@ -1,6 +1,6 @@
-export function patchClass(el,value) {
+export function patchClass(el, value) {
   if (value == null) {
-    el.removeAttribute("class");
+    el.removeAttribute('class');
   } else {
     el.className = value;
   }

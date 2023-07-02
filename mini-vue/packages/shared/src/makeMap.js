@@ -1,8 +1,8 @@
 export function makeMap(str) {
   const map = Object.create(null);
-  const list = str.split(",");
-  for (let i = 0; i < list.length; i++){
+  const list = str.split(',');
+  for (let i = 0; i < list.length; i++) {
     map[list[i]] = true;
   }
-  return val => !!map[val];
+  return (val) => !!map[val];
 }

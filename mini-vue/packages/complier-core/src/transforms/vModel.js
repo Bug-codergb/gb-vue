@@ -1,8 +1,9 @@
-import { camelize } from "../../../shared/src/general.js";
+import { camelize } from '../../../shared/src/general.js';
 import {
-  NodeTypes, createCompoundExpression, createObjectProperty, createSimpleExpression
-} from "../ast.js";
-import { isStaticExp } from "../utils.js"; 
+  NodeTypes, createCompoundExpression, createObjectProperty, createSimpleExpression,
+} from '../ast.js';
+import { isStaticExp } from '../utils.js';
+
 export const transformModel = (dir, node, context) => {
   const { exp, arg } = dir;
   if (!exp) {
@@ -12,30 +13,30 @@ export const transformModel = (dir, node, context) => {
 
   const expString = exp.type === NodeTypes.SIMPLE_EXPRESSION ? exp.content : rawExp;
 
-  const propName = arg ? arg : createSimpleExpression('modelValue', true);
-  const eventName = arg ? isStaticExp(arg) ?
-    `onUpdate:${camelize(arg.content)}` :
-    createCompoundExpression(['"onUpdate:" + ', arg]) : `onUpdate:modelValue`;
+  const propName = arg || createSimpleExpression('modelValue', true);
+  const eventName = arg ? isStaticExp(arg)
+    ? `onUpdate:${camelize(arg.content)}`
+    : createCompoundExpression(['"onUpdate:" + ', arg]) : 'onUpdate:modelValue';
   let assignmentExp;
-  const eventArg = `$event`;
+  const eventArg = '$event';
 
   assignmentExp = createCompoundExpression([
     `${eventArg} => ((`,
     exp,
-    `) = $event)`
-  ])
+    ') = $event)',
+  ]);
   const props = [
     createObjectProperty(propName, dir.exp),
-    createObjectProperty(eventName,assignmentExp)
-  ]
-  /* 
+    createObjectProperty(eventName, assignmentExp),
+  ];
+  /*
     modelValue 就是v-model绑定的值
     onUpdate:modelValue :发出的事件
   */
   return createTransformProps(props);
-}
+};
 function createTransformProps(props = []) {
   return {
-    props
-  }
+    props,
+  };
 }

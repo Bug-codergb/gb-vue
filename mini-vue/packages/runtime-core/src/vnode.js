@@ -1,51 +1,54 @@
-import ShapeFlags from "../../shared/src/shapeFlags.js";
-import { isRef} from "../../reactivity/src/index.js";
+import ShapeFlags from '../../shared/src/shapeFlags.js';
+import { isRef } from '../../reactivity/src/index.js';
 import {
-  isString, isFunction
-} from "../../shared/src/general.js";
-import {isObject} from "../../shared/src/index.js"
-import { normalizeClass, normalizeStyle } from "../../shared/src/normalizeProp.js";
+  isString, isFunction,
+} from '../../shared/src/general.js';
+import { isObject } from '../../shared/src/index.js';
+import { normalizeClass, normalizeStyle } from '../../shared/src/normalizeProp.js';
+
 const isSuspense = () => false;
-const isTeleport=()=>false
-const currentScopeId=""
+const isTeleport = () => false;
+const currentScopeId = '';
 
 export const createVNode = _createVNode;
 const __FEATURE_SUSPENSE__ = false;
 
-const normalizeKey = ({ key }) =>key != null ? key : null
+const normalizeKey = ({ key }) => (key != null ? key : null);
 const currentRenderingInstance = {};
 const normalizeRef = ({
   ref,
   ref_key,
-  ref_for
-})=> {
+  ref_for,
+}) => {
   if (typeof ref === 'number') {
-    ref = '' + ref
+    ref = `${ref}`;
   }
   return (
     ref != null
       ? isString(ref) || isRef(ref) || isFunction(ref)
-        ? { i: currentRenderingInstance, r: ref, k: ref_key, f: !!ref_for }
+        ? {
+          i: currentRenderingInstance, r: ref, k: ref_key, f: !!ref_for,
+        }
         : ref
       : null
-  )
-}
+  );
+};
 export function guardReactiveProps(props) {
-  if (!props) return null
+  if (!props) return null;
   return props;
 }
 function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNode) {
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)
-    ? ShapeFlags.SUSPENSE
-    : isTeleport(type)
-    ? ShapeFlags.TELEPORT
-    : isObject(type)
-    ? ShapeFlags.STATEFUL_COMPONENT
-    : isFunction(type)
-    ? ShapeFlags.FUNCTIONAL_COMPONENT
-    : 0
+      ? ShapeFlags.SUSPENSE
+      : isTeleport(type)
+        ? ShapeFlags.TELEPORT
+        : isObject(type)
+          ? ShapeFlags.STATEFUL_COMPONENT
+          : isFunction(type)
+            ? ShapeFlags.FUNCTIONAL_COMPONENT
+            : 0;
 
   return createBaseVNode(
     type,
@@ -54,7 +57,7 @@ function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNod
     patchFlag,
     dynamicProps,
     shapeFlag,
-    isBlockNode
+    isBlockNode,
   );
 }
 
@@ -70,7 +73,7 @@ function createBaseVNode(
   dynamicProps = null,
   shapeFlag = type === Fragment ? 0 : ShapeFlags.ELEMENT,
   isBlockNode,
-  needFullChildrenNormalization = false
+  needFullChildrenNormalization = false,
 ) {
   const vnode = {
     __v_isVNode: true,
@@ -98,40 +101,40 @@ function createBaseVNode(
     dynamicProps,
     dynamicChildren: null,
     appContext: null,
-    ctx: currentRenderingInstance
-  } 
-  //为设虚拟节点设置 shapeShape;
+    ctx: currentRenderingInstance,
+  };
+  // 为设虚拟节点设置 shapeShape;
   if (Array.isArray(children)) {
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
-  } else if (typeof children ==="string") {
+  } else if (typeof children === 'string') {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   }
   return vnode;
 }
 function getShapeFlag(type) {
-  return typeof type === "string"
+  return typeof type === 'string'
     ? ShapeFlags.ELEMENT
     : ShapeFlags.STATEFUL_COMPONENT;
 }
 
 export const Text = Symbol('Text');
-export const Fragment = Symbol("Fragment");
+export const Fragment = Symbol('Fragment');
 export const Static = Symbol.for('v-stc');
 
-export function createTextVNode(text,flag) {
+export function createTextVNode(text, flag) {
   return createVNode(Text, null, text, flag);
 }
 export function mergeProps(...args) {
   const ret = {};
-  for (let i = 0; i < args.length; i++){
+  for (let i = 0; i < args.length; i++) {
     const toMerge = args[i];
     for (const key in toMerge) {
       if (key === 'class') {
         if (ret.class !== toMerge.class) {
-          ret.class = normalizeClass([ret.class,toMerge.class]);
+          ret.class = normalizeClass([ret.class, toMerge.class]);
         }
-      } else if (key === "style") {
-        ret.style = normalizeStyle([ret.style,toMerge.style])
+      } else if (key === 'style') {
+        ret.style = normalizeStyle([ret.style, toMerge.style]);
       } else if (key !== '') {
         ret[key] = toMerge[key];
       }
@@ -140,8 +143,8 @@ export function mergeProps(...args) {
   return ret;
 }
 export {
-  createBaseVNode as createElementVNode
-}
-export function isSameVNodeType(n1,n2) {
+  createBaseVNode as createElementVNode,
+};
+export function isSameVNodeType(n1, n2) {
   return n1.type === n2.type && n1.key === n2.key;
 }

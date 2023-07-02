@@ -3,16 +3,16 @@ export {
   readonly,
   ReactiveFlags,
   isReadonly,
-  shallowReadonly
-} from "./reactive.js";
+  shallowReadonly,
+} from './reactive.js';
 export {
-  effect
-} from "./effect.js";
+  effect,
+} from './effect.js';
 export {
   ref,
   unRef,
-  isRef
-} from "./ref.js";
+  isRef,
+} from './ref.js';
 export {
-  computed
-} from "./computed.js"
+  computed,
+} from './computed.js';

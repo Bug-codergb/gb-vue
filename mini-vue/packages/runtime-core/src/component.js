@@ -1,26 +1,27 @@
-import { shallowReadonly } from "../../reactivity/src/index.js";
-import { PublicInstanceProxyHandlers } from "./componentPublicInstance.js";
-import { createAppContext } from "./apiCreateApp.js";
-import { EMPTY_OBJ, isFunction } from "../../shared/src/general.js";
-import { isObject } from "../../shared/src/index.js";
-import ShapeFlags from "../../shared/src/shapeFlags.js";
-import { markRaw } from "../../reactivity/src/reactive.js";
+import { shallowReadonly } from '../../reactivity/src/index.js';
+import { PublicInstanceProxyHandlers } from './componentPublicInstance.js';
+import { createAppContext } from './apiCreateApp.js';
+import { EMPTY_OBJ, isFunction } from '../../shared/src/general.js';
+import { isObject } from '../../shared/src/index.js';
+import ShapeFlags from '../../shared/src/shapeFlags.js';
+import { markRaw } from '../../reactivity/src/reactive.js';
+
 let complie = void 0;
 
 let uid = 0;
-const emptyAppContext = createAppContext()
+const emptyAppContext = createAppContext();
 
 export function createComponentInstance(vnode, parent, suspense) {
-  const type = vnode.type;
+  const { type } = vnode;
   const appContext = (parent ? parent.appContext : vnode.appContext) || emptyAppContext;
   const instance = {
-    uid:uid++,
+    uid: uid++,
     type,
     vnode,
     parent,
-    root:null,
+    root: null,
     next: null,
-    subTree:null,
+    subTree: null,
     effect: null,
     update: null,
     scope: {},
@@ -35,23 +36,23 @@ export function createComponentInstance(vnode, parent, suspense) {
 
     propsOptions: {},
     emitsOptions: {},
-    
+
     accessCache: null,
-    renderCache:[],
+    renderCache: [],
 
     emit: null,
     emitted: null,
-    
+
     isMounted: false,
-    isUnmounted:false,
+    isUnmounted: false,
     ctx: {},
     props: {},
     attrs: {},
-    
+
     setupState: EMPTY_OBJ,
-    setupContext:EMPTY_OBJ,
-  }
-  return instance
+    setupContext: EMPTY_OBJ,
+  };
+  return instance;
 }
 
 export function isStatefulComponent(instance) {
@@ -67,22 +68,20 @@ export function setupComponent(instance) {
   return setupResult;
 }
 function setupStatefulComponent(instance) {
-  const Component = instance.type;//type 为选项
+  const Component = instance.type;// type 为选项
 
   instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers));
 
-  
   const { setup } = Component;
   if (setup) {
-
-    const setupContext = (instance.setupContext = setup.length > 1 ? createSetupContext(instance):null)
+    const setupContext = (instance.setupContext = setup.length > 1 ? createSetupContext(instance) : null);
     setCurrentInstance(instance);
 
-    //返回setup的结果如果是函数则是render函数，否则就是需要代理的对象
+    // 返回setup的结果如果是函数则是render函数，否则就是需要代理的对象
     const setupResult = setup(shallowReadonly(instance.props), setupContext);
 
     setCurrentInstance(null);
-    handleSetupResult(instance,setupResult);
+    handleSetupResult(instance, setupResult);
   } else {
     finishComponentSetup(instance);
   }
@@ -92,10 +91,10 @@ function createSetupContext(instance) {
     attrs: instance.attrs,
     slots: instance.slots,
     emit: instance.emit,
-    expose:()=>{}
-  }
+    expose: () => {},
+  };
 }
-function handleSetupResult(instance,setupResult) {
+function handleSetupResult(instance, setupResult) {
   if (isFunction(setupResult)) {
     instance.render = setupResult;
   } else if (isObject(setupResult)) {
@@ -106,7 +105,7 @@ function handleSetupResult(instance,setupResult) {
 function finishComponentSetup(instance) {
   const Component = instance.type;
   if (!instance.render) {
-    //模板编译
+    // 模板编译
     if (complie && !Component.render) {
       if (Component.template) {
         Component.render = complie(Component.template);

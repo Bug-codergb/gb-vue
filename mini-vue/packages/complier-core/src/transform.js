@@ -1,16 +1,18 @@
 import {
-  isSingleElementRoot
-} from "./transforms/hoistStatic.js";
+  isSingleElementRoot,
+} from './transforms/hoistStatic.js';
 import {
   NOOP,
   isString,
-  EMPTY_OBJ
-} from "../../shared/src/general.js";
-import { PatchFlagNames, PatchFlags } from "../../shared/src/patchFlags.js";
-import { NodeTypes, ElementTypes,ConstantTypes ,createVNodeCall} from "./ast.js";
-import { FRAGMENT, helperNameMap,TO_DISPLAY_STRING } from "./runtimeHelpers.js";
+  EMPTY_OBJ,
+} from '../../shared/src/general.js';
+import { PatchFlagNames, PatchFlags } from '../../shared/src/patchFlags.js';
+import {
+  NodeTypes, ElementTypes, ConstantTypes, createVNodeCall,
+} from './ast.js';
+import { FRAGMENT, helperNameMap, TO_DISPLAY_STRING } from './runtimeHelpers.js';
 
-export function createTransformContext(root,{
+export function createTransformContext(root, {
   filename = '',
   prefixIdentifiers = false,
   hoistStatic = false,
@@ -25,12 +27,12 @@ export function createTransformContext(root,{
   slotted = true,
   ssr = false,
   inSSR = false,
-  ssrCssVars = ``,
+  ssrCssVars = '',
   inline = false,
   isTS = false,
-  bindingMetadata = EMPTY_OBJ
+  bindingMetadata = EMPTY_OBJ,
 }) {
-  const nameMatch = filename.replace(/\?.*$/, '').match(/([^/\\]+)\.\w+$/)
+  const nameMatch = filename.replace(/\?.*$/, '').match(/([^/\\]+)\.\w+$/);
   const context = {
     selfName: nameMatch && capitalize(camelize(nameMatch[1])),
     prefixIdentifiers,
@@ -50,7 +52,7 @@ export function createTransformContext(root,{
     bindingMetadata,
     inline,
     isTS,
-    
+
     root,
     helpers: new Map(),
     components: new Set(),
@@ -68,7 +70,7 @@ export function createTransformContext(root,{
       vFor: 0,
       vSlot: 0,
       vPre: 0,
-      vOnce: 0
+      vOnce: 0,
     },
     helper(name) {
       const count = context.helpers.get(name) || 0;
@@ -87,7 +89,7 @@ export function createTransformContext(root,{
       }
     },
     helperString(name) {
-      return `_${helperNameMap[context.helper(name)]}`
+      return `_${helperNameMap[context.helper(name)]}`;
     },
     replaceNode(node) {
       context.parent.children[context.childIndex] = context.currentNode = node;
@@ -97,37 +99,35 @@ export function createTransformContext(root,{
       const removalIndex = node ? list.indexOf(node) : context.currentNode ? context.childIndex : -1;
       if (!node || node === context.currentNode) {
         context.currentNode = null;
-        context.onNodeRemoved()
-      } else {
-        if (context.childIndex > removalIndex) {
-          context.childIndex--;
-          context.onNodeRemoved();
-        }
+        context.onNodeRemoved();
+      } else if (context.childIndex > removalIndex) {
+        context.childIndex--;
+        context.onNodeRemoved();
       }
       context.parent.children.splice(removalIndex, 1);
     },
     onNodeRemoved() {
-      
+
     },
     hoist(exp) {
-      if (isString(exp)) exp = createSimpleExpression(exp)
-      context.hoists.push(exp)
+      if (isString(exp)) exp = createSimpleExpression(exp);
+      context.hoists.push(exp);
       const identifier = createSimpleExpression(
         `_hoisted_${context.hoists.length}`,
         false,
         exp.loc,
-        ConstantTypes.CAN_HOIST
-      )
-      identifier.hoisted = exp
-      return identifier
+        ConstantTypes.CAN_HOIST,
+      );
+      identifier.hoisted = exp;
+      return identifier;
     },
     cache(exp, isVNode = false) {
-      return createCacheExpression(context.cached++, exp, isVNode)
-    }
-  }
+      return createCacheExpression(context.cached++, exp, isVNode);
+    },
+  };
   return context;
 }
-//这里开始
+// 这里开始
 export function transform(root, options) {
   const context = createTransformContext(root, options);
   traverseNode(root, context);
@@ -153,41 +153,40 @@ function createRootCodegen(root, context) {
   if (children.length === 1) {
     const child = children[0];
     if (isSingleElementRoot(root, child) && child.codegenNode) {
-      
-      const codegenNode = child.codegenNode;
+      const { codegenNode } = child;
       if (codegenNode.type === NodeTypes.VNODE_CALL) {
-        
+
       }
       root.codegenNode = codegenNode;
     } else {
       root.codegenNode = child;
     }
   } else if (children.length > 1) {
-    debugger
+    debugger;
     let patchFlag = PatchFlags.STABLE_FRAGMENT;
-    let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT]
-    if (children.filter(c => c.type !== NodeTypes.COMMENT).length === 1) {
+    let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT];
+    if (children.filter((c) => c.type !== NodeTypes.COMMENT).length === 1) {
       patchFlag |= PatchFlags.DEV_ROOT_FRAGMENT;
-      patchFlagText += ` ${PatchFlagNames[PatchFlags.DEV_ROOT_FRAGMENT]} `
+      patchFlagText += ` ${PatchFlagNames[PatchFlags.DEV_ROOT_FRAGMENT]} `;
     }
     root.codegenNode = createVNodeCall(
       context,
       helper(FRAGMENT),
       undefined,
       root.children,
-      patchFlag + ` /* ${patchFlagText} */`,
+      `${patchFlag} /* ${patchFlagText} */`,
       undefined,
       undefined,
       true,
       undefined,
-      false
-    )
+      false,
+    );
   }
 }
 
-export function createStructuralDirectiveTransform(name,fn) {
+export function createStructuralDirectiveTransform(name, fn) {
   const matches = isString(name) ? (n) => n === name : (n) => name.test(n);
-  return (node,context) => {
+  return (node, context) => {
     if (node.type === NodeTypes.ELEMENT) {
       const { props } = node;
       if (node.tagType === ElementTypes.TEMPLATE) {
@@ -195,7 +194,7 @@ export function createStructuralDirectiveTransform(name,fn) {
       }
 
       const exitFns = [];
-      for (let i = 0; i < props.length; i++){
+      for (let i = 0; i < props.length; i++) {
         const prop = props[i];
         if (prop.type === NodeTypes.DIRECTIVE && matches(prop.name)) {
           // why?
@@ -203,7 +202,7 @@ export function createStructuralDirectiveTransform(name,fn) {
           i--;
 
           const onExit = fn(node, prop, context);
-          
+
           if (onExit) {
             exitFns.push(onExit);
           }
@@ -211,15 +210,15 @@ export function createStructuralDirectiveTransform(name,fn) {
       }
       return exitFns;
     }
-  }
+  };
 }
 
 export function traverseNode(node, context) {
   context.currentNode = node;
   const { nodeTransforms } = context;
   const exitFns = [];
-  for (let i = 0; i < nodeTransforms.length; i++){
-    const onExit = nodeTransforms[i](node, context);//使用 v-if,v-on,v-for,或者transformText,tranformElement处理节点
+  for (let i = 0; i < nodeTransforms.length; i++) {
+    const onExit = nodeTransforms[i](node, context);// 使用 v-if,v-on,v-for,或者transformText,tranformElement处理节点
     if (onExit) {
       if (Array.isArray(onExit)) {
         exitFns.push(...onExit);
@@ -229,15 +228,14 @@ export function traverseNode(node, context) {
     }
     if (!context.currentNode) {
       return;
-    } else {
-      node = context.currentNode;
     }
+    node = context.currentNode;
   }
-  
+
   switch (node.type) {
     case NodeTypes.INTERPOLATION:
       if (!context.ssr) {
-        context.helper(TO_DISPLAY_STRING)
+        context.helper(TO_DISPLAY_STRING);
       }
       break;
     case NodeTypes.IF:
@@ -258,14 +256,14 @@ export function traverseNode(node, context) {
     exitFns[i]();
   }
 }
-export function traverseChildren(parent,context) {
+export function traverseChildren(parent, context) {
   let i = 0;
   const nodeRemoved = () => {
     i--;
-  }
-  for (; i < parent.children.length; i++){
+  };
+  for (; i < parent.children.length; i++) {
     const child = parent.children[i];
-    
+
     if (isString(child)) continue;
     context.parent = parent;
     context.childIndex = i;

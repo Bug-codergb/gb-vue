@@ -1,14 +1,14 @@
-export { registerRuntimeCompiler } from "./component.js";
-export { normalizeProps ,normalizeClass,normalizeStyle} from "../../shared/src/normalizeProp.js";
-export { toDisplayString } from "../../shared/src/toDisplayString.js"
+export { registerRuntimeCompiler } from './component.js';
+export { normalizeProps, normalizeClass, normalizeStyle } from '../../shared/src/normalizeProp.js';
+export { toDisplayString } from '../../shared/src/toDisplayString.js';
 export {
   createTextVNode,
   createElementVNode,
   guardReactiveProps,
-  mergeProps
-} from './vnode.js'
+  mergeProps,
+} from './vnode.js';
 
-export { withDirectives } from "./directives.js";
+export { withDirectives } from './directives.js';
 
 export {
   reactive,
@@ -18,4 +18,4 @@ export {
   unRef,
   isReadonly,
   shallowReadonly,
-} from "../../reactivity/src/index.js"
+} from '../../reactivity/src/index.js';

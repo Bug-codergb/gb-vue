@@ -1,11 +1,12 @@
-import {NodeTypes } from "../ast.js";
+import { NodeTypes } from '../ast.js';
+
 export function isSingleElementRoot(
   root,
-  child
+  child,
 ) {
-  const { children } = root
+  const { children } = root;
   return (
-    children.length === 1 &&
-    child.type === NodeTypes.ELEMENT
-  )
+    children.length === 1
+    && child.type === NodeTypes.ELEMENT
+  );
 }
