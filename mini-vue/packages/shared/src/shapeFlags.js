@@ -11,5 +11,5 @@ const ShapeFlags = {
   COMPONENT_KEPT_ALIVE : 1 << 9,
   COMPONENT : 1<<10
 }
-ShapeFlags.COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT
+ShapeFlags.COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT //0010 | 0100
 export default ShapeFlags;

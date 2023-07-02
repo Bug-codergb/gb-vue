@@ -504,7 +504,6 @@ function genVNodeCall(node, context) {
     push(`)`)
   }
   if (directives) {
-    console.log(directives)
     push(`, `)
     genNode(directives, context)
     push(`)`)

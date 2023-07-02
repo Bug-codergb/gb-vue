@@ -1,24 +1,54 @@
+import { EMPTY_OBJ,hasOwn } from "../../shared/src/general.js";
+
 const publicPropertiesMap = {
   // 当用户调用 instance.proxy.$emit 时就会触发这个函数
   // i 就是 instance 的缩写 也就是组件实例对象
   $el: (i) => i.vnode.el,
+  $data:i=>i.data,
   $emit: (i) => i.emit,
   $slots: (i) => i.slots,
   $props: (i) => i.props,
+  $emit: i => i.emit,
+  $nextTick:i=>i.n
 };
 
-// todo 需要让用户可以直接在 render 函数内直接使用 this 来触发 proxy
+const hasSetupBinding = (state,key) => {
+  state !== EMPTY_OBJ && hasOwn(state,key);
+}
+const AccessTypes = {
+  OTHER: 1,
+  SETUP: 2,
+  DATA: 3,
+  PROPS: 4,
+  CONTEXT:5
+}
 export const PublicInstanceProxyHandlers = {
   get({ _: instance }, key) {
-    // 用户访问 proxy[key]
-    // 这里就匹配一下看看是否有对应的 function
-    // 有的话就直接调用这个 function
-    const { setupState, props } = instance;
-    console.log(`触发 proxy hook , key -> : ${key}`);
+    const { ctx,setupState,data,type, props,appContext,accessCache } = instance;
+
+    let normalizedProps
 
     if (key[0] !== "$") {
-      // 说明不是访问 public api
-      // 先检测访问的 key 是否存在于 setupState 中, 是的话直接返回
+      const n = accessCache[key];
+      if (n !== undefined) {
+        
+      } else if (hasSetupBinding(setupState,key)) {
+        accessCache[key] = AccessTypes.SETUP;
+        return setupState[key];
+      } else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
+        accessCache[key] = AccessTypes.DATA;
+        return data[key];
+      } else if (normalizedProps = instance.propsOptions[0] && hasOwn(normalizedProps, key)) {
+        accessCache[key] = AccessTypes.PROPS;
+        return props[key];
+      } else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
+        accessCache[key] = AccessTypes.CONTEXT;
+        return ctx[key];
+      } else {
+        accessCache[key] = AccessTypes.OTHER;
+      }
+
+
       if (hasOwn(setupState, key)) {
         return setupState[key];
       } else if (hasOwn(props, key)) {
@@ -36,7 +66,7 @@ export const PublicInstanceProxyHandlers = {
   },
 
   set({ _: instance }, key, value) {
-    const { setupState } = instance;
+    const { setupState,data,ctx } = instance;
 
     if (hasOwn(setupState, key)) {
       // 有的话 那么就直接赋值

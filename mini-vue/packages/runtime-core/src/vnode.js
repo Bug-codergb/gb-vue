@@ -57,13 +57,18 @@ function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNod
     isBlockNode
   );
 }
+
+export function isVNode(value) {
+  return value ? value.__v_isVNode === true : false;
+}
+
 function createBaseVNode(
   type,
   props,
   children,
   patchFlag = 0,
   dynamicProps = null,
-  shapeFlag,
+  shapeFlag = type === Fragment ? 0 : ShapeFlags.ELEMENT,
   isBlockNode,
   needFullChildrenNormalization = false
 ) {

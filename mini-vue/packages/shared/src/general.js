@@ -65,3 +65,16 @@ const hyphenateRE = /\B([A-Z])/g
 export const hyphenate = cacheStringFunction((str) => {
   return str.replace(hyphenateRE,"-$1").toLowerCase();//这里匹配第一个大写字母(不在开头)
 })
+
+export const def = (obj,key,value) => {
+  Object.defineProperty(obj, key, {//不可以枚举
+    configurable: true,
+    enumerable: false,
+    value
+  })
+}
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+export const hasOwn = (val,key) => {
+  return hasOwnProperty.call(val, key);
+}

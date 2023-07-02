@@ -33,6 +33,7 @@ function baseCreateRenderer(options){
     insertStaticContent:hostInsertStaticContent
   } = options;
   const render = (vnode, container) => {
+
     if (vnode === null) {
       if (container._vnode) {
         unmount(container._vnode);
@@ -85,7 +86,7 @@ function baseCreateRenderer(options){
   }
   function processElement(n1,n2,container,anchor,parentComponent) {
     if (!n1) {
-      mountElement(n2, container, anchor);
+      mountElement(n2, container, anchor,parentComponent);
     } else {
       updateElement(n1,n2,container,anchor,parentComponent);
     }
@@ -111,23 +112,33 @@ function baseCreateRenderer(options){
     }
   }
   // element -> mount
-  function mountElement(vnode, container, anchor) {
-  
-    const { shapeFlag, type, props } = vnode;
-    const el = createElement(type);
+  function mountElement(vnode, container, anchor,parentComponent) {
+    const { shapeFlag, type, props, dirs } = vnode;
+    const el = hostCreateElement(type,props&& props.is,props);
     //文本节点
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el,vnode.children);
-    } else if (Array.isArray(vnode.children)||shapeFlag && ShapeFlags.ARRAY_CHILDREN) {//数组节点
-      mountChildren(vnode.children,el);
+    } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {//数组节点
+      mountChildren(vnode.children,el,null,parentComponent);
     }
+
+    if (dirs) {
+      
+    }
+
+
     if (props) {
       for (const key in props) {
-        const nextVal = props[key];
-        hostPatchProps(el,key,null,nextVal);
+        if (key !== 'value' && !isReservedProps(key)) {
+          const nextVal = props[key];
+          hostPatchProp(el,key,null,nextVal); 
+        }
+      }
+      if ('value' in props) {
+        hostPatchProp(el, 'value', null, props.value);
       }
     }
-    insert(el,container,anchor);
+    hostInsert(el,container,anchor);
   }
   function mountChildren(children,container) {
     children.forEach((child) => {
@@ -186,16 +197,18 @@ function baseCreateRenderer(options){
       updateComponent(n1, n2, container, parentComponent);
     }
   }
-  function mountComponent(vnode,container,parentComponent) {
-    const instance = createComponentInstance(vnode, container);
-    vnode.component = instance;
+  function mountComponent(initialVNode, container,anchor,parentComponent) {
+    const instance = createComponentInstance(initialVNode, container);
+    initialVNode.component = instance;
+
     setupComponent(instance);
-    setupRenderEffect(instance,vnode, container);
+    
+    setupRenderEffect(instance,initialVNode, container);
   }
   function updateComponent(n1,n2,container,parentComponent) {
     
   }
-  function setupRenderEffect(instance, vnode, container) {
+  function setupRenderEffect(instance, initialVNode, container,anchor) {
     const subTree = instance.render.call(instance.setupState, instance.setupState);
     patch(null, subTree, container, null, instance);
     instance.update = effect(() => { }, {

@@ -1,33 +1,86 @@
 import { shallowReadonly } from "../../reactivity/src/index.js";
-import {PublicInstanceProxyHandlers } from "./componentPublicInstance.js";
+import { PublicInstanceProxyHandlers } from "./componentPublicInstance.js";
+import { createAppContext } from "./apiCreateApp.js";
+import { EMPTY_OBJ, isFunction } from "../../shared/src/general.js";
+import { isObject } from "../../shared/src/index.js";
+import ShapeFlags from "../../shared/src/shapeFlags.js";
+import { markRaw } from "../../reactivity/src/reactive.js";
 let complie = void 0;
-export function createComponentInstance(vnode, parent) {
+
+let uid = 0;
+const emptyAppContext = createAppContext()
+
+export function createComponentInstance(vnode, parent, suspense) {
+  const type = vnode.type;
+  const appContext = (parent ? parent.appContext : vnode.appContext) || emptyAppContext;
   const instance = {
-    type: vnode.type,
+    uid:uid++,
+    type,
     vnode,
-    next: null,
     parent,
-    proxy:null,
+    root:null,
+    next: null,
+    subTree:null,
+    effect: null,
+    update: null,
+    scope: {},
+    render: null,
+    proxy: null,
+    exposed: null,
+    exposeProxy: null,
+    withProxy: null,
+    provides: parent ? parent.provides : Object.create(appContext.provides),
+    components: null,
+    directives: null,
+
+    propsOptions: {},
+    emitsOptions: {},
+    
+    accessCache: null,
+    renderCache:[],
+
+    emit: null,
+    emitted: null,
+    
     isMounted: false,
-    ctx:{}
+    isUnmounted:false,
+    ctx: {},
+    props: {},
+    attrs: {},
+    
+    setupState: EMPTY_OBJ,
+    setupContext:EMPTY_OBJ,
   }
   return instance
 }
+
+export function isStatefulComponent(instance) {
+  return instance.vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT;
+}
+
 export function setupComponent(instance) {
   const { props, children } = instance.vnode;
-  setupStatefulComponent(instance);
+  const isStateful = isStatefulComponent(instance);
+
+  const setupResult = isStateful
+    ? setupStatefulComponent(instance) : undefined;
+  return setupResult;
 }
 function setupStatefulComponent(instance) {
+  const Component = instance.type;//type 为选项
 
-  instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers);
+  instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers));
 
-  const Component = instance.type;
+  
   const { setup } = Component;
   if (setup) {
+
+    const setupContext = (instance.setupContext = setup.length > 1 ? createSetupContext(instance):null)
     setCurrentInstance(instance);
-    const setupContext = createSetupContext(instance);
+
     //返回setup的结果如果是函数则是render函数，否则就是需要代理的对象
     const setupResult = setup(shallowReadonly(instance.props), setupContext);
+
     setCurrentInstance(null);
     handleSetupResult(instance,setupResult);
   } else {
@@ -43,9 +96,9 @@ function createSetupContext(instance) {
   }
 }
 function handleSetupResult(instance,setupResult) {
-  if (typeof setupResult === "function") {
+  if (isFunction(setupResult)) {
     instance.render = setupResult;
-  } else if (typeof setupResult === "object") {
+  } else if (isObject(setupResult)) {
     instance.setupState = setupResult;
   }
   finishComponentSetup(instance);

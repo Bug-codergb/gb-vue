@@ -1,4 +1,4 @@
-import { isFunction } from "../../shared/src/general.js";
+import { NO, isFunction } from "../../shared/src/general.js";
 import { isObject } from "../../shared/src/index.js";
 import { createVNode } from "./vnode.js";
 
@@ -41,5 +41,26 @@ export function createAppAPI(render, hydrate) {
       }
     }
     return app;
+  }
+}
+export function createAppContext() {
+  return {
+    app: null,
+    config: {
+      isNativeTag: NO,
+      performace: false,
+      globalProperties: {},
+      optionMergeStrategies: {},
+      errorHandler: undefined,
+      warnHandler: undefined,
+      complierOptions:{}
+    },
+    mixins: [],
+    components: {},
+    directives: {},
+    provides: Object.create(null),
+    optionsCache: new WeakMap(),
+    propsCache: new WeakMap(),
+    emitsCache:new WeakMap
   }
 }

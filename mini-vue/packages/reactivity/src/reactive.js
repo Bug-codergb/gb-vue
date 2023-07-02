@@ -1,3 +1,4 @@
+import { def } from "../../shared/src/general.js";
 import { isObject } from "../../shared/src/index.js";
 import {
   baseHandler,
@@ -14,6 +15,7 @@ const shallowReadonlyMap = new WeakMap();
 
 const ReactiveFlags = {
   RAW: "raw",
+  SKIP:"_v_skip",
   REACTIVE: "_v_isReactive",
   READONLY: "_v_isReadonly",
   SHALLOW:"_v_isShallow"
@@ -53,6 +55,12 @@ export function toReactive(raw) {
 export function toReadonly(raw) {
   return isObject(raw) ? readonly(raw) : raw;
 }
+
+export function markRaw(value) {
+  def(value, ReactiveFlags.SKIP, true);
+  return value;
+}
+
 const createReactive = (raw, isReadonly, proxyMap, handler) => {
   if (!isObject(raw)) {
     console.warn("this is not a object ,cant not be reactive");
