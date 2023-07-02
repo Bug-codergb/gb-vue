@@ -8,7 +8,9 @@ import {
 } from "./component.js"
 import {
   Text,
-  Fragment
+  Fragment,
+  Static,
+  isSameVNodeType
 } from "./vnode.js";
 
 function createRenderer(rendererOptions){
@@ -17,14 +19,18 @@ function createRenderer(rendererOptions){
 
 function baseCreateRenderer(options){
   const {
-    createElement,
+    createElement:hostCreateElement,
     setElementText:hostSetElementText,
-    patchProp:hostPatchProps,
-    remove,
-    insert:hostInsert,
-    createText: hostCreateText,
+    patchProp:hostPatchProp,
+    remove:hostRemove,
     unmount,
-    insert
+    insert: hostInsert,
+    setScopeId: hostSetScopeId,
+    setText: hostSetText,
+    createText: hostCreateText,
+    parentNode: hostParentNode,
+    nextSibling: hostNextSibling,
+    insertStaticContent:hostInsertStaticContent
   } = options;
   const render = (vnode, container) => {
     if (vnode === null) {
@@ -32,31 +38,49 @@ function baseCreateRenderer(options){
         unmount(container._vnode);
       }
     } else {
-      patch(null, vnode, container);
+      patch(container._vnode || null, vnode, container);
     }
     container._vnode = vnode;
   }
   function patch(n1, n2, container, anchor, parentComponent) {
-    const { type,shapeFlag } = n2;
+    if (n1 === n2) {//相等则不比较
+      return;
+    }
+
+    if (n1 && !isSameVNodeType(n1, n2)) { // 如果接节存在，但是n1,n2的类型不一致且key不一致
+      unmount(n1);
+      n1 = null;
+    }
+
+    const { type,ref,shapeFlag } = n2;
     switch (type) {
       case Text:
-        processText(n1, n2, container); break;
+        processText(n1, n2, container, anchor); break;
+      case Static:
+        if (n1 == null) {
+          mountStatic(n2, container, anchor);break;
+        }
       case Fragment:
         processFragment(n1, n2, container); break;
       default:
-        if (typeof type==="string"||shapeFlag & ShapeFlags.ELEMENT) {
+        if (shapeFlag & ShapeFlags.ELEMENT) {
           processElement(n1,n2,container,anchor,parentComponent);
-        } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        } else if (shapeFlag & ShapeFlags.COMPONENT) {
           processComponent(n1, n2, container, parentComponent);
         }
     }
   }
   //处理文本节点
-  function processText(n1,n2,container) {
+  function processText(n1,n2,container,anchor) {
     if (n1 === null) { //挂载阶段
       const text = n2.children;
       n2.el = hostCreateText(text);
-      hostInsert(n2.el,container);//直接将n2插入
+      hostInsert(n2.el,container,anchor);//直接将n2插入
+    } else {
+      const el = (n2.el = n1.el);
+      if (n2.children !== n1.children) {
+        hostSetText(el, n2.children);
+      }
     }
   }
   function processElement(n1,n2,container,anchor,parentComponent) {

@@ -111,7 +111,7 @@ function getShapeFlag(type) {
 
 export const Text = Symbol('Text');
 export const Fragment = Symbol("Fragment");
-
+export const Static = Symbol.for('v-stc');
 
 export function createTextVNode(text,flag) {
   return createVNode(Text, null, text, flag);
@@ -136,4 +136,7 @@ export function mergeProps(...args) {
 }
 export {
   createBaseVNode as createElementVNode
+}
+export function isSameVNodeType(n1,n2) {
+  return n1.type === n2.type && n1.key === n2.key;
 }
