@@ -1,7 +1,7 @@
 import {
   isString,
 } from '../../shared/src/general.js';
-import { complie } from '../../complier-dom/src/index.js';
+import { complie } from '../../compiler-dom/src/index.js';
 import { registerRuntimeCompiler } from '../../runtime-dom/src/index.js';
 import * as runtimDom from '../../runtime-dom/src/index.js';
 

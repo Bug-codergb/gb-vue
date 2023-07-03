@@ -1,17 +1,18 @@
-import { ElementTypes, NodeTypes, createCompoundExpression, createObjectProperty, createSimpleExpression } from "../ast.js";
+import {
+  ElementTypes, NodeTypes, createCompoundExpression, createObjectProperty, createSimpleExpression,
+} from '../ast.js';
 import {
   toHandlerKey,
-  camelize
-} from "../../../shared/src/general.js";
-import { TO_HANDLER_KEY } from "../runtimeHelpers.js";
+  camelize,
+} from '../../../shared/src/general.js';
+import { TO_HANDLER_KEY } from '../runtimeHelpers.js';
 
-const fnExpRE =
-  /^\s*([\w$_]+|(async\s*)?\([^)]*?\))\s*(:[^=]+)?=>|^\s*(async\s+)?function(?:\s+[\w$]+)?\s*\(/
+const fnExpRE = /^\s*([\w$_]+|(async\s*)?\([^)]*?\))\s*(:[^=]+)?=>|^\s*(async\s+)?function(?:\s+[\w$]+)?\s*\(/;
 
 export const transformOn = (dir, node, context, augmentor) => {
-  const { loc,modifiers,arg } = dir;
+  const { loc, modifiers, arg } = dir;
   if (!dir.exp && !modifiers.length) {
-    console.error("error");    
+    console.error('error');
   }
   let eventName;
   if (arg.type === NodeTypes.SIMPLE_EXPRESSION) {
@@ -20,44 +21,43 @@ export const transformOn = (dir, node, context, augmentor) => {
       if (rawName.startsWith('vue:')) {
         rawName = `vnode-${rawName.slice(4)}`;
       }
-      const eventString = node.tagType !== ElementTypes.ELEMENT ||
-        rawName.startsWith('vnode') || 
-        !/[A-Z]/.test(rawName)
-        ?
-        toHandlerKey(camelize(rawName))
-        : `on:${rawName}`
+      const eventString = node.tagType !== ElementTypes.ELEMENT
+        || rawName.startsWith('vnode')
+        || !/[A-Z]/.test(rawName)
+        ? toHandlerKey(camelize(rawName))
+        : `on:${rawName}`;
       eventName = createSimpleExpression(eventString, true, arg.loc);
     } else {
       eventName = createCompoundExpression([
         `${context.helperString(TO_HANDLER_KEY)}(`,
         arg,
-        `)`
-      ])
+        ')',
+      ]);
     }
   } else {
     eventName = arg;
     eventName.children.unshift(`${context.helperString(TO_HANDLER_KEY)}(`);
-    eventName.children.push(`)`);
+    eventName.children.push(')');
   }
 
-  let exp = dir.exp;
+  let { exp } = dir;
   if (exp && !exp.content.trim()) {
     exp = undefined;
   }
-  let shouldCache = context.cacheHandlers && !exp && context.inVOnce;
+  const shouldCache = context.cacheHandlers && !exp && context.inVOnce;
 
   if (exp) {
     const isMemberExp = false;
     const isInlineStatement = !(isMemberExp || fnExpRE.test(exp.content));
-    const hasMultipleStatements = exp.content.includes(`;`);
+    const hasMultipleStatements = exp.content.includes(';');
     if (isInlineStatement || (shouldCache && isMemberExp)) {
       exp = createCompoundExpression([
         `${
-          isInlineStatement? `$event`:`(...args)`
+          isInlineStatement ? '$event' : '(...args)'
         }=>${hasMultipleStatements ? '{' : '('}`,
         exp,
-        hasMultipleStatements?'}':")"
-      ])
+        hasMultipleStatements ? '}' : ')',
+      ]);
     }
   }
 
@@ -65,13 +65,13 @@ export const transformOn = (dir, node, context, augmentor) => {
     props: [
       createObjectProperty(
         eventName,
-        exp || createSimpleExpression(`()=>{}`,false,loc)
-      )
-    ]
-  }
+        exp || createSimpleExpression('()=>{}', false, loc),
+      ),
+    ],
+  };
   if (augmentor) {
     ret = augmentor(ret);
   }
-  ret.props.forEach(p => (p.key.isHandlerKey = true));
+  ret.props.forEach((p) => (p.key.isHandlerKey = true));
   return ret;
-}
+};

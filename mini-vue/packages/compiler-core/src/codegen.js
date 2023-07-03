@@ -22,8 +22,8 @@ import { isSimpleIdentifier } from './utils.js';
 const aliasHelper = (s) => `${helperNameMap[s]}: _${helperNameMap[s]}`;
 
 function createCodegenContext(ast, {
-  mode = 'function',
-  prefixIdentifiers = mode === 'modlue',
+  mode = 'function', // 这里会决定是否block包含
+  prefixIdentifiers = mode === 'modlue', // 这里会决定是否block包含
   sourceMap = false,
   filename = 'template.vue.html',
   scopeId = null,
@@ -131,6 +131,7 @@ export function generate(
     push(`function ${functionName}(${signature}){`);
   }
   indent();
+  console.log(useWithBlock);
   if (useWithBlock) {
     push('with (_ctx) {');
     indent();

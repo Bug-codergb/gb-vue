@@ -1,4 +1,4 @@
-import { registerRuntimeHelpers } from '../../complier-core/src/runtimeHelpers.js';
+import { registerRuntimeHelpers } from '../../compiler-core/src/runtimeHelpers.js';
 
 const __DEV__ = true;
 export const V_MODEL_RADIO = Symbol(__DEV__ ? 'vModelRadio' : '');

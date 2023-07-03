@@ -1,6 +1,11 @@
 import { isString } from '../../shared/src/general.js';
 import {
-  CREATE_BLOCK, CREATE_ELEMENT_BLOCK, OPEN_BLOCK, WITH_DIRECTIVES, CREATE_VNODE, CREATE_ELEMENT_VNODE,
+  CREATE_BLOCK,
+  CREATE_ELEMENT_BLOCK,
+  OPEN_BLOCK,
+  WITH_DIRECTIVES,
+  CREATE_VNODE,
+  CREATE_ELEMENT_VNODE,
 } from './runtimeHelpers.js';
 
 export const NodeTypes = {

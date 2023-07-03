@@ -1,6 +1,8 @@
 export const NOOP = () => {};
 export const NO = () => false;
 export const EMPTY_OBJ = Object.freeze({});
+export const EMPTY_ARRAY = Object.freeze([]);
+
 const onRE = /^on[^a-z]/;
 export const isOn = (key) => onRE.test(key);
 

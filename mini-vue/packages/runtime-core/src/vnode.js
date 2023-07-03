@@ -1,7 +1,7 @@
 import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { isRef } from '../../reactivity/src/index.js';
 import {
-  isString, isFunction,
+  isString, isFunction, EMPTY_ARRAY,
 } from '../../shared/src/general.js';
 import { isObject } from '../../shared/src/index.js';
 import { normalizeClass, normalizeStyle } from '../../shared/src/normalizeProp.js';
@@ -10,7 +10,6 @@ const isSuspense = () => false;
 const isTeleport = () => false;
 const currentScopeId = '';
 
-export const createVNode = _createVNode;
 const __FEATURE_SUSPENSE__ = false;
 
 const normalizeKey = ({ key }) => (key != null ? key : null);
@@ -37,33 +36,9 @@ export function guardReactiveProps(props) {
   if (!props) return null;
   return props;
 }
-function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNode) {
-  const shapeFlag = isString(type)
-    ? ShapeFlags.ELEMENT
-    : __FEATURE_SUSPENSE__ && isSuspense(type)
-      ? ShapeFlags.SUSPENSE
-      : isTeleport(type)
-        ? ShapeFlags.TELEPORT
-        : isObject(type)
-          ? ShapeFlags.STATEFUL_COMPONENT
-          : isFunction(type)
-            ? ShapeFlags.FUNCTIONAL_COMPONENT
-            : 0;
 
-  return createBaseVNode(
-    type,
-    props,
-    children,
-    patchFlag,
-    dynamicProps,
-    shapeFlag,
-    isBlockNode,
-  );
-}
-
-export function isVNode(value) {
-  return value ? value.__v_isVNode === true : false;
-}
+export const blockStack = [];
+export let currentBlock = null;
 
 function createBaseVNode(
   type,
@@ -111,6 +86,99 @@ function createBaseVNode(
   }
   return vnode;
 }
+
+function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNode) {
+  const shapeFlag = isString(type)
+    ? ShapeFlags.ELEMENT
+    : __FEATURE_SUSPENSE__ && isSuspense(type)
+      ? ShapeFlags.SUSPENSE
+      : isTeleport(type)
+        ? ShapeFlags.TELEPORT
+        : isObject(type)
+          ? ShapeFlags.STATEFUL_COMPONENT
+          : isFunction(type)
+            ? ShapeFlags.FUNCTIONAL_COMPONENT
+            : 0;
+
+  return createBaseVNode(
+    type,
+    props,
+    children,
+    patchFlag,
+    dynamicProps,
+    shapeFlag,
+    isBlockNode,
+  );
+}
+export const createVNode = _createVNode;
+
+export function openBlock(disableTracking = false) {
+  blockStack.push((currentBlock = disableTracking ? null : []));
+}
+export function closeBlock() {
+  blockStack.pop();
+  currentBlock = blockStack[blockStack.length - 1] || null;
+}
+export let isBlockTreeEnabled = 1;
+
+export function setBlockTracking(value) {
+  isBlockTreeEnabled += value;
+}
+
+function setupBlock(vnode) {
+  vnode.dynamicChildren = isBlockTreeEnabled > 0 ? currentBlock || EMPTY_ARRAY : null;
+  closeBlock();
+
+  if (isBlockTreeEnabled > 0 && currentBlock) {
+    currentBlock.push(vnode);
+  }
+  return vnode;
+}
+
+export function createElementBlock(
+  type,
+  props,
+  children,
+  patchFlag,
+  dynamicProps,
+  shapeFlag,
+) {
+  return setupBlock(
+    createBaseVNode(
+      type,
+      props,
+      children,
+      patchFlag,
+      dynamicProps,
+      shapeFlag,
+      true,
+    ),
+  );
+}
+
+export function createBlock(
+  type,
+  props,
+  children,
+  patchFlag,
+  dynamicProps,
+) {
+  return setupBlock(
+    createVNode(
+      type,
+      props,
+      children,
+      patchFlag,
+      dynamicProps,
+      true,
+    ),
+  );
+}
+
+export function isVNode(value) {
+  return value ? value.__v_isVNode === true : false;
+}
+
 function getShapeFlag(type) {
   return typeof type === 'string'
     ? ShapeFlags.ELEMENT

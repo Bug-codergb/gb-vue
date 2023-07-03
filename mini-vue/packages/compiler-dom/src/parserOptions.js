@@ -1,4 +1,4 @@
-import { TextModes } from '../../complier-core/src/index.js';
+import { TextModes } from '../../compiler-core/src/index.js';
 import { isHTMLTag, isVoidTag, makeMap } from '../../shared/src/index.js';
 
 const isRawTextContainer = makeMap(

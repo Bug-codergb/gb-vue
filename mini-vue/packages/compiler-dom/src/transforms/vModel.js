@@ -1,6 +1,6 @@
-import { NodeTypes } from '../../../complier-core/src/ast.js';
-import { transformModel as baseTransform } from '../../../complier-core/src/transforms/vModel.js';
-import { findProp, hasDynamicKeyVBind } from '../../../complier-core/src/utils.js';
+import { NodeTypes } from '../../../compiler-core/src/ast.js';
+import { transformModel as baseTransform } from '../../../compiler-core/src/transforms/vModel.js';
+import { findProp, hasDynamicKeyVBind } from '../../../compiler-core/src/utils.js';
 import {
   V_MODEL_CHECKBOX,
   V_MODEL_DYNAMIC,

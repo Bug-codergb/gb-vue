@@ -1,13 +1,13 @@
-import { patchProp } from "./patchProp.js";
-import { nodeOps } from "./nodeOp.js";
-import { createRenderer } from "../../runtime-core/src/renderer.js";
-import { isString } from "../../shared/src/general.js";
+import { patchProp } from './patchProp.js';
+import { nodeOps } from './nodeOp.js';
+import { createRenderer } from '../../runtime-core/src/renderer.js';
+import { isString } from '../../shared/src/general.js';
 
 export {
-  vModelText
-} from "./directives/vModel.js"
+  vModelText,
+} from './directives/vModel.js';
 
-const renderOptions = Object.assign({ patchProp }, nodeOps);
+const renderOptions = { patchProp, ...nodeOps };
 
 let renderer;
 function ensureRenderer() {
@@ -15,19 +15,19 @@ function ensureRenderer() {
 }
 export const render = ((...args) => {
   ensureRenderer().render(args);
-})
+});
 export const createApp = ((...args) => {
   const app = ensureRenderer().createApp(...args);
   const { mount } = app;
   app.mount = (containerOrSelector) => {
     const container = normalizeContainer(containerOrSelector);
-    
+
     if (!container) return;
     const component = app._component;
-    container.innerHTML = "";
+    container.innerHTML = '';
     const proxy = mount(container);
     return proxy;
-  }
+  };
   return app;
 });
 function normalizeContainer(container) {
@@ -37,4 +37,4 @@ function normalizeContainer(container) {
   }
   return container;
 }
-export * from "../../runtime-core/src/index.js";
+export * from '../../runtime-core/src/index.js';

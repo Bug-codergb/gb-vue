@@ -1,4 +1,4 @@
-import { NodeTypes } from '../../../complier-core/src/ast.js';
+import { NodeTypes } from '../../../compiler-core/src/ast.js';
 
 export const transformStyle = (node) => {
   if (node.type === NodeTypes.ELEMENT) {
