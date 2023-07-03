@@ -11,6 +11,7 @@ import {
   TO_DISPLAY_STRING,
   helperNameMap,
   WITH_DIRECTIVES,
+  OPEN_BLOCK,
 } from './runtimeHelpers.js';
 import {
   NodeTypes,

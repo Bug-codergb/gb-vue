@@ -8,7 +8,7 @@ import {
 } from '../../shared/src/general.js';
 import { PatchFlagNames, PatchFlags } from '../../shared/src/patchFlags.js';
 import {
-  NodeTypes, ElementTypes, ConstantTypes, createVNodeCall,
+  NodeTypes, ElementTypes, ConstantTypes, createVNodeCall, convertToBlock,
 } from './ast.js';
 import { FRAGMENT, helperNameMap, TO_DISPLAY_STRING } from './runtimeHelpers.js';
 
@@ -146,7 +146,7 @@ export function transform(root, options) {
   root.temps = context.temps;
   root.cached = context.cached;
 }
-
+// 对于跟节点需要做一些处理
 function createRootCodegen(root, context) {
   const { helper } = context;
   const { children } = root;
@@ -154,15 +154,14 @@ function createRootCodegen(root, context) {
     const child = children[0];
     if (isSingleElementRoot(root, child) && child.codegenNode) {
       const { codegenNode } = child;
-      if (codegenNode.type === NodeTypes.VNODE_CALL) {
-
+      if (codegenNode.type === NodeTypes.VNODE_CALL) { // 单个跟节点需要使用block处理
+        convertToBlock(codegenNode, context);
       }
       root.codegenNode = codegenNode;
     } else {
       root.codegenNode = child;
     }
   } else if (children.length > 1) {
-    debugger;
     let patchFlag = PatchFlags.STABLE_FRAGMENT;
     let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT];
     if (children.filter((c) => c.type !== NodeTypes.COMMENT).length === 1) {

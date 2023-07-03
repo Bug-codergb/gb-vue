@@ -197,3 +197,12 @@ export function getVNodeHelper(ssr, isComponent) {
 export function getVNodeBlockHelper(ssr, isComponent) {
   return ssr || isComponent ? CREATE_BLOCK : CREATE_ELEMENT_BLOCK;
 }
+
+export function convertToBlock(node, { helper, removeHelper, inSSR }) {
+  if (!node.isBlock) {
+    node.isBlock = true;
+    removeHelper(getVNodeHelper(inSSR, node.isComponent));
+    helper(OPEN_BLOCK);
+    helper(getVNodeBlockHelper(inSSR, node.isComponent));
+  }
+}

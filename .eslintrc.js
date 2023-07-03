@@ -36,5 +36,10 @@ module.exports = {
     'no-plusplus': 'off',
     'no-continue': 'off',
     'max-len': 'off',
+    'no-new-func': 'off',
+    'no-return-assign': 'off',
+    'use-isnan': 'off',
+    'import/no-cycle': 'off',
+    'no-use-before-define': 'warn',
   },
 };

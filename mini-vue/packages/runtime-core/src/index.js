@@ -6,6 +6,10 @@ export {
   createElementVNode,
   guardReactiveProps,
   mergeProps,
+  openBlock,
+  createBlock,
+  createElementBlock,
+  closeBlock,
 } from './vnode.js';
 
 export { withDirectives } from './directives.js';
