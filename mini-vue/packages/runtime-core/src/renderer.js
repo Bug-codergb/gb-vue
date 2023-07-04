@@ -59,7 +59,7 @@ function baseCreateRenderer(options) {
       case Static:
         if (n1 == null) {
           mountStatic(n2, container, anchor); break;
-        }
+        } break;
       case Fragment:
         processFragment(n1, n2, container); break;
       default:
@@ -94,7 +94,7 @@ function baseCreateRenderer(options) {
   function patchProps(el, vnode, oldProps, newProps, parentComponent) {
     if (oldProps !== newProps) {
       if (Object.keys(oldProps).length !== 0) {
-        for (key in oldProps) {
+        for (const key in oldProps) {
           if (!isReservedProps(key) && !(key in newProps)) { // 删除旧的key
             hostPatchProps(el, key, oldProps[key], null, vnode.children, parentComponent);
           }
@@ -210,6 +210,7 @@ function baseCreateRenderer(options) {
   }
   function setupRenderEffect(instance, initialVNode, container, anchor) {
     const subTree = instance.render.call(instance.setupState, instance.setupState);
+    console.log(subTree);
     patch(null, subTree, container, null, instance);
     instance.update = effect(() => { }, {
       scheduler: () => {

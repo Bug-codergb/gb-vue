@@ -3,7 +3,7 @@ import { isRef } from '../../reactivity/src/index.js';
 import {
   isString, isFunction, EMPTY_ARRAY,
 } from '../../shared/src/general.js';
-import { isObject } from '../../shared/src/index.js';
+import { PatchFlags, isObject } from '../../shared/src/index.js';
 import { normalizeClass, normalizeStyle } from '../../shared/src/normalizeProp.js';
 
 const isSuspense = () => false;
@@ -83,6 +83,16 @@ function createBaseVNode(
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
   } else if (typeof children === 'string') {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
+  }
+
+  if (
+    isBlockTreeEnabled > 0
+    && !isBlockNode
+    && currentBlock
+    && (vnode.patchFlag > 0 || shapeFlag & ShapeFlags.COMPONENT)
+    && vnode.patchFlag !== PatchFlags.HYDRATE_EVENTS
+  ) {
+    currentBlock.push(vnode);
   }
   return vnode;
 }

@@ -41,5 +41,6 @@ module.exports = {
     'use-isnan': 'off',
     'import/no-cycle': 'off',
     'no-use-before-define': 'warn',
+    'no-lonely-if': 'off',
   },
 };

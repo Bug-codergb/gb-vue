@@ -132,7 +132,6 @@ export function generate(
     push(`function ${functionName}(${signature}){`);
   }
   indent();
-  console.log(useWithBlock);
   if (useWithBlock) {
     push('with (_ctx) {');
     indent();
