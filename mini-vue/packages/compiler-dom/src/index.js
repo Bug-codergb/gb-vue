@@ -3,6 +3,7 @@ import { parserOptions } from './parserOptions.js';
 
 import { transformStyle } from './transforms/transformStyle.js';
 import { transformModel } from './transforms/vModel.js';
+import { transformOn } from './transforms/vOn.js';
 
 export const DOMNodeTransforms = [
   transformStyle,
@@ -10,6 +11,7 @@ export const DOMNodeTransforms = [
 
 export const DOMDirectiveTransforms = {
   model: transformModel,
+  on: transformOn,
 };
 
 export function complie(template, options) {

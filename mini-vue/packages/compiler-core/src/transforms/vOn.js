@@ -1,5 +1,9 @@
 import {
-  ElementTypes, NodeTypes, createCompoundExpression, createObjectProperty, createSimpleExpression,
+  ElementTypes,
+  NodeTypes,
+  createCompoundExpression,
+  createObjectProperty,
+  createSimpleExpression,
 } from '../ast.js';
 import {
   toHandlerKey,
@@ -12,7 +16,7 @@ const fnExpRE = /^\s*([\w$_]+|(async\s*)?\([^)]*?\))\s*(:[^=]+)?=>|^\s*(async\s+
 export const transformOn = (dir, node, context, augmentor) => {
   const { loc, modifiers, arg } = dir;
   if (!dir.exp && !modifiers.length) {
-    console.error('error');
+    console.error('error');// v-on表达式不存在时
   }
   let eventName;
   if (arg.type === NodeTypes.SIMPLE_EXPRESSION) {
@@ -21,8 +25,7 @@ export const transformOn = (dir, node, context, augmentor) => {
       if (rawName.startsWith('vue:')) {
         rawName = `vnode-${rawName.slice(4)}`;
       }
-      const eventString = node.tagType !== ElementTypes.ELEMENT
-        || rawName.startsWith('vnode')
+      const eventString = node.tagType !== ElementTypes.ELEMENT || rawName.startsWith('vnode')
         || !/[A-Z]/.test(rawName)
         ? toHandlerKey(camelize(rawName))
         : `on:${rawName}`;
@@ -39,7 +42,7 @@ export const transformOn = (dir, node, context, augmentor) => {
     eventName.children.unshift(`${context.helperString(TO_HANDLER_KEY)}(`);
     eventName.children.push(')');
   }
-
+  console.log(eventName);
   let { exp } = dir;
   if (exp && !exp.content.trim()) {
     exp = undefined;
@@ -72,6 +75,7 @@ export const transformOn = (dir, node, context, augmentor) => {
   if (augmentor) {
     ret = augmentor(ret);
   }
+  console.log(ret)
   ret.props.forEach((p) => (p.key.isHandlerKey = true));
   return ret;
 };

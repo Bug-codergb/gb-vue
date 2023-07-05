@@ -69,7 +69,7 @@ export const transformElement = (node, context) => function postTransformElement
       isDynamicComponent,
     );
 
-    // console.log(propsBuildResult);
+    console.log(propsBuildResult);
 
     vnodeProps = propsBuildResult.props;
     patchFlag = propsBuildResult.patchFlag;
@@ -347,7 +347,7 @@ export function buildProps(
 
       if (directiveTransform) {
         const { props, needRuntime } = directiveTransform(prop, node, context);
-
+        console.log(props, needRuntime);
         !ssr && props.forEach(analyzePatchFlag);
         if (isVOn && arg && !isStaticExp(arg)) { // 非静态arg :[app]= app v-on:[event] = handler
 
