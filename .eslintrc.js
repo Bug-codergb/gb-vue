@@ -42,5 +42,6 @@ module.exports = {
     'import/no-cycle': 'off',
     'no-use-before-define': 'warn',
     'no-lonely-if': 'off',
+    'no-multi-assign': 'off',
   },
 };

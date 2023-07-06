@@ -223,7 +223,6 @@ function genHoists(hoists, context) {
 }
 
 function genNodeList(nodes, context, multilines, comma = true) {
-  console.log(nodes)
   const { push, newline } = context;
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];

@@ -10,6 +10,7 @@ import {
   camelize,
 } from '../../../shared/src/general.js';
 import { TO_HANDLER_KEY } from '../runtimeHelpers.js';
+import { isMemberExpressionBrowser } from '../utils.js';
 
 const fnExpRE = /^\s*([\w$_]+|(async\s*)?\([^)]*?\))\s*(:[^=]+)?=>|^\s*(async\s+)?function(?:\s+[\w$]+)?\s*\(/;
 
@@ -50,7 +51,7 @@ export const transformOn = (dir, node, context, augmentor) => {
   const shouldCache = context.cacheHandlers && !exp && context.inVOnce;
 
   if (exp) {
-    const isMemberExp = false;
+    const isMemberExp = isMemberExpressionBrowser(exp.content);
     const isInlineStatement = !(isMemberExp || fnExpRE.test(exp.content));
     const hasMultipleStatements = exp.content.includes(';');
     if (isInlineStatement || (shouldCache && isMemberExp)) {
@@ -75,7 +76,6 @@ export const transformOn = (dir, node, context, augmentor) => {
   if (augmentor) {
     ret = augmentor(ret);
   }
-  console.log(ret)
   ret.props.forEach((p) => (p.key.isHandlerKey = true));
   return ret;
 };

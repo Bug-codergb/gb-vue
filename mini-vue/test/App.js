@@ -1,12 +1,7 @@
 import { reactive, ref, complieToFunction } from '../packages/vue/src/index.js';
 
 const temp = `
-   <div @click="handler">
-     <p>{{foo}}</p>
-     <ul>
-       <li :class="{classProp1:app}">{{ appProp }}</li>
-     </ul>
-   </div>
+   <div @click="handler">点击</div>
 `;
 const App = {
   template: temp,
