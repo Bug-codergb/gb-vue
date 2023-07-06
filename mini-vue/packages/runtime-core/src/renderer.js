@@ -96,7 +96,7 @@ function baseCreateRenderer(options) {
       if (Object.keys(oldProps).length !== 0) {
         for (const key in oldProps) {
           if (!isReservedProps(key) && !(key in newProps)) { // 删除旧的key
-            hostPatchProps(el, key, oldProps[key], null, vnode.children, parentComponent);
+            hostPatchProp(el, key, oldProps[key], null, vnode.children, parentComponent);
           }
         }
       }
@@ -105,7 +105,7 @@ function baseCreateRenderer(options) {
         const next = newProps[key];
         const prev = oldProps[key];
         if (next !== prev && key !== 'value') {
-          hostPatchProps(el, key, prev, next, vnode.children, parentComponent);
+          hostPatchProp(el, key, prev, next, vnode.children, parentComponent);
         }
       }
     }
@@ -140,9 +140,9 @@ function baseCreateRenderer(options) {
     }
     hostInsert(el, container, anchor);
   }
-  function mountChildren(children, container) {
+  function mountChildren(children, container, anchor, parentComponent) {
     children.forEach((child) => {
-      patch(null, child, container);
+      patch(null, child, container, anchor, parentComponent);
     });
   }
   // element -> update
@@ -209,6 +209,12 @@ function baseCreateRenderer(options) {
 
   }
   function setupRenderEffect(instance, initialVNode, container, anchor) {
+    const componentUpdateFn = () => {
+      if (!instance.isMounted) {
+        const { el, props } = initialVNode;
+        instance.isMounted = true;
+      }
+    };
     const subTree = instance.render.call(instance.setupState, instance.setupState);
     console.log(subTree);
     patch(null, subTree, container, null, instance);
