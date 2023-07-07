@@ -216,7 +216,7 @@ function baseCreateRenderer(options) {
       }
     };
     const subTree = instance.render.call(instance.setupState, instance.setupState);
-    console.log(subTree);
+    console.log(subTree,instance);
     patch(null, subTree, container, null, instance);
     instance.update = effect(() => { }, {
       scheduler: () => {

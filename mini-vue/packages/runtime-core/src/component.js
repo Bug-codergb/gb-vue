@@ -5,6 +5,7 @@ import { EMPTY_OBJ, isFunction } from '../../shared/src/general.js';
 import { isObject } from '../../shared/src/index.js';
 import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { markRaw } from '../../reactivity/src/reactive.js';
+import { initProps, normalizePropsOptions } from './componentProps.js';
 
 let complie = void 0;
 
@@ -34,7 +35,7 @@ export function createComponentInstance(vnode, parent, suspense) {
     components: null,
     directives: null,
 
-    propsOptions: {},
+    propsOptions: normalizePropsOptions(type, appContext),
     emitsOptions: {},
 
     accessCache: null,
@@ -63,6 +64,8 @@ export function setupComponent(instance) {
   const { props, children } = instance.vnode;
   const isStateful = isStatefulComponent(instance);
 
+  initProps(instance, props, isStateful, false);
+  
   const setupResult = isStateful
     ? setupStatefulComponent(instance) : undefined;
   return setupResult;

@@ -5,6 +5,12 @@ const temp = `
 `;
 const App = {
   template: temp,
+  props: {
+    app: {
+      type: Boolean,
+      default: false,
+    },
+  },
   setup() {
     const user = reactive({
       name: 'app',

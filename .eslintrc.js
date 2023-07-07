@@ -43,5 +43,7 @@ module.exports = {
     'no-use-before-define': 'warn',
     'no-lonely-if': 'off',
     'no-multi-assign': 'off',
+    'guard-for-in': 'off',
+    'prefer-object-spread': 'off',
   },
 };
