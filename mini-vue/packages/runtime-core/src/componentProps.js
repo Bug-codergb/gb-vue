@@ -1,9 +1,10 @@
 import {
-  EMPTY_OBJ, camelize, isArray, isFunction, isString,
+  EMPTY_OBJ, camelize, def, hasOwn, isArray, isFunction, isReservedProps, isString,
 } from '../../shared/src/general.js';
 import {
   isObject,
 } from '../../shared/src/index.js';
+import { InternalObjectKey } from './vnode.js';
 
 function validatePropName(key) {
   if (key[0] !== '$') {
@@ -69,4 +70,26 @@ export function normalizePropsOptions(comp, appContext, asMixin) {
 export function initProps(instance, rawProps, isStateful, isSSR) {
   const props = {};
   const attrs = {};
+  def(attrs, InternalObjectKey, 1);
+  instance.propsDefaults = Object.call(null);
+}
+function setFullProps(instance, rawProps, props, attrs) {
+  const [options, needCastKeys] = instance.propsOptions;
+  let rawCastValues;
+  if (rawProps) {
+    for (const key in rawProps) {
+      if (isReservedProps(key)) {
+        continue;
+      }
+      const value = rawProps[key];
+      let camelKey;
+      if (options && hasOwn(options, (camelKey = camelize(key)))) {
+        if (!needCastKeys || !needCastKeys.includes(camelKey)) {
+          props[camelKey] = value;
+        } else {
+
+        }
+      }
+    }
+  }
 }

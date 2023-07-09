@@ -25,4 +25,21 @@ export const parserOptions = {
     }
     return TextModes.DATA;
   },
+  getNamespace(tag, parent) {
+    const ns = parent ? parent.ns : DOMNamespaces.HTML;
+    if (parent && ns === DOMNamespaces.MATH_ML) {
+
+    } else if (parent && ns === DOMNamespaces.SVG) {
+
+    }
+    if (ns === DOMNamespaces.HTML) {
+      if (tag === 'svg') {
+        return DOMNamespaces.SVG;
+      }
+      if (tag === 'match') {
+        return DOMNamespaces.MATH_ML;
+      }
+    }
+    return ns;
+  },
 };

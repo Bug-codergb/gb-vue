@@ -34,11 +34,14 @@ export const defaultParserOptions = {
   isPreTag: NO, // <pre>
   getNamespace: () => Namespaces.HTML,
   getTextMode: () => TextModes.DATA,
+  isCustomElement: NO,
 };
 
 export function baseParser(content, options) {
+  console.log(options);
+  // vue 在转换时都会创建一个context,贯穿整个过程（在transform,codegen）都是如此
   const context = createParserContext(content, options);
-  const start = getCursor(context);
+  const start = getCursor(context);// 获取当前编译位置
   return createRoot(
     parseChildren(context, TextModes.DATA, []),
     getSelection(context, start),
@@ -46,6 +49,7 @@ export function baseParser(content, options) {
 }
 // 创建编译上下文
 function createParserContext(content, rawOptions) {
+  // 如果用户传入options则替换defaultOptions中的相关项
   const options = { ...defaultParserOptions };
   for (const key in rawOptions) {
     options[key] = rawOptions[key] === undefined ? defaultParserOptions[key] : rawOptions[key];
@@ -61,15 +65,16 @@ function createParserContext(content, rawOptions) {
     inVPrev: false, // 是否为 v-pre
   };
 }
-// 核心
+// 核心转换
 function parseChildren(context, mode, ancestors) {
-  const parent = last(ancestors);
+  const parent = last(ancestors); // 获取副节点
   const ns = parent ? parent.ns : Namespaces.HTML;
   const nodes = [];
-  while (!isEnd(context, mode, ancestors)) {
+  while (!isEnd(context, mode, ancestors)) { // 是否解析至末尾，如何判断是否解析至末尾》isEnd
     const s = context.source;
     let node;
     if (mode === TextModes.DATA || mode === TextModes.RCDATA) {
+      // 如果元素上不存在v-prev指令，且开头为{{, v-pre需要原样渲染
       if (!context.inVPrev && s.startsWith(context.options.delimiters[0])) {
         node = parseInterpolation(context, mode); // 解析大括号语法
       } else if (mode === TextModes.DATA && s[0] === '<') {
@@ -77,7 +82,7 @@ function parseChildren(context, mode, ancestors) {
           console.error('error');
         } else if (s[1] === '!') { // 注释以及文档声明暂不实现
 
-        } else if (s[1] === '/') {
+        } else if (s[1] === '/') { // 解析结束标签
           if (s.length === 2) {
             console.error('error');
           } else if (s[2] === '>') {
@@ -89,7 +94,7 @@ function parseChildren(context, mode, ancestors) {
           } else {
 
           }
-        } else if (/[a-z]/i.test(s[1])) {
+        } else if (/[a-z]/i.test(s[1])) { // 解析开始标签
           node = parseElement(context, ancestors);
         }
       }
@@ -186,7 +191,9 @@ function parseInterpolation(context, mode) {
 function parseElement(context, ancestors) {
   const wasInPre = context.inPre;
   const wasInVPre = context.inVPrev;
-  const parent = last(ancestors);
+
+  const parent = last(ancestors);// 获取父元素，初始化则为[]
+
   const element = parseTag(context, TagType.Start, parent);
   const isPreBoundary = context.inPre && !wasInPre;
   const isVPreBoundary = context.inVPre && !wasInVPre;
@@ -223,11 +230,12 @@ function parseElement(context, ancestors) {
   return element;
 }
 function parseTag(context, type, parent) {
+  console.log(context);
   const start = getCursor(context);
   const match = /^<\/?([a-z][^\t\r\n\f />]*)/i.exec(context.source);
-  const tag = match[1];
-  const ns = ''; // 待修改
-  advanceBy(context, match[0].length);
+  const tag = match[1]; // 匹配到标签名称
+  const ns = context.options.getNamespace(tag, parent);
+  advanceBy(context, match[0].length);// 推进<div
   advanceSpaces(context);
   const cursor = getCursor(context);
   const currentSource = context.source;
@@ -236,8 +244,12 @@ function parseTag(context, type, parent) {
   }
   const props = parseAttributes(context, type);
 
-  if (type == TagType.Start && !context.inVPre) {
-
+  if (
+    type === TagType.Start
+    && !context.inVPre
+    && props.some((p) => p.type === NodeTypes.DIRECTIVE && p.name === 'pre')) {
+    context.inPre = true;
+    props.parseAttributes(context, type).filter(((p) => p.name !== 'v-prev'));
   }
 
   let isSelfClosing = false;
@@ -249,11 +261,15 @@ function parseTag(context, type, parent) {
     return;
   }
 
-  const tagType = ElementTypes.ELEMENT;
+  let tagType = ElementTypes.ELEMENT;
 
   if (!context.inVPre) {
     if (tag === 'slot') {
-      tagType === ElementTypes.SLOT;
+      tagType = ElementTypes.SLOT;
+    } else if (tag === 'template') {
+
+    } else if (isComponent(tag, props, context)) {
+      tagType = ElementTypes.COMPONENT;
     }
   }
   return {
@@ -268,6 +284,22 @@ function parseTag(context, type, parent) {
     codegenNode: undefined, // to be created during transform phase
   };
 }
+
+function isComponent(tag, props, context) {
+  console.log(tag);
+  const { options } = context;
+  if (options.isCustomElement(tag)) {
+    return false;
+  }
+  if (
+    tag === 'component'
+    || /^[A-Z]/.test(tag)
+    || (options.isNativeTag && !options.isNativeTag(tag))
+  ) {
+    return true;
+  }
+}
+
 function parseAttributes(context, type) {
   const props = [];
   const attributeNames = new Set();
@@ -462,6 +494,7 @@ function isEnd(context, mode, ancestors) {
       }
       break;
     }
+    default:
   }
   return !s;
 }

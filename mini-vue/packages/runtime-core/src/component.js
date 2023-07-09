@@ -65,7 +65,7 @@ export function setupComponent(instance) {
   const isStateful = isStatefulComponent(instance);
 
   initProps(instance, props, isStateful, false);
-  
+
   const setupResult = isStateful
     ? setupStatefulComponent(instance) : undefined;
   return setupResult;

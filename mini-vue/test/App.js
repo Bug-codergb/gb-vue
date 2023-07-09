@@ -1,7 +1,10 @@
 import { reactive, ref, complieToFunction } from '../packages/vue/src/index.js';
 
 const temp = `
-   <div @click="handler">点击</div>
+   <div @click="handler">
+     点击
+     <Bar/>
+   </div>
 `;
 const App = {
   template: temp,

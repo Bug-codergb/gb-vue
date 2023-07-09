@@ -12,6 +12,8 @@ const currentScopeId = '';
 
 const __FEATURE_SUSPENSE__ = false;
 
+export const InternalObjectKey = '__vInternal';
+
 const normalizeKey = ({ key }) => (key != null ? key : null);
 const currentRenderingInstance = {};
 const normalizeRef = ({

@@ -40,10 +40,11 @@ module.exports = {
     'no-return-assign': 'off',
     'use-isnan': 'off',
     'import/no-cycle': 'off',
-    'no-use-before-define': 'warn',
+    'no-use-before-define': 'off',
     'no-lonely-if': 'off',
     'no-multi-assign': 'off',
     'guard-for-in': 'off',
     'prefer-object-spread': 'off',
+    'consistent-return': 'off',
   },
 };
