@@ -1,9 +1,14 @@
 import { reactive, ref, complieToFunction } from '../packages/vue/src/index.js';
 
 const temp = `
-   <div @click="handler">
-     点击
-     <Bar/>
+   <div @click="handler" :class="{foo:app}">
+    <div v-if="app">{{app}}</div>
+    <div v-else>appProp</div>
+    <div :style="{color:bgc}">我是真的</div>
+    <div>
+      <span>锄禾日当午</span>
+      <span>{{ appProp }}</span>
+    </div>
    </div>
 `;
 const App = {
@@ -20,7 +25,7 @@ const App = {
       age: 18,
     });
 
-    const app = true;
+    const app = ref(true);
     const foo = 'lina';
     const bar = false;
     const handler = () => {
@@ -31,6 +36,7 @@ const App = {
 
     const classProp1 = 'active';
     const classProp2 = 'bar';
+    const bgc = 'pink';
     return {
       user,
       app,
@@ -41,6 +47,7 @@ const App = {
       flag,
       classProp1,
       classProp2,
+      bgc,
     };
   },
 };

@@ -4,6 +4,7 @@ import {
 } from './dep.js';
 import {
   toRaw, toReactive,
+  isReactive,
 } from './reactive.js';
 
 import {
@@ -28,7 +29,7 @@ class RefImpl {
 
   set value(newValue) {
     if (hasChanged(newValue, this._rawValue)) {
-      this._value = covert(newValue);
+      this._value = toReactive(newValue);
       this._rawValue = newValue;
       triggerRefValue(this);
     }
@@ -53,6 +54,22 @@ function createRef(rawValue, shallow) {
   }
   return new RefImpl(rawValue, shallow);
 }
+
+export function proxyRefs(objectWidthRefs) {
+  console.log(objectWidthRefs);
+  return isReactive(objectWidthRefs) ? objectWidthRefs : new Proxy(objectWidthRefs, shallowUnwrapHandlers);
+}
+const shallowUnwrapHandlers = {
+  get: (target, key, receiver) => unRef(Reflect.get(target, key, receiver) ?? ''),//疑问点
+  set: (target, key, value, receiver) => {
+    const oldValue = target[key];
+    if (isRef(oldValue) && !isRef(value)) {
+      oldValue.value = value;
+      return true;
+    }
+    return Reflect.set(target, key, value, receiver);
+  },
+};
 export {
   trackRefValue,
   triggerRefValue,

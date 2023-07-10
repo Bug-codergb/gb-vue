@@ -21,7 +21,7 @@ const ReactiveFlags = {
   SHALLOW: '_v_isShallow',
 };
 const reactive = (raw) => createReactive(raw, false, reactiveMap, baseHandler);
-const isReactive = (value) => {
+export const isReactive = (value) => {
   if (isReadonly(value)) {
     return isReactive(value[ReactiveFlags.RAW]);
   }

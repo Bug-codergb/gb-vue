@@ -1,4 +1,4 @@
-import { shallowReadonly } from '../../reactivity/src/index.js';
+import { shallowReadonly, proxyRefs } from '../../reactivity/src/index.js';
 import { PublicInstanceProxyHandlers } from './componentPublicInstance.js';
 import { createAppContext } from './apiCreateApp.js';
 import { EMPTY_OBJ, isFunction } from '../../shared/src/general.js';
@@ -82,7 +82,7 @@ function setupStatefulComponent(instance) {
 
     // 返回setup的结果如果是函数则是render函数，否则就是需要代理的对象
     const setupResult = setup(shallowReadonly(instance.props), setupContext);
-
+    console.log(setupResult);
     setCurrentInstance(null);
     handleSetupResult(instance, setupResult);
   } else {
@@ -101,7 +101,7 @@ function handleSetupResult(instance, setupResult) {
   if (isFunction(setupResult)) {
     instance.render = setupResult;
   } else if (isObject(setupResult)) {
-    instance.setupState = setupResult;
+    instance.setupState = proxyRefs(setupResult);
   }
   finishComponentSetup(instance);
 }

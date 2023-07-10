@@ -12,6 +12,7 @@ export {
   ref,
   unRef,
   isRef,
+  proxyRefs,
 } from './ref.js';
 export {
   computed,

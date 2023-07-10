@@ -151,20 +151,20 @@ function parseChildren(context, mode, ancestors) {
 
 function parseInterpolation(context, mode) {
   const [open, close] = context.options.delimiters;
-  const closeIndex = context.source.indexOf(close, open.length);
+  const closeIndex = context.source.indexOf(close, open.length); // 获取 }} 的索引
   if (closeIndex === -1) {
     return undefined;
   }
   const start = getCursor(context);
 
-  advanceBy(context, open.length);
+  advanceBy(context, open.length); // 继续推进
 
   const innerStart = getCursor(context);
   const innerEnd = getCursor(context);
 
-  const rawContentLength = closeIndex - open.length;
+  const rawContentLength = closeIndex - open.length; // 虽然推进了，索引的终-起得到原始内容长度（如果存在空格或者换行）
 
-  const rawContent = context.source.slice(0, rawContentLength);
+  const rawContent = context.source.slice(0, rawContentLength); // 获取原始内容（如果存在空格换行）
 
   const preTrimContent = parseTextData(context, rawContentLength, mode);
 
@@ -175,13 +175,15 @@ function parseInterpolation(context, mode) {
   }
   const endOffset = rawContentLength - (preTrimContent.length - content.length - startOffset);
   advancePositionWithMutation(innerEnd, rawContent, endOffset);
-  advanceBy(context, close.length);
+
+  advanceBy(context, close.length);// 继续推进
+
   return {
     type: NodeTypes.INTERPOLATION,
     content: {
       type: NodeTypes.SIMPLE_EXPRESSION,
       isStatic: false,
-      constType: ConstantTypes.NOT_CONSTANT,
+      constType: ConstantTypes.NOT_CONSTANT, // 不可以静态提升至全局变量
       content,
       loc: getSelection(context, innerStart, innerEnd),
     },
@@ -192,7 +194,7 @@ function parseElement(context, ancestors) {
   const wasInPre = context.inPre;
   const wasInVPre = context.inVPrev;
 
-  const parent = last(ancestors);// 获取父元素，初始化则为[]
+  const parent = last(ancestors);// 获取父元素，初始化则为[],当树节点层级嵌套时，ancestors会一直保存其父节点（父节点的父节点）；
 
   const element = parseTag(context, TagType.Start, parent);
   const isPreBoundary = context.inPre && !wasInPre;
@@ -211,7 +213,7 @@ function parseElement(context, ancestors) {
   ancestors.push(element);
   const mode = context.options.getTextMode(element, parent);
   const children = parseChildren(context, mode, ancestors);
-  ancestors.pop();
+  ancestors.pop();// 类似于回溯的思想
 
   element.children = children;
 
@@ -230,13 +232,14 @@ function parseElement(context, ancestors) {
   return element;
 }
 function parseTag(context, type, parent) {
-  console.log(context);
   const start = getCursor(context);
-  const match = /^<\/?([a-z][^\t\r\n\f />]*)/i.exec(context.source);
+  const match = /^<\/?([a-z][^\t\r\n\f />]*)/i.exec(context.source);// 匹配开始标签或者结束标签
+
   const tag = match[1]; // 匹配到标签名称
   const ns = context.options.getNamespace(tag, parent);
   advanceBy(context, match[0].length);// 推进<div
   advanceSpaces(context);
+
   const cursor = getCursor(context);
   const currentSource = context.source;
   if (context.options.isPreTag(tag)) {
@@ -303,6 +306,7 @@ function isComponent(tag, props, context) {
 function parseAttributes(context, type) {
   const props = [];
   const attributeNames = new Set();
+  // 匹配标签上的属性直至标签结束 div> 或者自结束标签 div/>
   while (
     context.source.length > 0 && !context.source.startsWith('>')
     && !context.source.startsWith('/>')) {
@@ -365,7 +369,7 @@ function parseAttribute(context, nameSet) {
     let arg;
     if (match[2]) {
       const isSlot = dirName === 'slot';
-      const content = match[2];
+      let content = match[2];
       let isStatic = true;
       if (content.startsWith('[')) {
         isStatic = false;

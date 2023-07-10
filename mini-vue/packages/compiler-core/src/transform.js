@@ -5,10 +5,17 @@ import {
   NOOP,
   isString,
   EMPTY_OBJ,
+  capitalize,
+  camelize,
 } from '../../shared/src/general.js';
 import { PatchFlagNames, PatchFlags } from '../../shared/src/patchFlags.js';
 import {
-  NodeTypes, ElementTypes, ConstantTypes, createVNodeCall, convertToBlock,
+  NodeTypes,
+  ElementTypes,
+  ConstantTypes,
+  createVNodeCall,
+  convertToBlock,
+  createSimpleExpression,
 } from './ast.js';
 import { FRAGMENT, helperNameMap, TO_DISPLAY_STRING } from './runtimeHelpers.js';
 
@@ -248,6 +255,7 @@ export function traverseNode(node, context) {
     case NodeTypes.ROOT:
       traverseChildren(node, context);
       break;
+    default:
   }
   context.currentNode = node;
   let i = exitFns.length;
