@@ -46,5 +46,6 @@ module.exports = {
     'guard-for-in': 'off',
     'prefer-object-spread': 'off',
     'consistent-return': 'off',
+    'no-unused-expressions': 'off',
   },
 };
