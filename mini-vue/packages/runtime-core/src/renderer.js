@@ -1,7 +1,8 @@
 import { createAppAPI } from './apiCreateApp.js';
-import { effect } from '../../reactivity/src/effect.js';
+import { ReactiveEffect, effect } from '../../reactivity/src/effect.js';
 import { isReservedProps } from '../../shared/src/general.js';
 import ShapeFlags from '../../shared/src/shapeFlags.js';
+import { queueJob } from './scheduler.js';
 import {
   createComponentInstance,
   setupComponent,
@@ -215,14 +216,14 @@ function baseCreateRenderer(options) {
         instance.isMounted = true;
       }
     };
-    const subTree = instance.render.call(instance.setupState, instance.setupState);
-    console.log(subTree,instance);
-    patch(null, subTree, container, null, instance);
-    instance.update = effect(() => { }, {
-      scheduler: () => {
+    const effect = (instance.effect = new ReactiveEffect(
+      componentUpdateFn,
+      () => queueJob(),
+    ));
+    const update = (instance.update = () => effect.run());
+    update.id = instance.uid;
 
-      },
-    });
+    update();
   }
   return {
     render,
