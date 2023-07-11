@@ -47,5 +47,6 @@ module.exports = {
     'prefer-object-spread': 'off',
     'consistent-return': 'off',
     'no-unused-expressions': 'off',
+    'max-classes-per-file': 'off',
   },
 };

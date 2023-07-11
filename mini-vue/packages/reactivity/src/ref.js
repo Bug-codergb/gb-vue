@@ -48,6 +48,7 @@ const isRef = (value) => !!value._v_isRef;
 const unRef = (ref) => (isRef(ref) ? ref.value : ref);
 const ref = (raw) => createRef(raw, false);
 const shallowRef = (raw) => createRef(raw, true);
+
 function createRef(rawValue, shallow) {
   if (isRef(rawValue)) {
     return rawValue; // 已经是ref则不需要重新创建 ref传入一个shallowRef 仍然是shallowRef
@@ -56,9 +57,32 @@ function createRef(rawValue, shallow) {
 }
 
 export function proxyRefs(objectWidthRefs) {
-  console.log(objectWidthRefs);
   return isReactive(objectWidthRefs) ? objectWidthRefs : new Proxy(objectWidthRefs, shallowUnwrapHandlers);
 }
+class CustomRefImpl {
+  constructor(factory) {
+    this.dep = [];
+    this._v_isRef = true;
+    const { get, set } = factory(
+      () => trackRefValue(this),
+      () => triggerRefValue(this),
+    );
+    this._get = get;
+    this._set = set;
+  }
+
+  get value() {
+    return this._get();
+  }
+
+  set value(newValue) {
+    this._set(newValue);
+  }
+}
+export function customRef(factory) {
+  return new CustomRefImpl(factory);
+}
+
 const shallowUnwrapHandlers = {
   get: (target, key, receiver) => unRef(Reflect.get(target, key, receiver) ?? ''), // 疑问点
   set: (target, key, value, receiver) => {
