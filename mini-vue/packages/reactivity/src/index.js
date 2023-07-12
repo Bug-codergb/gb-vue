@@ -7,6 +7,8 @@ export {
 } from './reactive.js';
 export {
   effect,
+  pauseTracking,
+  resetTracking,
 } from './effect.js';
 export {
   ref,

@@ -82,7 +82,7 @@ function setupStatefulComponent(instance) {
 
     // 返回setup的结果如果是函数则是render函数，否则就是需要代理的对象
     const setupResult = setup(shallowReadonly(instance.props), setupContext);
-    console.log(setupResult);
+    
     setCurrentInstance(null);
     handleSetupResult(instance, setupResult);
   } else {

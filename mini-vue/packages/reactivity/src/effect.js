@@ -13,6 +13,7 @@ export const ITERATE_KEY = Symbol('iterate');
 
 const proxyMap = new WeakMap();
 let activeEffect = void 0;
+
 let shouldTrack = false;
 
 let effectTrackDepth = 0;
@@ -60,6 +61,17 @@ class ReactiveEffect {
     }
   }
 }
+
+const trackStack = [];
+export function pauseTracking() {
+  trackStack.push(shouldTrack);
+  shouldTrack = false;
+}
+export function resetTracking() {
+  trackStack.push(shouldTrack);
+  shouldTrack = true;
+}
+
 const isTracking = () => activeEffect !== undefined && shouldTrack;
 const track = (target, key) => {
   if (!isTracking()) {
@@ -130,6 +142,7 @@ const trigger = (target, key, newValue, oldValue, type) => {
         break;
       case 'set': // 在修改值的时候不需要触发遍历key的操纵，因为key不变
         break;
+      default:
     }
   }
   const effects = [];

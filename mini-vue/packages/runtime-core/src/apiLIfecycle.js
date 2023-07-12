@@ -1,3 +1,4 @@
+import { pauseTracking, resetTracking } from '../../reactivity/src/effect.js';
 import { LifecycleHooks } from './enum.js';
 
 export function injectHook(type, hook, target, prepend = false) {
@@ -8,7 +9,9 @@ export function injectHook(type, hook, target, prepend = false) {
         if (target.isUnmounted) {
           return;
         }
+        pauseTracking();
         const res = hook.call(target, args);
+        resetTracking();
         return res;
       }
     );

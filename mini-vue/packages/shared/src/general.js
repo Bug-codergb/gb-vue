@@ -55,3 +55,9 @@ export const def = (obj, key, value) => {
 
 const { hasOwnProperty } = Object.prototype;
 export const hasOwn = (val, key) => hasOwnProperty.call(val, key);
+
+export const invokArrayFns = (fns, arg) => {
+  for (let i = 0; i < fns.length; i++) {
+    fns[i](arg);
+  }
+};

@@ -1,12 +1,15 @@
 import { createAppAPI } from './apiCreateApp.js';
 import { ReactiveEffect, effect } from '../../reactivity/src/effect.js';
-import { isReservedProps } from '../../shared/src/general.js';
+import { invokArrayFns, isReservedProps } from '../../shared/src/general.js';
 import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { queueJob } from './scheduler.js';
 import {
   createComponentInstance,
   setupComponent,
 } from './component.js';
+import {
+  renderComponentRoot,
+} from './componentRenderUtils.js';
 import {
   Text,
   Fragment,
@@ -213,7 +216,46 @@ function baseCreateRenderer(options) {
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
         const { el, props } = initialVNode;
+        const { bm, m, parent } = instance;
+        if (bm) {
+          invokArrayFns(bm);
+        }
+        const subTree = (instance.subTree = renderComponentRoot(instance));
+        console.log(subTree);
+        patch(
+          null,
+          subTree,
+          container,
+          anchor,
+          instance,
+        );
+        initialVNode.el = subTree.el;
+        if (m) {
+
+        }
         instance.isMounted = true;
+        initialVNode = container = anchor = null;
+      } else {
+        let {
+          next, bu, u, parent, vnode,
+        } = instance;
+        const originNext = next;
+        if (next) {
+          next.el = vnode.el;
+        } else {
+          next = vnode;
+        }
+        if (bu) {
+          invokArrayFns(bu);
+        }
+        const nextTree = renderComponentRoot(instance);
+        const prevTree = instance.subTree;
+        instance.subTree = nextTree;
+        patch(
+          prevTree,
+          nextTree,
+
+        );
       }
     };
     const effect = (instance.effect = new ReactiveEffect(
