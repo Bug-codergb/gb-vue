@@ -19,6 +19,7 @@ huochunyang-mini-vue对于《Vuejs设计与实现》实现思路,在mini-vue中�
 - [x] shallowRef
 - [x] unRef
 - [x] isRef
+- [x] customRef
 - [x] reactive
 - [x] shallowReactive
 - [x] readonly
