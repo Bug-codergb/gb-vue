@@ -146,7 +146,7 @@ function setFullProps(instance, rawProps, props, attrs) {
         key,
         castValues[key],
         instance,
-        !hasOwn(castValues,key)
+        !hasOwn(castValues, key),
       );
     }
   }
@@ -179,7 +179,7 @@ function resolvePropValue(
     if (opt[BooleanFlags.shouldCast]) {
       if (!hasDefault) {
         value = false;
-      } else if (opt[BooleanFlags.shouldCastTrue] && (value === '' || value === hyphenate(key)))) {
+      } else if (opt[BooleanFlags.shouldCastTrue] && (value === '' || value === hyphenate(key))) {
         value = true;
       }
     }

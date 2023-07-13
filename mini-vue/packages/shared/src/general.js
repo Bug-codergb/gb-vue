@@ -42,8 +42,7 @@ export const capitalize = cacheStringFunction((str) => str.charAt(0).toUpperCase
 export const toHandlerKey = cacheStringFunction((str) => (str ? `on${capitalize(str)}` : ''));
 
 const hyphenateRE = /\B([A-Z])/g;
-export const hyphenate = cacheStringFunction((str) => str.replace(hyphenateRE, '-$1').toLowerCase(), // 这里匹配第一个大写字母(不在开头)
-);
+export const hyphenate = cacheStringFunction((str) => str.replace(hyphenateRE, '-$1').toLowerCase()); // 这里匹配第一个大写字母(不在开头)
 
 export const def = (obj, key, value) => {
   Object.defineProperty(obj, key, { // 不可以枚举

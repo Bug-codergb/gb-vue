@@ -1,4 +1,5 @@
-import { reactive, ref, complieToFunction } from '../packages/vue/src/index.js';
+import { reactive, ref } from '../packages/vue/index.js';
+import Bar from './Bar.js';
 
 const temp = `
    <div @click="handler" :class="{foo:app}">
@@ -9,6 +10,7 @@ const temp = `
       <span>锄禾日当午</span>
       <span>{{ appProp }}</span>
     </div>
+    <Bar/>
    </div>
 `;
 const App = {
