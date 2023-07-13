@@ -4,6 +4,7 @@ export {
   ReactiveFlags,
   isReadonly,
   shallowReadonly,
+  toRaw,
 } from './reactive.js';
 export {
   effect,

@@ -48,5 +48,7 @@ module.exports = {
     'consistent-return': 'off',
     'no-unused-expressions': 'off',
     'max-classes-per-file': 'off',
+    'no-prototype-builtins': 'off',
+    'no-cond-assign': 'off',
   },
 };
