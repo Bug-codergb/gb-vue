@@ -1,9 +1,6 @@
-const app = require('./dist/bundle.js');
-
-console.log(app);
 const reactive = {};
-const ref = {}
+const ref = {};
 export {
   reactive,
-  ref
-}
+  ref,
+};

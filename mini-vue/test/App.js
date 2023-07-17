@@ -1,8 +1,9 @@
-import { reactive, ref } from '../packages/vue/index.js';
-import Bar from './Bar.js';
+import { reactive, ref } from '../packages/vue/src/index.js';
+// import Bar from './Bar.js';
 
 const temp = `
    <div @click="handler" :class="{foo:app}">
+    <div v-show="app">测试vShow</div> 
     <div v-if="app">{{app}}</div>
     <div v-else>appProp</div>
     <div :style="{color:bgc}">我是真的</div>
@@ -10,7 +11,6 @@ const temp = `
       <span>锄禾日当午</span>
       <span>{{ appProp }}</span>
     </div>
-    <Bar/>
    </div>
 `;
 const App = {

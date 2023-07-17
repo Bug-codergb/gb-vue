@@ -6,6 +6,9 @@ import { isString } from '../../shared/src/general.js';
 export {
   vModelText,
 } from './directives/vModel.js';
+export {
+  vShow,
+} from './directives/vShow.js';
 
 const renderOptions = { patchProp, ...nodeOps };
 
