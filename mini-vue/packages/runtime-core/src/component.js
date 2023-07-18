@@ -7,7 +7,7 @@ import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { markRaw } from '../../reactivity/src/reactive.js';
 import { initProps, normalizePropsOptions } from './componentProps.js';
 
-let complie = void 0;
+let compile = void 0;
 
 let uid = 0;
 const emptyAppContext = createAppContext();
@@ -109,21 +109,21 @@ function finishComponentSetup(instance) {
   const Component = instance.type;
   if (!instance.render) {
     // 模板编译
-    if (complie && !Component.render) {
+    if (compile && !Component.render) {
       if (Component.template) {
-        Component.render = complie(Component.template);
+        Component.render = compile(Component.template);
       }
     }
     instance.render = Component.render;
   }
 }
-let currentInstance = {};
+export let currentInstance = {};
 export function getCurrentInstance() {
   return currentInstance;
 }
 export function setCurrentInstance(instance) {
   currentInstance = instance;
 }
-export function registerRuntimeCompiler(_complie) {
-  complie = _complie;
+export function registerRuntimeCompiler(_compile) {
+  compile = _compile;
 }
