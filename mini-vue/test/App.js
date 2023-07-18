@@ -3,7 +3,8 @@ import { reactive, ref } from '../packages/vue/src/index.js';
 
 const temp = `
    <span>
-    <div v-show="app">测试vShow</div> 
+    <div v-show="app">测试vShow</div>
+    <input v-model="foo"/>
    </span>
 `;
 const App = {

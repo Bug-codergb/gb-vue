@@ -60,3 +60,7 @@ export const invokArrayFns = (fns, arg) => {
     fns[i](arg);
   }
 };
+export const looseToNumber = (val) => {
+  const n = parseFloat(val);
+  return Number.isNaN(n) ? val : n;
+};
