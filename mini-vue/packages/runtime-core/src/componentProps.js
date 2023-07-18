@@ -83,7 +83,7 @@ export function normalizePropsOptions(comp, appContext, asMixin = false) {
          * }
          */
         const prop = (normalized[normalizeKey] = isArray(opt) || isFunction(opt) ? { type: opt } : Object.assign({}, opt));
-        console.log(prop);
+        // console.log(prop);
         if (prop) {
           const booleanIndex = getTypeIndex(Boolean, prop.type);
           const stringIndex = getTypeIndex(String, prop.type);

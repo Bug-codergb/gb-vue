@@ -27,3 +27,24 @@ export function withDirectives(vnode, directives) {
   }
   return vnode;
 }
+
+export function invokeDirectiveHook(
+  vnode,
+  prevNode,
+  instance,
+  name,
+) {
+  const bindings = vnode.dirs;
+  const oldBindings = prevNode && prevNode.dirs;
+  for (let i = 0; i < bindings.length; i++) {
+    const binding = bindings[i];
+    if (oldBindings) {
+      binding.oldValue = oldBindings[i].value;
+    }
+    const hook = binding.dir[name];
+
+    if (hook) {
+      hook(vnode.el, binding, vnode, prevNode);
+    }
+  }
+}

@@ -16,6 +16,7 @@ import {
   Static,
   isSameVNodeType,
 } from './vnode.js';
+import { invokeDirectiveHook } from './directives.js';
 
 function createRenderer(rendererOptions) {
   return baseCreateRenderer(rendererOptions);
@@ -119,7 +120,7 @@ function baseCreateRenderer(options) {
     const {
       shapeFlag, type, props, dirs,
     } = vnode;
-    const el = hostCreateElement(type, props && props.is, props);
+    const el = vnode.el = hostCreateElement(type, props && props.is, props);
     // 文本节点
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el, vnode.children);
@@ -128,7 +129,7 @@ function baseCreateRenderer(options) {
     }
 
     if (dirs) {
-
+      invokeDirectiveHook(vnode, null, parentComponent, 'created');
     }
 
     if (props) {
@@ -142,7 +143,14 @@ function baseCreateRenderer(options) {
         hostPatchProp(el, 'value', null, props.value);
       }
     }
+    if (dirs) {
+      invokeDirectiveHook(vnode, null, parentComponent, 'beforeMount');
+    }
     hostInsert(el, container, anchor);
+
+    if (dirs) {
+      invokeDirectiveHook(vnode, null, parentComponent, 'mounted');
+    }
   }
   function mountChildren(children, container, anchor, parentComponent) {
     children.forEach((child) => {
@@ -221,7 +229,7 @@ function baseCreateRenderer(options) {
           invokArrayFns(bm);
         }
         const subTree = (instance.subTree = renderComponentRoot(instance));
-        console.log(subTree);
+        // console.log(subTree);
         patch(
           null,
           subTree,

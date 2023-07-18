@@ -43,7 +43,7 @@ export const transformOn = (dir, node, context, augmentor) => {
     eventName.children.unshift(`${context.helperString(TO_HANDLER_KEY)}(`);
     eventName.children.push(')');
   }
-  console.log(eventName);
+  // console.log(eventName);
   let { exp } = dir;
   if (exp && !exp.content.trim()) {
     exp = undefined;

@@ -2,16 +2,9 @@ import { reactive, ref } from '../packages/vue/src/index.js';
 // import Bar from './Bar.js';
 
 const temp = `
-   <div @click="handler" :class="{foo:app}">
+   <span>
     <div v-show="app">测试vShow</div> 
-    <div v-if="app">{{app}}</div>
-    <div v-else>appProp</div>
-    <div :style="{color:bgc}">我是真的</div>
-    <div>
-      <span>锄禾日当午</span>
-      <span>{{ appProp }}</span>
-    </div>
-   </div>
+   </span>
 `;
 const App = {
   template: temp,

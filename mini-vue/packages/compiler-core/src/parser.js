@@ -38,7 +38,7 @@ export const defaultParserOptions = {
 };
 
 export function baseParser(content, options) {
-  console.log(options);
+  // console.log(options);
   // vue 在转换时都会创建一个context,贯穿整个过程（在transform,codegen）都是如此
   const context = createParserContext(content, options);
   const start = getCursor(context);// 获取当前编译位置
@@ -289,7 +289,7 @@ function parseTag(context, type, parent) {
 }
 
 function isComponent(tag, props, context) {
-  console.log(tag);
+  // console.log(tag);
   const { options } = context;
   if (options.isCustomElement(tag)) {
     return false;
