@@ -1,7 +1,10 @@
-import { reactive } from "../reactivity/reactive.js";
-import { effect } from "../reactivity/effect.js";
+import { reactive } from '../reactivity/reactive.js';
+import { effect } from '../reactivity/effect.js';
+
 const createRenderer = (options) => {
-  const { unmount, createElement, remove, setElementText, insert } = options;
+  const {
+    unmount, createElement, remove, setElementText, insert,
+  } = options;
   const render = (vnode, container) => {
     /*
       如果vnode不存在但是container._vnode存在则是卸载操作
@@ -20,13 +23,13 @@ const createRenderer = (options) => {
       unmount(n1);
       n1 = null;
     }
-    if (typeof type === "string") {
+    if (typeof type === 'string') {
       if (!n1) {
         mountElement(n2, container, anchor);
       } else {
         patchElement(n1, n2, container);
       }
-    } else if (typeof type === "object") {
+    } else if (typeof type === 'object') {
       if (!n1) {
         mountComponent(n2, container);
       } else {
@@ -39,7 +42,7 @@ const createRenderer = (options) => {
     const el = createElement(type);
     n2.el = el;
     const childrenType = typeof children;
-    if (childrenType === "string") {
+    if (childrenType === 'string') {
       setElementText(n2.el, children);
     } else if (Array.isArray(children)) {
       children.forEach((child) => {
@@ -47,7 +50,7 @@ const createRenderer = (options) => {
       });
     }
     if (props && Object.keys(props)) {
-      for (let key of Object.keys(props)) {
+      for (const key of Object.keys(props)) {
         const value = props[key];
         patchProps(el, key, null, value);
       }
@@ -58,12 +61,12 @@ const createRenderer = (options) => {
     if (/^on/.test(key)) {
       const eventName = key.slice(2).toLowerCase();
       el.addEventListener(eventName, nextValue);
-    } else if (key === "class") {
+    } else if (key === 'class') {
       el.className = nextValue;
     } else {
       const type = typeof el[key];
-      if (type === "boolean") {
-        if (nextValue === "") {
+      if (type === 'boolean') {
+        if (nextValue === '') {
           el[key] = true;
         } else {
           el[key] = prevValue;
@@ -79,20 +82,20 @@ const createRenderer = (options) => {
     const oldProps = n1.props;
     const newProps = n2.props;
 
-    for (let newKey in newProps) {
+    for (const newKey in newProps) {
       if (newProps[newKey] !== oldProps[newKey]) {
-        //找到新增的key
+        // 找到新增的key
         patchProps(el, newKey, oldProps[newKey], newProps[newKey]);
       }
     }
     for (const oldKey in oldProps) {
       if (!newProps.hasOwnProperty(oldKey)) {
-        //找到要删除的旧的key
+        // 找到要删除的旧的key
         patchProps(el, oldKey, oldProps[oldKey], null);
       }
     }
 
-    if (typeof n2.children === "string") {
+    if (typeof n2.children === 'string') {
       if (Array.isArray(n1.children)) {
         n1.children.forEach((child) => {
           unmount(child);
@@ -100,13 +103,13 @@ const createRenderer = (options) => {
       }
       setElementText(el, n2.children);
     } else if (Array.isArray(n2.children)) {
-      if (typeof n1.children === "string") {
-        setElementText(el, "");
+      if (typeof n1.children === 'string') {
+        setElementText(el, '');
         n2.children.forEach((child) => {
           patch(null, child, el);
         });
       } else if (Array.isArray(n1.children)) {
-        //diff
+        // diff
         const oldChildren = n1.children;
         const newChildren = n2.children;
 
@@ -131,7 +134,6 @@ const createRenderer = (options) => {
             patch(oldStartNode, newStartNode, el);
             oldStartNode = oldChildren[++oldStartIndex];
             newStartNode = newChildren[++newStartIndex];
-            
           } else if (oldEndNode.key === newEndNode.key) {
             patch(oldEndNode, newEndNode, el);
             oldEndNode = oldChildren[--oldEndIndex];
@@ -145,7 +147,6 @@ const createRenderer = (options) => {
             oldStartNode = oldChildren[++oldStartIndex];
             newEndNode = newChildren[--newEndIndex];
           } else if (oldEndNode.key === newStartNode.key) {
-            
             patch(oldEndNode, newStartNode, el);
             insert(oldEndNode.el, el, oldStartNode.el);
 
@@ -153,49 +154,46 @@ const createRenderer = (options) => {
 
             oldEndNode = oldChildren[--oldEndIndex];
             newStartNode = newChildren[++newStartIndex];
-            
           } else {
-            //第一轮循环没有找到更新节点
-            const index = oldChildren.findIndex((child) => {
-              return child!==undefined && child.key === newStartNode.key;
-            });
+            // 第一轮循环没有找到更新节点
+            const index = oldChildren.findIndex((child) => child !== undefined && child.key === newStartNode.key);
             if (index > 0) {
               patch(oldChildren[index], newStartNode, el);
               insert(oldChildren[index].el, el, oldStartNode.el);
               oldChildren[index] = undefined;
             } else {
-              //是新增节点
+              // 是新增节点
               patch(null, newStartNode, el, oldStartNode.el);
             }
             newStartNode = newChildren[++newStartIndex];
           }
         }
 
-        if (oldEndIndex < oldStartIndex && newStartIndex <= newEndIndex) {//旧children先遍历完成
+        if (oldEndIndex < oldStartIndex && newStartIndex <= newEndIndex) { // 旧children先遍历完成
           for (let i = newStartIndex; i <= newEndIndex; i++) {
             patch(
               null,
               newChildren[i],
               el,
-              oldStartNode ? oldStartNode.el : oldEndNode.el.nextSibling
+              oldStartNode ? oldStartNode.el : oldEndNode.el.nextSibling,
             );
           }
-        } else if (newStartIndex>newEndIndex && oldStartIndex <= oldEndIndex) {
-          for (let i = oldStartIndex; i <= oldEndIndex; i++){
+        } else if (newStartIndex > newEndIndex && oldStartIndex <= oldEndIndex) {
+          for (let i = oldStartIndex; i <= oldEndIndex; i++) {
             unmount(oldChildren[i]);
           }
         }
       } else {
-        //n1为null则直接挂载n2
-        setElementText(el, "");
+        // n1为null则直接挂载n2
+        setElementText(el, '');
         n2.children.forEach((child) => {
           patch(null, child, el);
         });
       }
     } else {
-      //新节点为null,
-      if (typeof n1Type === "string") {
-        setElementText(el, "");
+      // 新节点为null,
+      if (typeof n1Type === 'string') {
+        setElementText(el, '');
       } else if (Array.isArray(n1.children)) {
         n1.children.forEach((child) => {
           unmount(child);
@@ -206,9 +204,11 @@ const createRenderer = (options) => {
 
   const mountComponent = (n2, container) => {
     const componentOptions = n2.type;
-    const { render, data, props: propsOptions, setup } = componentOptions;
+    const {
+      render, data, props: propsOptions, setup,
+    } = componentOptions;
     const state = reactive(data());
-    //const vnode = render(state);
+    // const vnode = render(state);
     const instance = {
       state,
       subTree: null,
