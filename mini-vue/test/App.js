@@ -1,10 +1,11 @@
-import { reactive, ref } from '../packages/vue/src/index.js';
+import { reactive, ref, watch } from '../packages/vue/src/index.js';
 // import Bar from './Bar.js';
 
 const temp = `
    <span>
     <div v-show="app">测试vShow</div>
     <input v-model="foo"/>
+    <button @click="handlers">修改</button>
    </span>
 `;
 const App = {
@@ -33,7 +34,19 @@ const App = {
     const classProp1 = 'active';
     const classProp2 = 'bar';
     const bgc = 'pink';
+
+    watch(user, (newVal, oldVal) => {
+      console.log(newVal, oldVal);
+    });
+    watch(() => user.age, (newValue, oldValue) => {
+      console.log(newValue, oldValue);
+    });
+    const handlers = () => {
+      user.name = user.name === 'app' ? 'web' : 'app';
+      user.age++;
+    };
     return {
+      handlers,
       user,
       app,
       foo,

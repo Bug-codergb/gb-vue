@@ -23,3 +23,7 @@ export {
   isReadonly,
   shallowReadonly,
 } from '../../reactivity/src/index.js';
+
+export {
+  watch,
+} from './apiWatch.js';

@@ -47,6 +47,9 @@ export function flushJobs() {
       }
     }
   } finally {
-
+    flushIndex = 0;
+    queue.length = 0;
+    isFlushing = false;
+    currentFlushPromise = null;
   }
 }
