@@ -8,10 +8,10 @@ const createDep = (effects) => {
   dep.n = 0;
   return dep;
 };
-const wasTracked = (dep) => (trackOpBit & dep.w) > 0// 这里注意运算符优先级
-;
-const newTracked = (dep) => (trackOpBit & dep.n) > 0// 这里注意运算符优先级
-;
+const wasTracked = (dep) => (trackOpBit & dep.w) > 0;// 这里注意运算符优先级
+
+const newTracked = (dep) => (trackOpBit & dep.n) > 0;// 这里注意运算符优先级
+
 const initDepMakers = (reactiveEffect) => {
   const { deps } = reactiveEffect;
   if (deps.length) {
