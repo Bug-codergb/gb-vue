@@ -1,4 +1,6 @@
-import { reactive, ref, watch } from '../packages/vue/src/index.js';
+import {
+  reactive, ref, watch, onBeforeMount, onMounted,
+} from '../packages/vue/src/index.js';
 // import Bar from './Bar.js';
 
 const temp = `
@@ -6,6 +8,7 @@ const temp = `
     <div v-show="app">测试vShow</div>
     <input v-model="foo"/>
     <button @click="handlers">修改</button>
+    <span>{{foo}}</span>
    </span>
 `;
 const App = {
@@ -23,7 +26,7 @@ const App = {
     });
 
     const app = ref(true);
-    const foo = 'lina';
+    const foo = ref('lina');
     const bar = false;
     const handler = () => {
       console.log('jintianshigehaoriz1');
@@ -44,7 +47,15 @@ const App = {
     const handlers = () => {
       user.name = user.name === 'app' ? 'web' : 'app';
       user.age++;
+
+      foo.value = foo.value === 'lina' ? 'gb' : 'lina';
     };
+    onBeforeMount(() => {
+      console.log('渲染之前');
+    });
+    onMounted(() => {
+      console.log('渲染完毕');
+    });
     return {
       handlers,
       user,

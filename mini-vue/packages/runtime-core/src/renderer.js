@@ -1,8 +1,8 @@
 import { createAppAPI } from './apiCreateApp.js';
-import { ReactiveEffect, effect } from '../../reactivity/src/effect.js';
+import { ReactiveEffect } from '../../reactivity/src/effect.js';
 import { invokArrayFns, isReservedProps } from '../../shared/src/general.js';
 import ShapeFlags from '../../shared/src/shapeFlags.js';
-import { queueJob } from './scheduler.js';
+import { queueJob, queuePostFlushCb } from './scheduler.js';
 import {
   createComponentInstance,
   setupComponent,
@@ -17,6 +17,8 @@ import {
   isSameVNodeType,
 } from './vnode.js';
 import { invokeDirectiveHook } from './directives.js';
+
+export const queuePostRenderEffect = queuePostFlushCb;
 
 function createRenderer(rendererOptions) {
   return baseCreateRenderer(rendererOptions);
@@ -71,6 +73,7 @@ function baseCreateRenderer(options) {
         if (shapeFlag & ShapeFlags.ELEMENT) {
           processElement(n1, n2, container, anchor, parentComponent);
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
+          console.log('更新组件');
           processComponent(n1, n2, container, parentComponent);
         }
     }
@@ -159,9 +162,15 @@ function baseCreateRenderer(options) {
   }
   // element -> update
   function updateElement(n1, n2, container, anchor, parentComponent) {
+    const el = n2.el = n1.el;
+    const { patchFlag, dirs } = n2;
+
     const oldProps = (n1 && n1.props) || {};
     const newProps = n2.props || {};
-    const el = n2.el = n1.el;
+
+    if (dirs) {
+      invokeDirectiveHook(n2, n1, parentComponent, 'beforeUpdate');
+    }
     patchProps(el, n2, oldProps, newProps, parentComponent);
     patchChildren(n1, n2, el, anchor, parentComponent);
   }
@@ -206,6 +215,7 @@ function baseCreateRenderer(options) {
     if (n1 === null) {
       mountComponent(n2, container, parentComponent);
     } else {
+      console.log(n1, n2);
       updateComponent(n1, n2, container, parentComponent);
     }
   }
@@ -222,9 +232,11 @@ function baseCreateRenderer(options) {
   }
   function setupRenderEffect(instance, initialVNode, container, anchor) {
     const componentUpdateFn = () => {
+      console.log('副作用函数');
       if (!instance.isMounted) {
         const { el, props } = initialVNode;
         const { bm, m, parent } = instance;
+        console.log(instance);
         if (bm) {
           invokArrayFns(bm);
         }
@@ -239,7 +251,7 @@ function baseCreateRenderer(options) {
         );
         initialVNode.el = subTree.el;
         if (m) {
-
+          queuePostRenderEffect(m);
         }
         instance.isMounted = true;
         initialVNode = container = anchor = null;
@@ -259,16 +271,21 @@ function baseCreateRenderer(options) {
         const nextTree = renderComponentRoot(instance);
         const prevTree = instance.subTree;
         instance.subTree = nextTree;
+
+        console.log(prevTree, nextTree);
         patch(
           prevTree,
           nextTree,
 
         );
+        if (u) {
+          queuePostRenderEffect(u);
+        }
       }
     };
     const effect = (instance.effect = new ReactiveEffect(
       componentUpdateFn,
-      () => queueJob(),
+      () => queueJob(update),
     ));
     const update = (instance.update = () => effect.run());
     update.id = instance.uid;

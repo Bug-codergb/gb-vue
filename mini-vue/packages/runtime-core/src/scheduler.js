@@ -1,7 +1,13 @@
+import { isArray } from '../../shared/src/general.js';
+
 const queue = [];
 let isFlushing = false;
 let isFlushPending = false;
 let flushIndex = 0;
+
+const pendingPostFlushCbs = [];
+let activePostFlushCbs = null;
+let postFlushIndex = 0;
 
 let currentFlushPromise = null;
 const resolvedPromise = Promise.resolve();
@@ -36,9 +42,11 @@ export function queueflush() {
     currentFlushPromise = resolvedPromise.then(flushJobs);
   }
 }
-export function flushJobs() {
+export function flushJobs(seen) {
   isFlushPending = false;
   isFlushing = true;
+
+  seen = seen || new Map();
   try {
     for (flushIndex = 0; flushIndex < queue.length; flushIndex++) {
       const job = queue[flushIndex];
@@ -49,7 +57,40 @@ export function flushJobs() {
   } finally {
     flushIndex = 0;
     queue.length = 0;
+
+    flushPostFlushCbs(seen);
+
     isFlushing = false;
     currentFlushPromise = null;
   }
 }
+// 后置队列
+export function queuePostFlushCb(cb) {
+  if (!isArray(cb)) {
+    if (!activePostFlushCbs || !activePostFlushCbs.includes(cb, cb.allowRecurse ? postFlushIndex + 1 : postFlushIndex)) {
+      pendingPostFlushCbs.push(cb);
+    }
+  } else {
+    pendingPostFlushCbs.push(...cb);
+  }
+  queueflush();
+}
+export function flushPostFlushCbs(seen) {
+  if (pendingPostFlushCbs.length) {
+    const deduped = [...new Set(pendingPostFlushCbs)];
+    pendingPostFlushCbs.length = 0;
+
+    if (activePostFlushCbs) {
+      activePostFlushCbs.push(...deduped);
+      return;
+    }
+    activePostFlushCbs = deduped;
+
+    for (postFlushIndex = 0; postFlushIndex < activePostFlushCbs.length; postFlushIndex++) {
+      activePostFlushCbs[postFlushIndex]();
+    }
+  }
+  activePostFlushCbs = null;
+  postFlushIndex = 0;
+}
+const getId = (job) => (job.id === null ? Infinity : job.id);

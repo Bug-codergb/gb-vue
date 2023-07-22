@@ -52,6 +52,15 @@ export function createComponentInstance(vnode, parent, suspense) {
 
     setupState: EMPTY_OBJ,
     setupContext: EMPTY_OBJ,
+
+    bc: null,
+    c: null,
+    bm: null,
+    m: null,
+    bu: null,
+    u: null,
+    um: null,
+    bum: null,
   };
   return instance;
 }

@@ -27,3 +27,12 @@ export {
 export {
   watch,
 } from './apiWatch.js';
+
+export {
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
+  onUmounted,
+} from './apiLIfecycle.js';
