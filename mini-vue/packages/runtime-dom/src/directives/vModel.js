@@ -27,4 +27,10 @@ export const vModelText = {
   mounted(el, { value }) {
     el.value = value == null ? '' : value;
   },
+  beforeUpdate(el, { value, modifiers: { lazy, trim, number } }, vnode) {
+    const newValue = value === null ? '' : value;
+    if (el.value !== newValue) {
+      el.value = newValue;
+    }
+  },
 };

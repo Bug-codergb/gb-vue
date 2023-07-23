@@ -17,6 +17,7 @@ import {
   isSameVNodeType,
 } from './vnode.js';
 import { invokeDirectiveHook } from './directives.js';
+import { PatchFlags } from '../../shared/src/patchFlags.js';
 
 export const queuePostRenderEffect = queuePostFlushCb;
 
@@ -162,6 +163,7 @@ function baseCreateRenderer(options) {
   }
   // element -> update
   function updateElement(n1, n2, container, anchor, parentComponent) {
+    console.log(n1, n2);
     const el = n2.el = n1.el;
     const { patchFlag, dirs } = n2;
 
@@ -171,12 +173,36 @@ function baseCreateRenderer(options) {
     if (dirs) {
       invokeDirectiveHook(n2, n1, parentComponent, 'beforeUpdate');
     }
+    if (patchFlag > 0) {
+      if (patchFlag & PatchFlags.TEXT) {
+        if (n1.children !== n2.children) {
+          hostSetElementText(el, n2.children);
+        }
+      }
+    }
     patchProps(el, n2, oldProps, newProps, parentComponent);
     patchChildren(n1, n2, el, anchor, parentComponent);
+    if (dirs) {
+      queuePostRenderEffect(() => {
+        dirs && invokeDirectiveHook(n2, n1, parentComponent, 'updated');
+      });
+    }
   }
+
   function patchChildren(n1, n2, container, anchor, parentComponent) {
+    console.log(n1, n2, container);
     const { shapeFlag: prevShapeFlag, children: c1 } = n1;
-    const { shapeFlag, children: c2 } = n2;
+    const { shapeFlag, patchFlag, children: c2 } = n2;
+
+    if (patchFlag > 0) {
+      if (patchFlag & PatchFlags.KEYED_FRAGMENT) {
+        patchKeyedChildren(c1, c2, container, anchor, parentComponent);
+      }
+      return;
+    } if (patchFlag & PatchFlags.UNKEYED_FRAGMENT) {
+      patchUnKeyedChildren(c1, c2, container, anchor, parentComponent);
+    }
+
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) { // 新节点是文本节点
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 旧节点的字节点是数组，新节点的字节点是文本
         c1.forEach((c) => {
@@ -208,6 +234,24 @@ function baseCreateRenderer(options) {
     }
   }
   function patchKeyedChildren(c1, c2, container, anchor, parentComponent) {
+    console.log(c1, c2);
+    let i = 0;
+    const l2 = c2.length;
+    const e1 = c1.length - 1;
+    const e2 = l2 - 1;
+
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[i];
+      const n2 = c2[i];
+      if (isSameVNodeType(n1, n2)) {
+        patch(n1, n2, container, null, parentComponent);
+      } else {
+        break;
+      }
+      i++;
+    }
+  }
+  function patchUnKeyedChildren(c1, c2, container, anchor, parentComponent) {
 
   }
   // 组件

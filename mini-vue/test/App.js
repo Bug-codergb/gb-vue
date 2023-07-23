@@ -6,7 +6,7 @@ import { parse } from '../packages/compiler-sfc/parse.js';
 
 const temp = `
    <span>
-    <div v-show="app">测试vShow</div>
+    <div v-show="app">测试vShow--{{foo}}</div>
     <input v-model="foo"/>
     <button @click="handlers">修改</button>
     <span>{{foo}}</span>
