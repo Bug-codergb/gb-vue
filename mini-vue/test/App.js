@@ -1,7 +1,8 @@
 import {
   reactive, ref, watch, onBeforeMount, onMounted,
+  parseSfc,
 } from '../packages/vue/src/index.js';
-import { parse } from '../packages/compiler-sfc/parse.js';
+
 // import Bar from './Bar.js';
 
 const temp = `
@@ -93,5 +94,5 @@ const sfc = `
     }
   </style>
 `;
-parse(sfc, {});
+parseSfc(sfc, {});
 export default App;

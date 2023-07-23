@@ -25,3 +25,4 @@ export function compileToFunction(template, options) {
 }
 registerRuntimeCompiler(compileToFunction);
 export * from '../../runtime-dom/src/index.js';
+export * from '../../compiler-sfc/index.js';
