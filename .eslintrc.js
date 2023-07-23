@@ -51,5 +51,6 @@ module.exports = {
     'no-prototype-builtins': 'off',
     'no-cond-assign': 'off',
     'no-useless-return': 'off',
+    'no-case-declarations': 'off',
   },
 };
