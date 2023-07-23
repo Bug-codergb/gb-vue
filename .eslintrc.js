@@ -50,5 +50,6 @@ module.exports = {
     'max-classes-per-file': 'off',
     'no-prototype-builtins': 'off',
     'no-cond-assign': 'off',
+    'no-useless-return': 'off',
   },
 };

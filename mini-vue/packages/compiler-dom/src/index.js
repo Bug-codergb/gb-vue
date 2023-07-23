@@ -1,4 +1,4 @@
-import { baseComplie } from '../../compiler-core/src/index.js';
+import { baseComplie, baseParser } from '../../compiler-core/src/index.js';
 import { parserOptions } from './parserOptions.js';
 
 import { transformStyle } from './transforms/transformStyle.js';
@@ -29,6 +29,9 @@ export function complie(template, options) {
       ...options.directiveTransforms || {},
     },
   });
+}
+export function parse(template, options = {}) {
+  return baseParser(template, Object.assign({}, parserOptions, options));
 }
 
 export * from '../../compiler-core/src/index.js';

@@ -138,7 +138,7 @@ function parseChildren(context, mode, ancestors) {
             node.content = node.content.replace(/[\t\r\n\f ]+/g, ' ');
           }
         } else {
-          node.content = node.content.reaplce(/\r\n/g, '\n');
+          node.content = node.content.replace(/\r\n/g, '\n');
         }
       } else if (node.type === NodeTypes.COMMENT && !context.options.comments) {
         removedWhitespace = true;

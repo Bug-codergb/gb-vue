@@ -1,6 +1,7 @@
 import {
   reactive, ref, watch, onBeforeMount, onMounted,
 } from '../packages/vue/src/index.js';
+import { parse } from '../packages/compiler-sfc/parse.js';
 // import Bar from './Bar.js';
 
 const temp = `
@@ -71,4 +72,26 @@ const App = {
     };
   },
 };
+
+const sfc = `
+  <template>
+    <div class="container">
+      <div v-show="app">{{ app }}</div>
+    </div>
+  </template>
+  <script setup>
+    import { ref,reactive } from "vue";
+    const app = ref(true);
+    const user = reactive({
+      name:"web",
+      age:18
+    })
+  </script>
+  <style scoped>
+    .container{
+      color:pink
+    }
+  </style>
+`;
+parse(sfc, {});
 export default App;
