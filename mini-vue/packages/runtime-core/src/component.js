@@ -1,5 +1,5 @@
 import { shallowReadonly, proxyRefs } from '../../reactivity/src/index.js';
-import { PublicInstanceProxyHandlers } from './componentPublicInstance.js';
+import { PublicInstanceProxyHandlers, createDevRenderContext } from './componentPublicInstance.js';
 import { createAppContext } from './apiCreateApp.js';
 import { EMPTY_OBJ, isFunction } from '../../shared/src/general.js';
 import { isObject } from '../../shared/src/index.js';
@@ -62,6 +62,10 @@ export function createComponentInstance(vnode, parent, suspense) {
     um: null,
     bum: null,
   };
+
+  instance.ctx = createDevRenderContext(instance);
+  instance.root = parent ? parent.root : instance;
+  instance.emit = null;
   return instance;
 }
 

@@ -1,14 +1,16 @@
-import { EMPTY_OBJ, hasOwn } from '../../shared/src/general.js';
+import { EMPTY_OBJ, NOOP, hasOwn } from '../../shared/src/general.js';
+import { shallowReadonly } from '../../reactivity/src/reactive.js';
 
 const publicPropertiesMap = {
   // 当用户调用 instance.proxy.$emit 时就会触发这个函数
   // i 就是 instance 的缩写 也就是组件实例对象
+  $: (i) => i,
   $el: (i) => i.vnode.el,
   $data: (i) => i.data,
   $emit: (i) => i.emit,
   $slots: (i) => i.slots,
-  $props: (i) => i.props,
-  $emit: (i) => i.emit,
+  $props: (i) => shallowReadonly(i.props),
+  $attrs: (i) => shallowReadonly(i.$attrs),
   $nextTick: (i) => i.n,
 };
 
@@ -77,3 +79,23 @@ export const PublicInstanceProxyHandlers = {
     return true;
   },
 };
+export function createDevRenderContext(instance) {
+  const target = {};
+  Object.defineProperty(target, '_', {
+    configurable: true,
+    enumerable: true/* false */,
+    get() {
+      return instance;
+    },
+  });
+  Object.keys(publicPropertiesMap).forEach((key) => {
+    Object.defineProperty(target, key, {
+      configurable: true,
+      enumerable: false,
+      set: NOOP,
+      get: () => publicPropertiesMap[key](instance),
+    });
+  });
+
+  return target;
+}
