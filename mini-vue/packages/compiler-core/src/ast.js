@@ -206,3 +206,13 @@ export function convertToBlock(node, { helper, removeHelper, inSSR }) {
     helper(getVNodeBlockHelper(inSSR, node.isComponent));
   }
 }
+export function createFunctionExpression(params, returns, newline, isSlot, loc = {}) {
+  return {
+    type: NodeTypes.JS_FUNCTION_EXPRESSION,
+    params,
+    returns,
+    newline,
+    isSlot,
+    loc,
+  };
+}

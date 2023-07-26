@@ -1,4 +1,5 @@
 import { NO } from '../../shared/src/general.js';
+import { makeMap } from '../../shared/src/index.js';
 import {
   Namespaces, createRoot, NodeTypes, ElementTypes, ConstantTypes,
 } from './ast.js';
@@ -231,6 +232,9 @@ function parseElement(context, ancestors) {
   }
   return element;
 }
+
+const isSpecialTemplateDirective = makeMap('if,else,else-if,for,slot');
+
 function parseTag(context, type, parent) {
   const start = getCursor(context);
   const match = /^<\/?([a-z][^\t\r\n\f />]*)/i.exec(context.source);// 匹配开始标签或者结束标签
@@ -270,7 +274,9 @@ function parseTag(context, type, parent) {
     if (tag === 'slot') {
       tagType = ElementTypes.SLOT;
     } else if (tag === 'template') {
-
+      if (props.some((p) => p.type === NodeTypes.DIRECTIVE && isSpecialTemplateDirective(p.name))) {
+        tagType = ElementTypes.TEMPLATE;
+      }
     } else if (isComponent(tag, props, context)) {
       tagType = ElementTypes.COMPONENT;
     }

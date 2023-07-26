@@ -6,6 +6,7 @@ import { transform } from './transform.js';
 import { transformIf } from './transforms/vIf.js';
 import { transformText } from './transforms/transformText.js';
 import { transformElement } from './transforms/transformElement.js';
+import { transformSlotOutlet } from './transforms/transformSlotOutlet.js';
 
 import { transformBind } from './transforms/vBind.js';
 import { transformOn } from './transforms/vOn.js';
@@ -17,6 +18,7 @@ export function getBaseTransformPreset() { // 转换所需预设
   return [
     [
       transformIf,
+      transformSlotOutlet,
       transformElement,
       transformText,
     ],

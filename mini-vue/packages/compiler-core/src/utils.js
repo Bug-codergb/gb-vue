@@ -1,4 +1,4 @@
-import { NodeTypes } from './ast.js';
+import { ElementTypes, NodeTypes } from './ast.js';
 
 const nonIdentifierRE = /^\d|[^\$\w]/;
 export const isSimpleIdentifier = (name) => !nonIdentifierRE.test(name);
@@ -138,3 +138,6 @@ export const isMemberExpressionBrowser = (path) => {
   }
   return !currentOpenBracketCount && !currentOpenParensCount;
 };
+export function isSlotOutlet(node) {
+  return node.type === NodeTypes.ELEMENT && node.tagType === ElementTypes.SLOT;
+}

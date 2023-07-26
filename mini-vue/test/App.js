@@ -11,6 +11,7 @@ const temp = `
     <input v-model="foo"/>
     <button @click="handlers">修改</button>
     <span>{{foo}}</span>
+    <slot name="root" :appProp="app" :fooProp="foo">插槽未替换的内容</slot>
    </span>
 `;
 const App = {
