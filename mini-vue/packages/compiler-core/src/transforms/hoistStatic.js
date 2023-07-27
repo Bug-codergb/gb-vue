@@ -59,6 +59,51 @@ export function getConstantType(node, context) {
       if (codegenNode.type !== NodeTypes.VNODE_CALL) {
         return ConstantTypes.NOT_CONSTANT;
       }
+      if (codegenNode.isBlock && node.tag !== 'svg' && node.tag !== 'foreignObject') {
+        return ConstantTypes.NOT_CONSTANT;
+      }
+      const flag = getPatchFlag(codegenNode);
+      if (!flag) {
+        const returnType = ConstantTypes.CAN_STRINGIFY;
+      }
+    case NodeTypes.TEXT:
+    case NodeTypes.COMMENT:
+      return ConstantTypes.CAN_STRINGIFY;
+    case NodeTypes.IF:
+    case NodeTypes.FOR:
+    case NodeTypes.IF_BRANCH:
+      return ConstantTypes.NOT_CONSTANT;
+    case NodeTypes.INTERPOLATION:
+    case NodeTypes.TEXT_CALL:
+      return getConstantType(node.content, context);
     default:
   }
+}
+function getGeneratePropsConstantType(node, context) {
+  let returnType = ConstantTypes.CAN_STRINGIFY;
+  const props = getNodeProps(node);
+  if (props && props.type === NodeTypes.JS_OBJECT_EXPRESSION) {
+    const { properties } = props;
+    for (let i = 0; i < properties.length; i++) {
+      const { key, value } = properties[i];
+      const keyType = getConstantType(key, context);
+      if (keyType === ConstantTypes.NOT_CONSTANT) {
+        return keyType;
+      }
+      if (keyType < returnType) {
+        returnType = keyType;
+      }
+    }
+  }
+  return returnType;
+}
+function getNodeProps(node) {
+  const { codegenNode } = node;
+  if (codegenNode.type === NodeTypes.VNODE_CALL) {
+    return codegenNode.props;
+  }
+}
+function getPatchFlag(node) {
+  const flag = node.patchFlag;
+  return flag ? parseInt(flag, 10) : undefined;
 }

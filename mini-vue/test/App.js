@@ -7,11 +7,8 @@ import {
 
 const temp = `
    <span>
-    <div v-show="app">测试vShow--{{foo}}</div>
+    <p>{{ foo }}</p>
     <input v-model="foo"/>
-    <button @click="handlers">修改</button>
-    <span>{{foo}}</span>
-    <slot name="root" :appProp="app" :fooProp="foo">插槽未替换的内容</slot>
    </span>
 `;
 const App = {
@@ -41,24 +38,12 @@ const App = {
     const classProp2 = 'bar';
     const bgc = 'pink';
 
-    watch(user, (newVal, oldVal) => {
-      console.log(newVal, oldVal);
-    });
-    watch(() => user.age, (newValue, oldValue) => {
-      console.log(newValue, oldValue);
-    });
     const handlers = () => {
       user.name = user.name === 'app' ? 'web' : 'app';
       user.age++;
 
       foo.value = foo.value === 'lina' ? 'gb' : 'lina';
     };
-    onBeforeMount(() => {
-      console.log('渲染之前');
-    });
-    onMounted(() => {
-      console.log('渲染完毕');
-    });
     return {
       handlers,
       user,
