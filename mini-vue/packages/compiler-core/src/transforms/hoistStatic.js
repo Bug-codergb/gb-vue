@@ -64,8 +64,16 @@ export function getConstantType(node, context) {
       }
       const flag = getPatchFlag(codegenNode);
       if (!flag) {
-        const returnType = ConstantTypes.CAN_STRINGIFY;
+        let returnType = ConstantTypes.CAN_STRINGIFY;
+        const generatedPropsType = getGeneratePropsConstantType(node, context);
+        if (generatedPropsType === ConstantTypes.NOT_CONSTANT) {
+          return ConstantTypes.NOT_CONSTANT;
+        }
+        if (generatedPropsType < returnType) {
+          returnType = generatedPropsType;
+        }
       }
+      return;
     case NodeTypes.TEXT:
     case NodeTypes.COMMENT:
       return ConstantTypes.CAN_STRINGIFY;
