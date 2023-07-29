@@ -9,6 +9,9 @@ const temp = `
    <span>
     <p>{{ foo }}</p>
     <input v-model="foo"/>
+    <span>
+      <p class="container">container</p>
+    </span>
    </span>
 `;
 const App = {

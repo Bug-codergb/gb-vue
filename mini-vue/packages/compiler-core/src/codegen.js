@@ -20,6 +20,7 @@ import {
 } from './ast.js';
 import { isSimpleIdentifier } from './utils.js';
 
+const PURE_ANNOTATION = '/*#__PURE__*/';
 const aliasHelper = (s) => `${helperNameMap[s]}: _${helperNameMap[s]}`;
 
 function createCodegenContext(ast, {
@@ -30,7 +31,7 @@ function createCodegenContext(ast, {
   scopeId = null,
   optimizeImports = false,
   runtimeGlobaName = 'Vue',
-  runtimeModuleName = 'Vue',
+  runtimeModuleName = 'vue',
   ssr = false,
   inSSR = false,
 }) {
@@ -217,9 +218,31 @@ function genFunctionPreamble(ast, context) {
   push('return ');
 }
 function genHoists(hoists, context) {
+  console.log(hoists);
   if (!hoists.length) {
-
+    return;
   }
+  context.pure = true;
+  const {
+    push, newline, helper, scopeId, mode,
+  } = context;
+  const genScopeId = scopeId != null && mode !== 'function';
+  newline();
+  for (let i = 0; i < hoists.length; i++) {
+    const exp = hoists[i];
+    if (exp) {
+      const needScopeIdWrapper = genScopeId && exp.type === NodeTypes.VNODE_CALL;
+      push(`
+        const _hoisted_${i + 1}=${needScopeIdWrapper ? `${PURE_ANNOTATION} _withScopeId(()=>` : ''}
+      `);
+      genNode(exp, context);
+      if (needScopeIdWrapper) {
+        push(')');
+      }
+      newline();
+    }
+  }
+  context.pure = false;
 }
 
 function genNodeList(nodes, context, multilines, comma = true) {

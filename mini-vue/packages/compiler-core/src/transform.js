@@ -1,4 +1,5 @@
 import {
+  hoistStatic,
   isSingleElementRoot,
 } from './transforms/hoistStatic.js';
 import {
@@ -138,9 +139,11 @@ export function createTransformContext(root, {
 export function transform(root, options) {
   const context = createTransformContext(root, options);
   traverseNode(root, context);
-
-  // console.log(context.hoistStatic); false
-
+  console.log(options.hoistStatic);
+  if (options.hoistStatic) {
+    console.log('111111');
+    hoistStatic(root, context);
+  }
   if (!options.ssr) {
     createRootCodegen(root, context);
   }
