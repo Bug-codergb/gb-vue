@@ -36,3 +36,5 @@ export {
   onBeforeUnmount,
   onUmounted,
 } from './apiLIfecycle.js';
+
+export { renderList } from './helpers/renderList.js';

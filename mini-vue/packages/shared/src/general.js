@@ -20,7 +20,7 @@ export const hasChanged = (newValue, oldValue) => !Object.is(newValue, oldValue)
 export const isString = (value) => typeof value === 'string';
 export const isSymbol = (value) => typeof value === 'symbol';
 export const isArray = (value) => Array.isArray(value);
-
+export const isObject = (value) => typeof value === 'object' && value !== null;
 export const isMap = (val) => toTypeString(val) === '[object Map]';
 export const isSet = (val) => toTypeString(val) === '[object Set]';
 export const isPlainObject = (val) => toTypeString(val) === '[object Object]';

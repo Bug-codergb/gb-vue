@@ -141,3 +141,6 @@ export const isMemberExpressionBrowser = (path) => {
 export function isSlotOutlet(node) {
   return node.type === NodeTypes.ELEMENT && node.tagType === ElementTypes.SLOT;
 }
+export function isTemplateNode(node) {
+  return node.type === NodeTypes.ELEMENT && node.tagType === ElementTypes.TEMPLATE;
+}

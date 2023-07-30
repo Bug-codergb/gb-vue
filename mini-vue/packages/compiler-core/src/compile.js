@@ -3,6 +3,7 @@ import {
 } from '../../shared/src/general.js';
 import { baseParser } from './parser.js';
 import { transform } from './transform.js';
+import { transformFor } from './transforms/vFor.js';
 import { transformIf } from './transforms/vIf.js';
 import { transformText } from './transforms/transformText.js';
 import { transformElement } from './transforms/transformElement.js';
@@ -18,6 +19,7 @@ export function getBaseTransformPreset() { // 转换所需预设
   return [
     [
       transformIf,
+      transformFor,
       transformSlotOutlet,
       transformElement,
       transformText,

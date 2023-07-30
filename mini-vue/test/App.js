@@ -6,13 +6,11 @@ import {
 // import Bar from './Bar.js';
 
 const temp = `
-   <span>
-    <p>{{ foo }}</p>
-    <input v-model="foo"/>
-    <span>
-      <p class="container">container</p>
-    </span>
-   </span>
+   <ul>
+    <li v-for="(item,index,arr) in list" :key="item.id">
+      {{item.id}}-{{item.name}}
+    </li>
+   </ul>
 `;
 const App = {
   template: temp,
@@ -47,7 +45,26 @@ const App = {
 
       foo.value = foo.value === 'lina' ? 'gb' : 'lina';
     };
+    const list = [
+      {
+        id: 1001,
+        name: 'web',
+      },
+      {
+        id: 1002,
+        name: 'app',
+      },
+      {
+        id: 1003,
+        name: 'tomcat',
+      },
+      {
+        id: 1004,
+        name: 'vite',
+      },
+    ];
     return {
+      list,
       handlers,
       user,
       app,
