@@ -30,6 +30,7 @@ export const transformOn = (dir, node, context, augmentor) => {
         || !/[A-Z]/.test(rawName)
         ? toHandlerKey(camelize(rawName))
         : `on:${rawName}`;
+
       eventName = createSimpleExpression(eventString, true, arg.loc);
     } else {
       eventName = createCompoundExpression([
@@ -52,7 +53,9 @@ export const transformOn = (dir, node, context, augmentor) => {
 
   if (exp) {
     const isMemberExp = isMemberExpressionBrowser(exp.content);
+
     const isInlineStatement = !(isMemberExp || fnExpRE.test(exp.content));
+
     const hasMultipleStatements = exp.content.includes(';');
     if (isInlineStatement || (shouldCache && isMemberExp)) {
       exp = createCompoundExpression([
@@ -77,5 +80,6 @@ export const transformOn = (dir, node, context, augmentor) => {
     ret = augmentor(ret);
   }
   ret.props.forEach((p) => (p.key.isHandlerKey = true));
+
   return ret;
 };

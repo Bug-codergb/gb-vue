@@ -19,6 +19,7 @@ import {
   createSimpleExpression,
 } from './ast.js';
 import { FRAGMENT, helperNameMap, TO_DISPLAY_STRING } from './runtimeHelpers.js';
+import { isVSlot } from './utils.js';
 
 export function createTransformContext(root, {
   filename = '',
@@ -139,9 +140,8 @@ export function createTransformContext(root, {
 export function transform(root, options) {
   const context = createTransformContext(root, options);
   traverseNode(root, context);
-  console.log(options.hoistStatic);
+  // console.log(options.hoistStatic);
   if (options.hoistStatic) {
-    console.log('111111');
     hoistStatic(root, context);
   }
   if (!options.ssr) {
@@ -198,7 +198,7 @@ export function createStructuralDirectiveTransform(name, fn) {
   return (node, context) => {
     if (node.type === NodeTypes.ELEMENT) {
       const { props } = node;
-      if (node.tagType === ElementTypes.TEMPLATE) {
+      if (node.tagType === ElementTypes.TEMPLATE && props.some(isVSlot)) {
         return;
       }
 

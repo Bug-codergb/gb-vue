@@ -10,13 +10,14 @@ export const transformModel = (dir, node, context) => {
     console.error('v-model不存在表达式');
   }
   const rawExp = exp.loc.source;
-
+  console.log(rawExp);
   const expString = exp.type === NodeTypes.SIMPLE_EXPRESSION ? exp.content : rawExp;
 
   const propName = arg || createSimpleExpression('modelValue', true);
   const eventName = arg ? isStaticExp(arg)
     ? `onUpdate:${camelize(arg.content)}`
     : createCompoundExpression(['"onUpdate:" + ', arg]) : 'onUpdate:modelValue';
+  console.log(eventName);
   let assignmentExp;
   const eventArg = '$event';
 

@@ -218,7 +218,7 @@ function genFunctionPreamble(ast, context) {
   push('return ');
 }
 function genHoists(hoists, context) {
-  console.log(hoists);
+  // console.log(hoists);
   if (!hoists.length) {
     return;
   }

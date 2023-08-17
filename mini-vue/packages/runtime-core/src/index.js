@@ -10,8 +10,14 @@ export {
   createBlock,
   createElementBlock,
   closeBlock,
+  createCommentVNode,
 } from './vnode.js';
+export {
+  Comment,
+  Fragment,
+  Text,
 
+} from './vnode.js';
 export { withDirectives } from './directives.js';
 
 export {

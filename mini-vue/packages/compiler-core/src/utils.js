@@ -2,7 +2,9 @@ import { ElementTypes, NodeTypes } from './ast.js';
 
 const nonIdentifierRE = /^\d|[^\$\w]/;
 export const isSimpleIdentifier = (name) => !nonIdentifierRE.test(name);
-
+export function isVSlot(p) {
+  return p.type === NodeTypes.DIRECTIVE && p.name === 'slot';
+}
 export function advancePositionWithMutation(
   pos,
   source,

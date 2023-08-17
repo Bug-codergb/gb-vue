@@ -19,6 +19,7 @@ import { PatchFlagNames } from '../../../shared/src/patchFlags.js';
 const __DEV__ = true;
 export const transformIf = createStructuralDirectiveTransform(/^(if|else|else-if)$/, (node, dir, context) => processIf(node, dir, context, (ifNode, branch, isRoot) => {
   const siblings = context.parent.children;
+
   let i = siblings.indexOf(ifNode);
   let key = 0;
   while (i-- >= 0) {
@@ -48,7 +49,7 @@ export const transformIf = createStructuralDirectiveTransform(/^(if|else|else-if
 export function processIf(node, dir, context, processCodegen) {
   // v-if 或者 v-else-if 没有value, v-if = undefined,v-else-if=undefined
   if (dir.name !== 'else' && (!dir.exp || !dir.exp.content.trim())) {
-    const loc = fir.exp ? dir.exp.loc : node.loc;
+    const loc = dir.exp ? dir.exp.loc : node.loc;
     dir.exp = createSimpleExpression('true', false, loc);
   }
 
@@ -114,7 +115,7 @@ function createIfBranch(node, dir) {
     type: NodeTypes.IF_BRANCH,
     loc: node.loc,
     condition: dir.name === 'else' ? undefined : dir.exp,
-    children: [node],
+    children: isTemplate ? node.children : [node],
     isTemplate,
   };
 }
@@ -127,7 +128,7 @@ function createCodegenNodeForBranch(branch, keyIndex, context) {
       createCallExpression(
         context.helper(CREATE_COMMENT),
         [
-          'v-if',
+          '"v-if"',
           'true',
         ],
       ),
@@ -149,14 +150,14 @@ function createChildrenCodegenNode(branch, keyIndex, context) {
   const { children } = branch;
 
   const firstChild = children[0];
+
   const needFragmentWrapper = children.length !== 1 || firstChild.type !== NodeTypes.ELEMENT;
 
   if (needFragmentWrapper) {
-    if (children.length === 1 || firstChild.type !== NodeTypes.FOR) {
+    if (children.length === 1 || firstChild.type === NodeTypes.FOR) {
       const vnodeCall = firstChild.codegenNode;
       return vnodeCall;
     }
-    debugger;
     let patchFlag = PatchFlags.STABLE_FRAGMENT;
     let patchFlagText = PatchFlagNames[PatchFlags.STABLE_FRAGMENT];
     if (__DEV__ && !branch.isTemplateIf && children.filter((c) => c.type !== NodeTypes.COMMENT).length === 1) {

@@ -6,11 +6,25 @@ import {
 // import Bar from './Bar.js';
 
 const temp = `
-   <ul>
-    <li v-for="(item,index,arr) in list" :key="item.id">
-      {{item.id}}-{{item.name}}
-    </li>
-   </ul>
+   <div class="container" key="90">
+     <template v-if="app">
+       <div key="1001">锄禾日当午</div>
+       <div key="1002">汗滴禾下土</div>
+       <span key="1003">{{ appProp }}</span>
+       <div key="1004">谁知盘中餐</div>
+       <p key="1005">{{ foo }}</p>
+       <div key="1006">粒粒皆辛苦</div>
+     </template>
+     <template v-else>
+       <p key="1005">{{ foo }}</p>
+       <div key="1006">粒粒皆辛苦</div>
+       <span key="1003">{{ appProp }}</span>
+       <div key="1004">谁知盘中餐</div>
+       <div key="1001">锄禾日当午</div>
+       <div key="1002">汗滴禾下土</div>
+     </template>
+     <button key="1007" @click="handlers">点击切换</button>
+   </div>
 `;
 const App = {
   template: temp,
@@ -32,7 +46,7 @@ const App = {
     const handler = () => {
       console.log('jintianshigehaoriz1');
     };
-    const appProp = 'linalina';
+    const appProp = ref('gblina');
     const flag = true;
 
     const classProp1 = 'active';
@@ -40,10 +54,9 @@ const App = {
     const bgc = 'pink';
 
     const handlers = () => {
-      user.name = user.name === 'app' ? 'web' : 'app';
-      user.age++;
-
-      foo.value = foo.value === 'lina' ? 'gb' : 'lina';
+      foo.value = foo.value === 'lina' ? '李娜' : 'lina';
+      appProp.value = appProp.value === 'gblina' ? '郭斌李娜' : 'gblina';
+      app.value = !app.value;
     };
     const list = [
       {
@@ -63,6 +76,14 @@ const App = {
         name: 'vite',
       },
     ];
+
+    const obj = {
+      name: '我在查找',
+    };
+    const proxy = reactive([
+      obj,
+    ]);
+
     return {
       list,
       handlers,
@@ -76,6 +97,7 @@ const App = {
       classProp1,
       classProp2,
       bgc,
+      proxy,
     };
   },
 };

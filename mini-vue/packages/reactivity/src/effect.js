@@ -73,6 +73,7 @@ export function resetTracking() {
 }
 
 const isTracking = () => activeEffect !== undefined && shouldTrack;
+
 const track = (target, key) => {
   if (!isTracking()) {
     return;

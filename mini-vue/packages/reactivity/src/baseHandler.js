@@ -60,12 +60,12 @@ function createGetter(isReadonly, isShallow) {
     }
 
     // 判断是否调用数组方法
-    const targetIsArray = Array.isArray(target);
+    /* const targetIsArray = Array.isArray(target);
     if (!isReadonly) {
       if (targetIsArray && arrayInstrumentations.hasOwnProperty(key)) {
         return Reflect.get(arrayInstrumentations, key, receiver);
       }
-    }
+    } */
 
     const res = Reflect.get(target, key, receiver);
     if (!isReadonly) {

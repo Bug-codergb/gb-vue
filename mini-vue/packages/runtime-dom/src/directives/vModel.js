@@ -14,7 +14,7 @@ const getModelAssigner = (vnode) => {
 export const vModelText = {
   created(el, { modifiers: { lazy, trim, number } }, vnode) {
     el._assign = getModelAssigner(vnode);
-
+    console.log(el._assign);
     const castToNumber = number || (vnode.props && vnode.props.type === 'number');
     addEventListener(el, lazy ? 'change' : 'input', (e) => {
       let domValue = el.value;

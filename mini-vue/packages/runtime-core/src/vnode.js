@@ -200,9 +200,13 @@ function getShapeFlag(type) {
 export const Text = Symbol('Text');
 export const Fragment = Symbol('Fragment');
 export const Static = Symbol.for('v-stc');
+export const Comment = Symbol.for('v-cmt');
 
 export function createTextVNode(text, flag) {
   return createVNode(Text, null, text, flag);
+}
+export function createCommentVNode(text = '', asBlock = false) {
+  return asBlock ? (openBlock(), createBlock(Comment, null, text)) : createVNode(Comment, null, text);
 }
 export function mergeProps(...args) {
   const ret = {};

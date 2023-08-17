@@ -553,5 +553,6 @@ export function buildDirectiveArgs(dir, context) {
       ),
     );
   }
+
   return createArrayExpression(dirArgs, dir.loc);
 }

@@ -55,6 +55,6 @@ export function baseComplie(template, options) {
     ast,
     { ...options },
   );
-  console.log(generateCode.code);
+  // console.log(generateCode.code);
   return generateCode;
 }

@@ -1,7 +1,7 @@
 import { EMPTY_OBJ, isFunction } from '../../shared/src/general.js';
 
 export function withDirectives(vnode, directives) {
-  // console.log(directives)
+  console.log(directives);
   const bindings = vnode.dirs || (vnode.dirs = []);
   for (let i = 0; i < directives.length; i++) {
     let [dir, value, arg, modifiers = EMPTY_OBJ] = directives[i];

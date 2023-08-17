@@ -23,10 +23,7 @@ export function injectHook(type, hook, target, prepend = false) {
     }
   }
 }
-export const createHook = (lifecycle) => {
-  console.log('注入生命周期');
-  return (hook, target=currentInstance) => injectHook(lifecycle, (...args) => hook(...args), target);
-};
+export const createHook = (lifecycle) => (hook, target = currentInstance) => injectHook(lifecycle, (...args) => hook(...args), target);
 export const onBeforeMount = createHook(LifecycleHooks.BEFORE_MOUNT);
 export const onMounted = createHook(LifecycleHooks.MOUNTED);
 export const onBeforeUpdate = createHook(LifecycleHooks.BEFORE_UPDATE);

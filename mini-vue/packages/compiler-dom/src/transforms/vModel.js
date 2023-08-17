@@ -12,7 +12,7 @@ import {
 const __DEV__ = true;
 export const transformModel = (dir, node, context) => {
   const baseResult = baseTransform(dir, node, context);
-
+  
   if (!baseResult.props.length) {
     return baseResult;
   }

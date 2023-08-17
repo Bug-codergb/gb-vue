@@ -171,7 +171,7 @@ export function parse(
         break;
     }
   });
-  console.log(descriptor);
+  // console.log(descriptor);
 
   const result = {
     descriptor,
