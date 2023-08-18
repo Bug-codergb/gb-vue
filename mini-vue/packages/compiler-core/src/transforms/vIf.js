@@ -125,7 +125,7 @@ function createCodegenNodeForBranch(branch, keyIndex, context) {
     return createConditionalExpression(
       branch.condition,
       createChildrenCodegenNode(branch, keyIndex, context),
-      createCallExpression(
+      createCallExpression(// 默认情况下条件不成立时添加一个注释节点，渲染时会创建一个注释<!--v-if-->
         context.helper(CREATE_COMMENT),
         [
           '"v-if"',
