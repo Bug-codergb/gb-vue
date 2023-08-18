@@ -4,9 +4,7 @@ export const nodeOps = {
     if (child) parent.insertBefore(child, anchor);
   },
   remove: (child) => {
-    console.log(child);
     const parent = child.parentNode;
-    console.log(parent);
     if (parent) {
       parent.removeChild(child);
     }
@@ -15,9 +13,7 @@ export const nodeOps = {
     const el = doc.createElement(tag);
     return el;
   },
-  createText: (text) => {
-    doc.createTextNode(text);
-  },
+  createText: (text) => doc.createTextNode(text),
   createComment: (text) => doc.createComment(text),
   setElementText: (el, text) => {
     el.textContent = text;

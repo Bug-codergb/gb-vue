@@ -19,7 +19,7 @@ export const simpleDiff = (c1, c2, container, anchor, patch, unmount, insert) =>
       if (newChild.key === oldChild.key) {
         find = true;
         console.log(oldChild, newChild);
-        patch(oldChild, newChild, container, anchor);// 为什么不直接添加锚点
+        patch(oldChild, newChild, container);// 为什么不直接添加锚点
         if (j < lastIndex) {
           if (newChildren[i - 1]) { // 如果newChildren[i-1]为null则是第一个节点，第一个节点是不需要移动的
             const anchor = newChildren[i - 1].el.nextSibling;
@@ -32,6 +32,7 @@ export const simpleDiff = (c1, c2, container, anchor, patch, unmount, insert) =>
       }
     }
     if (!find) {
+      console.log(newChild);
       const prevNode = newChildren[i - 1];
       const anchor = prevNode ? prevNode.el.nextSibling : container.firstChild;
       patch(null, newChild, container, anchor);// 这里需要锚点？

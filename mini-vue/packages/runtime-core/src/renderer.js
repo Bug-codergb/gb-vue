@@ -141,6 +141,7 @@ function baseCreateRenderer(options) {
     anchor,
     parentComponent,
   ) {
+    console.log(n1, n2, container, anchor);
     const fragmentStartAnchor = (n2.el = n1 ? n1.el : hostCreateText(''));
     const fragmentEndAnchor = (n2.anchor = n1 ? n1.anchor : hostCreateText(''));
 
@@ -415,17 +416,14 @@ function baseCreateRenderer(options) {
       patchFlag,
       dirs,
     } = vnode;
-    console.log(type, vnode, doRemove);
+
     if (
       (type === Fragment
     /* && patchFlag & (PatchFlags.KEYED_FRAGMENT | PatchFlags.UNKEYED_FRAGMENT) */)
     ) {
-      console.log(children);
       unmountChildren(children, null, null, true);
     }
     if (doRemove) {
-      console.log(vnode);
-
       remove(vnode);
     }
   }
@@ -442,7 +440,6 @@ function baseCreateRenderer(options) {
     }
   }
   function remove(vnode) {
-    console.log(vnode);
     const {
       type, el, anchor,
     } = vnode;
@@ -461,7 +458,7 @@ function baseCreateRenderer(options) {
       hostRemove(cur);
       cur = next;
     }
-    // hostRemove(end);
+    hostRemove(end);
   }
   return {
     render,
