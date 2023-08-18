@@ -144,7 +144,7 @@ function baseCreateRenderer(options) {
     anchor,
     parentComponent,
   ) {
-    console.log(n1, n2, container, anchor);
+    // console.log(n1, n2, container, anchor);
     const fragmentStartAnchor = (n2.el = n1 ? n1.el : hostCreateText(''));
     const fragmentEndAnchor = (n2.anchor = n1 ? n1.anchor : hostCreateText(''));
 
@@ -283,7 +283,7 @@ function baseCreateRenderer(options) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) { // 新节点是文本节点
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 旧节点的字节点是数组，新节点的字节点是文本
         c1.forEach((c) => {
-          unmount(c);
+          unmount(c, null, null, true);
         });
       }
       if (c1 !== c2) {
@@ -295,7 +295,7 @@ function baseCreateRenderer(options) {
           patchKeyedChildren(c1, c2, container, anchor, parentComponent, unmount);
         } else { // 新节点是null 旧节点是array
           c1.forEach((c) => {
-            unmount(c);
+            unmount(c, null, null, true);
           });
         }
       } else { // 旧节点的字节点是text ｜｜ null
@@ -383,7 +383,7 @@ function baseCreateRenderer(options) {
         const prevTree = instance.subTree;
         instance.subTree = nextTree;
 
-        console.log(prevTree, nextTree);
+        // console.log(prevTree, nextTree);
         patch(
           prevTree,
           nextTree,

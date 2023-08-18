@@ -6,23 +6,14 @@ import {
 // import Bar from './Bar.js';
 
 const temp = `
-   <div class="container" key="90">
-       <div v-if="app" key="1001">锄禾日当午</div>
-       <div v-if="app" key="1002">汗滴禾下土</div>
-       <span v-if="app" key="1003">{{ appProp }}</span>
-       <div v-if="app" key="1004">谁知盘中餐</div>
-       <p v-if="app" key="1005">{{ foo }}</p>
-       <div v-if="app" key="1006">粒粒皆辛苦</div>
-
-       <p v-if="!app" key="1005">{{ foo }}</p>
-       <div v-if="!app" key="1006">粒粒皆辛苦</div>
-       <span v-if="!app" key="1003">{{ appProp }}</span>
-       <div v-if="!app" key="1004">谁知盘中餐</div>
-       <div v-if="!app" key="1001">锄禾日当午</div>
-       <div v-if="!app" key="1002">汗滴禾下土</div>
-     
-     <button key="1007" @click="handlers">点击切换</button>
-   </div>
+  <div class="container" key="91">
+    <ul key="90">
+      <li v-for="(item,index,arr) in list" :key="item.id">
+        {{item.id}}-{{item.name}}
+      </li>
+    </ul>
+    <button @click="handlers">点击改变顺序</button>
+  </div>
 `;
 const App = {
   template: temp,
@@ -51,29 +42,63 @@ const App = {
     const classProp2 = 'bar';
     const bgc = 'pink';
 
+    const list = ref(
+      [
+        {
+          id: 1,
+          name: 'web',
+        },
+        {
+          id: 2,
+          name: 'vite',
+        },
+        {
+          id: 3,
+          name: 'app',
+        },
+        {
+          id: 4,
+          name: 'tomcat',
+        },
+        {
+          id: 6,
+          name: 'rollup',
+        },
+        {
+          id: 5,
+          name: 'vite',
+        },
+
+      ],
+    );
     const handlers = () => {
-      foo.value = foo.value === 'lina' ? '李娜' : 'lina';
-      appProp.value = appProp.value === 'gblina' ? '郭斌李娜' : 'gblina';
-      app.value = !app.value;
+      list.value = [
+        {
+          id: 1,
+          name: 'web',
+        },
+        {
+          id: 3,
+          name: 'app',
+        },
+        {
+          id: 4,
+          name: 'tomcat',
+        },
+        {
+          id: 2,
+          name: 'vite',
+        },
+        {
+          id: 7,
+          name: 'webpack',
+        },
+        {
+          id: 5,
+          name: 'vite',
+        },
+      ];
     };
-    const list = [
-      {
-        id: 1001,
-        name: 'web',
-      },
-      {
-        id: 1002,
-        name: 'app',
-      },
-      {
-        id: 1003,
-        name: 'tomcat',
-      },
-      {
-        id: 1004,
-        name: 'vite',
-      },
-    ];
 
     const obj = {
       name: '我在查找',

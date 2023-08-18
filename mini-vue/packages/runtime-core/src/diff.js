@@ -1,5 +1,8 @@
 // 该文件用于实现三种diff算法
 // 简单diff算法
+
+import { isSameVNodeType } from './vnode.js';
+
 /*
   新节点   旧节点
   3       1
@@ -113,40 +116,57 @@ export const doubleEndDiff = (c1, c2, container, anchor, patch, unmount, insert)
 };
 // 快速diff算法 （vue3）
 export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => {
+  if (c1.length < 1 && c2.length < 1) {
+    return;
+  }
   const newChildren = c2;
   const oldChildren = c1;
 
+  let e1 = c1.length - 1;
+  let e2 = c2.length - 1;
   // 前置节点处理
   let j = 0;
-  let oldNode = oldChildren[j];
-  let newNode = newChildren[j];
-  while (oldNode.key === newNode.key) {
-    patch(oldNode, newNode, container);
+
+  while (j <= e1 && j <= e2) {
+    const oldNode = oldChildren[j];
+    const newNode = newChildren[j];
+    if (isSameVNodeType(oldNode, newNode)) {
+      patch(oldNode, newNode, container);
+    } else {
+      break;
+    }
     j++;
-    oldNode = oldChildren[j];
-    newNode = newChildren[j];
   }
   // 后置节点处理
-  let oldEndIndex = oldChildren.length - 1;
-  let newEndIndex = newChildren.length - 1;
-
-  oldNode = oldChildren[oldEndIndex];
-  newNode = newChildren[newEndIndex];
-
-  while (oldNode.key === newNode.key) {
-    patch(oldNode, newNode, container);
-    oldEndIndex--;
-    newEndIndex--;
-
-    oldNode = oldChildren[oldEndIndex];
-    newNode = newChildren[newEndIndex];
+  while (j <= e1 && j <= e2.length) {
+    const oldNode = oldChildren[e1];
+    const newNode = newChildren[e2];
+    if (isSameVNodeType(oldNode, newNode)) {
+      patch(oldNode, newNode, container, anchor);
+    } else {
+      break;
+    }
+    e1--;
+    e2--;
   }
+
+  const oldEndIndex = e1;
+  const newEndIndex = e2;
   if (j > oldEndIndex && j <= newEndIndex) { // 新增
-
+    const anchorIndex = newEndIndex + 1;
+    const anchor = anchorIndex < newChildren.length ? newChildren[anchorIndex].el : null;
+    while (j <= newEndIndex) {
+      patch(null, newChildren[j++], container, anchor);
+    }
   } else if (j > newEndIndex && j <= oldEndIndex) {
-
+    while (j <= oldEndIndex) {
+      unmount(oldChildren[j++], null, null, false);
+    }
   } else {
     const count = newEndIndex - j + 1;// 以新节点为标准
+    if (count < 0) {
+      return;
+    }
     const source = new Array(count);
     source.fill(-1);
 
@@ -162,11 +182,11 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
 
     let patched = 0;
     for (let i = oldStartIndex; i <= oldEndIndex; i++) {
-      oldNode = oldChildren[i];
+      const oldNode = oldChildren[i];
       if (patched < count) {
         const k = keyIndex[oldNode.key];// 旧节点在新节点中的位置
         if (typeof k !== 'undefined') {
-          newNode = newChildren[k];
+          const newNode = newChildren[k];
           patch(oldNode, newNode, container);
           source[k - newStartIndex] = i;
           patched++;
@@ -186,7 +206,7 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
     if (moved) {
       // source是新节点在旧节点的位置信息
       const seq = getSequence(source);
-      console.log(seq);
+      console.log(seq, source, newStartIndex);
       let s = seq.length - 1;
       let i = count - 1;// count是新children中需要处理的几点
       for (i; i >= 0; i--) { // 遍历新节点中经过前置，后置处理后的list
@@ -196,6 +216,7 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
           const nextPos = pos + 1;
 
           const anchor = nextPos < newChildren.length ? newChildren[nextPos].el : null;
+
           patch(null, newNode, container, anchor);
         } else if (i !== seq[s]) {
           const pos = i + newStartIndex;

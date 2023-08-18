@@ -1,8 +1,17 @@
 import { PatchFlagNames, PatchFlags } from '../../../shared/src/patchFlags.js';
 import {
-  ConstantTypes, NodeTypes, createCallExpression, createObjectProperty, createSimpleExpression, createVNodeCall,
+  ConstantTypes,
+  NodeTypes,
+  createCallExpression,
+  createObjectProperty,
+  createSimpleExpression,
+  createVNodeCall,
+  createObjectExpression,
+  getVNodeBlockHelper,
+  getVNodeHelper,
+  createFunctionExpression,
 } from '../ast.js';
-import { FRAGMENT, RENDER_LIST } from '../runtimeHelpers.js';
+import { FRAGMENT, RENDER_LIST, OPEN_BLOCK } from '../runtimeHelpers.js';
 import { createStructuralDirectiveTransform } from '../transform.js';
 import { isTemplateNode, findProp } from '../utils.js';
 
@@ -12,6 +21,7 @@ export const transformFor = createStructuralDirectiveTransform('for', (node, dir
     const renderExp = createCallExpression(helper(RENDER_LIST), [
       forNode.source,
     ]);
+    // console.log(renderExp);
     const isTemplate = isTemplateNode(node);
     const keyProp = findProp(node, 'key');
     const keyExp = keyProp && (
@@ -37,7 +47,70 @@ export const transformFor = createStructuralDirectiveTransform('for', (node, dir
     );
 
     return () => {
+      let childBlock;
+      const { children } = forNode;
+      if (isTemplate) {
+        node.children.some((c) => {
+          if (c.type === NodeTypes.ELEMENT) {
+            const key = findProp(c, 'key');
+            if (key) {
+              console.error('key on false');
+            }
+          }
+        });
+      }
+      const needFragmentWrapper = children.length !== 1 || children[0].type !== NodeTypes.ELEMENT;
+      if (needFragmentWrapper) {
+        // <template v-for="..."> with text or multi-elements
+        // should generate a fragment block for each loop
+        childBlock = createVNodeCall(
+          context,
+          helper(FRAGMENT),
+          keyProperty ? createObjectExpression([keyProperty]) : undefined,
+          node.children,
+          `${PatchFlags.STABLE_FRAGMENT
+          } /* ${PatchFlagNames[PatchFlags.STABLE_FRAGMENT]} */`,
+          undefined,
+          undefined,
+          true,
+          undefined,
+          false, /* isComponent */
+        );
+      } else {
+        childBlock = children[0].codegenNode;
+        if (isTemplate && keyProperty) {
+          // injectProp(childBlock, keyProperty, context);
+        }
+        if (childBlock.isBlock !== !isStableFragment) {
+          if (childBlock.isBlock) {
+            // switch from block to vnode
+            removeHelper(OPEN_BLOCK);
+            removeHelper(
+              getVNodeBlockHelper(context.inSSR, childBlock.isComponent),
+            );
+          } else {
+            // switch from vnode to block
+            removeHelper(
+              getVNodeHelper(context.inSSR, childBlock.isComponent),
+            );
+          }
+        }
+        childBlock.isBlock = !isStableFragment;
+        if (childBlock.isBlock) {
+          helper(OPEN_BLOCK);
+          helper(getVNodeBlockHelper(context.inSSR, childBlock.isComponent));
+        } else {
+          helper(getVNodeHelper(context.inSSR, childBlock.isComponent));
+        }
+      }
 
+      renderExp.arguments.push(
+        createFunctionExpression(
+          createForLoopParams(forNode.parseResult),
+          childBlock,
+          true, /* force newline */
+        ),
+      );
     };
   });
 });
@@ -104,7 +177,7 @@ export function parseForExpression(
   const inMatch = exp.match(forAliasRE);
   if (!inMatch) return;
   const [, LHS, RHS] = inMatch;// LHS(item,index) RHS(list  )
-  console.log(LHS, RHS);
+  // console.log(LHS, RHS);
 
   const result = {
     source: createAliasExpression(
@@ -121,7 +194,7 @@ export function parseForExpression(
   const trimmedOffset = LHS.indexOf(valueContent);
 
   const iteratorMatch = valueContent.match(forIteratorRE);
-  console.log(iteratorMatch);
+
   if (iteratorMatch) {
     valueContent = valueContent.replace(forIteratorRE, '').trim(); // item
     const keyContent = iteratorMatch[1].trim(); // index
@@ -143,4 +216,23 @@ export function parseForExpression(
     result.value = createAliasExpression(loc, valueContent, {});
   }
   return result;
+}
+
+export function createForLoopParams(
+  { value, key, index },
+  memoArgs = [],
+) {
+  return createParamsList([value, key, index, ...memoArgs]);
+}
+
+function createParamsList(
+  args,
+) {
+  let i = args.length;
+  while (i--) {
+    if (args[i]) break;
+  }
+  return args
+    .slice(0, i + 1)
+    .map((arg, i) => arg || createSimpleExpression('_'.repeat(i + 1), false));
 }
