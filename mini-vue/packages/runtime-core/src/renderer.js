@@ -312,7 +312,6 @@ function baseCreateRenderer(options) {
   }
   function patchKeyedChildren(c1, c2, container, anchor, parentComponent) {
     console.log(c1, c2);
-
     // simpleDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
     // doubleEndDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
     quickDiff(c1, c2, container, anchor, patch, unmount, hostInsert);

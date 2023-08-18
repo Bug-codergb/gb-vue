@@ -89,7 +89,7 @@ export const doubleEndDiff = (c1, c2, container, anchor, patch, unmount, insert)
       newStartNode = newChildren[++newStartIndex];
       oldEndNode = oldChildren[--oldEndIndex];
     } else {
-      const indexOld = oldChildren.findIndex((node) => node.key === newStartNode.key);
+      const indexOld = oldChildren.findIndex((node) => node && (node.key === newStartNode.key));
       if (indexOld > 0) {
         const vnodeToMove = oldChildren[indexOld];
         patch(vnodeToMove, newStartNode, container);
@@ -206,7 +206,6 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
     if (moved) {
       // source是新节点在旧节点的位置信息
       const seq = getSequence(source);
-      console.log(seq, source, newStartIndex);
       let s = seq.length - 1;
       let i = count - 1;// count是新children中需要处理的几点
       for (i; i >= 0; i--) { // 遍历新节点中经过前置，后置处理后的list
