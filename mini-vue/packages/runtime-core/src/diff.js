@@ -98,15 +98,13 @@ export const doubleEndDiff = (c1, c2, container, anchor, patch, unmount, insert)
       newStartNode = newChildren[++newStartIndex];
     }
   }
-  console.log(newChildren.slice(newStartIndex, newEndIndex + 1));
-  console.log(oldChildren.slice(oldStartIndex, oldEndIndex + 1));
+
   // oldVNode已经对比完毕，但是新节点仍然存在
   if (oldEndIndex < oldStartIndex && newStartIndex <= newEndIndex) {
     for (let i = newStartIndex; i <= newEndIndex; i++) {
       patch(null, newChildren[i], container, oldStartNode.el);
     }
   } else if (newEndIndex < newStartIndex && oldStartIndex <= oldEndIndex) {
-    console.log(oldChildren);
     for (let i = oldStartIndex; i <= oldEndIndex; i++) {
       console.log(oldChildren[i]);
       if (oldChildren[i]) unmount(oldChildren[i], null, null, true);
@@ -115,6 +113,141 @@ export const doubleEndDiff = (c1, c2, container, anchor, patch, unmount, insert)
 };
 // 快速diff算法 （vue3）
 export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => {
-  const newChildren = c2; const
-    oldChildren = c1;
+  const newChildren = c2;
+  const oldChildren = c1;
+
+  // 前置节点处理
+  let j = 0;
+  let oldNode = oldChildren[j];
+  let newNode = newChildren[j];
+  while (oldNode.key === newNode.key) {
+    patch(oldNode, newNode, container);
+    j++;
+    oldNode = oldChildren[j];
+    newNode = newChildren[j];
+  }
+  // 后置节点处理
+  let oldEndIndex = oldChildren.length - 1;
+  let newEndIndex = newChildren.length - 1;
+
+  oldNode = oldChildren[oldEndIndex];
+  newNode = newChildren[newEndIndex];
+
+  while (oldNode.key === newNode.key) {
+    patch(oldNode, newNode, container);
+    oldEndIndex--;
+    newEndIndex--;
+
+    oldNode = oldChildren[oldEndIndex];
+    newNode = newChildren[newEndIndex];
+  }
+  if (j > oldEndIndex && j <= newEndIndex) { // 新增
+
+  } else if (j > newEndIndex && j <= oldEndIndex) {
+
+  } else {
+    const count = newEndIndex - j + 1;// 以新节点为标准
+    const source = new Array(count);
+    source.fill(-1);
+
+    let moved = false;
+    let pos = 0;
+
+    const newStartIndex = j;
+    const oldStartIndex = j;
+    const keyIndex = {};
+    for (let i = newStartIndex; i <= newEndIndex; i++) {
+      keyIndex[newChildren[i].key] = i;
+    }
+
+    let patched = 0;
+    for (let i = oldStartIndex; i <= oldEndIndex; i++) {
+      oldNode = oldChildren[i];
+      if (patched < count) {
+        const k = keyIndex[oldNode.key];// 旧节点在新节点中的位置
+        if (typeof k !== 'undefined') {
+          newNode = newChildren[k];
+          patch(oldNode, newNode, container);
+          source[k - newStartIndex] = i;
+          patched++;
+          if (k < pos) {
+            moved = true;
+          } else {
+            pos = k;
+          }
+        } else {
+          unmount(oldNode, null, null, true);
+        }
+      } else {
+        unmount(oldNode, null, null, true);
+      }
+    }
+
+    if (moved) {
+      // source是新节点在旧节点的位置信息
+      const seq = getSequence(source);
+      console.log(seq);
+      let s = seq.length - 1;
+      let i = count - 1;// count是新children中需要处理的几点
+      for (i; i >= 0; i--) { // 遍历新节点中经过前置，后置处理后的list
+        if (source[i] === -1) {
+          const pos = i + newStartIndex;
+          const newNode = newChildren[pos];
+          const nextPos = pos + 1;
+
+          const anchor = nextPos < newChildren.length ? newChildren[nextPos].el : null;
+          patch(null, newNode, container, anchor);
+        } else if (i !== seq[s]) {
+          const pos = i + newStartIndex;
+          const newNode = newChildren[pos];
+          const nextPos = pos + 1;
+          const anchor = nextPos < newChildren.length ? newChildren[nextPos].el : null;
+          insert(newNode.el, container, anchor);
+        } else {
+          s--;
+        }
+      }
+    }
+  }
 };
+function getSequence(arr) {
+  const p = arr.slice();
+  const result = [0];
+  let i; let j; let u; let v; let
+    c;
+  const len = arr.length;
+  for (i = 0; i < len; i++) {
+    const arrI = arr[i];
+    if (arrI !== 0) {
+      j = result[result.length - 1];
+      if (arr[j] < arrI) {
+        p[i] = j;
+        result.push(i);
+        continue;
+      }
+      u = 0;
+      v = result.length - 1;
+      while (u < v) {
+        c = (u + v) >> 1;
+        if (arr[result[c]] < arrI) {
+          u = c + 1;
+        } else {
+          v = c;
+        }
+      }
+      if (arrI < arr[result[u]]) {
+        if (u > 0) {
+          p[i] = result[u - 1];
+        }
+        result[u] = i;
+      }
+    }
+  }
+  u = result.length;
+  v = result[u - 1];
+  while (u-- > 0) {
+    result[u] = v;
+    v = p[v];
+  }
+  return result;
+}

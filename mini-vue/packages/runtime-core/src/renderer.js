@@ -24,6 +24,7 @@ import { PatchFlags } from '../../shared/src/patchFlags.js';
 import {
   simpleDiff,
   doubleEndDiff,
+  quickDiff,
 } from './diff.js';
 
 export const queuePostRenderEffect = queuePostFlushCb;
@@ -313,7 +314,8 @@ function baseCreateRenderer(options) {
     console.log(c1, c2);
 
     // simpleDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
-    doubleEndDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
+    // doubleEndDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
+    quickDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
   }
   function patchUnKeyedChildren(c1, c2, container, anchor, parentComponent) {
 
