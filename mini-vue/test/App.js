@@ -7,22 +7,20 @@ import {
 
 const temp = `
    <div class="container" key="90">
-     <template v-if="app">
-       <div key="1001">锄禾日当午</div>
-       <div key="1002">汗滴禾下土</div>
-       <span key="1003">{{ appProp }}</span>
-       <div key="1004">谁知盘中餐</div>
-       <p key="1005">{{ foo }}</p>
-       <div key="1006">粒粒皆辛苦</div>
-     </template>
-     <template v-else>
-       <p key="1005">{{ foo }}</p>
-       <div key="1006">粒粒皆辛苦</div>
-       <span key="1003">{{ appProp }}</span>
-       <div key="1004">谁知盘中餐</div>
-       <div key="1001">锄禾日当午</div>
-       <div key="1002">汗滴禾下土</div>
-     </template>
+       <div v-if="app" key="1001">锄禾日当午</div>
+       <div v-if="app" key="1002">汗滴禾下土</div>
+       <span v-if="app" key="1003">{{ appProp }}</span>
+       <div v-if="app" key="1004">谁知盘中餐</div>
+       <p v-if="app" key="1005">{{ foo }}</p>
+       <div v-if="app" key="1006">粒粒皆辛苦</div>
+
+       <p v-if="!app" key="1005">{{ foo }}</p>
+       <div v-if="!app" key="1006">粒粒皆辛苦</div>
+       <span v-if="!app" key="1003">{{ appProp }}</span>
+       <div v-if="!app" key="1004">谁知盘中餐</div>
+       <div v-if="!app" key="1001">锄禾日当午</div>
+       <div v-if="!app" key="1002">汗滴禾下土</div>
+     
      <button key="1007" @click="handlers">点击切换</button>
    </div>
 `;

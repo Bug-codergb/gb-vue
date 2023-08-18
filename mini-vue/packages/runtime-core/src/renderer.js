@@ -21,7 +21,10 @@ import { invokeDirectiveHook } from './directives.js';
 import { PatchFlags } from '../../shared/src/patchFlags.js';
 
 // diff
-import { simpleDiff } from './diff.js';
+import {
+  simpleDiff,
+  doubleEndDiff,
+} from './diff.js';
 
 export const queuePostRenderEffect = queuePostFlushCb;
 
@@ -64,7 +67,6 @@ function baseCreateRenderer(options) {
   };
 
   function patch(n1, n2, container, anchor, parentComponent) {
-    console.log(n1, n2);
     if (n1 === n2) { // 相等则不比较
       return;
     }
@@ -309,7 +311,9 @@ function baseCreateRenderer(options) {
   }
   function patchKeyedChildren(c1, c2, container, anchor, parentComponent) {
     console.log(c1, c2);
-    simpleDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
+
+    // simpleDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
+    doubleEndDiff(c1, c2, container, anchor, patch, unmount, hostInsert);
   }
   function patchUnKeyedChildren(c1, c2, container, anchor, parentComponent) {
 
