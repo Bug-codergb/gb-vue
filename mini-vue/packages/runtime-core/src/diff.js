@@ -138,7 +138,7 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
     j++;
   }
   // 后置节点处理
-  while (j <= e1 && j <= e2.length) {
+  while (j <= e1 && j <= e2) {
     const oldNode = oldChildren[e1];
     const newNode = newChildren[e2];
     if (isSameVNodeType(oldNode, newNode)) {
@@ -179,7 +179,7 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
     for (let i = newStartIndex; i <= newEndIndex; i++) {
       keyIndex[newChildren[i].key] = i;
     }
-
+    console.log(keyIndex);
     let patched = 0;
     for (let i = oldStartIndex; i <= oldEndIndex; i++) {
       const oldNode = oldChildren[i];
@@ -189,6 +189,7 @@ export const quickDiff = (c1, c2, container, anchor, patch, unmount, insert) => 
           const newNode = newChildren[k];
           patch(oldNode, newNode, container);
           source[k - newStartIndex] = i;
+          console.log(JSON.parse(JSON.stringify(source)));
           patched++;
           if (k < pos) {
             moved = true;
