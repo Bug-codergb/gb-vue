@@ -12,14 +12,16 @@ import {
   TO_DISPLAY_STRING,
   helperNameMap,
   WITH_DIRECTIVES,
+  RESOLVE_COMPONENT,
   OPEN_BLOCK,
+  RESOLVE_DIRECTIVE,
 } from './runtimeHelpers.js';
 import {
   NodeTypes,
   getVNodeBlockHelper,
   getVNodeHelper,
 } from './ast.js';
-import { isSimpleIdentifier } from './utils.js';
+import { isSimpleIdentifier, toValidAssetId } from './utils.js';
 
 const PURE_ANNOTATION = '/*#__PURE__*/';
 const aliasHelper = (s) => `${helperNameMap[s]}: _${helperNameMap[s]}`;
@@ -189,6 +191,37 @@ export function generate(
     map: context.map ? context.map.toJSON() : undefined,
   };
 }
+
+function genAssets(
+  assets,
+  type,
+  {
+    helper, push, newline, isTS,
+  },
+) {
+  const resolver = helper(
+    type === 'component'
+      ? RESOLVE_COMPONENT
+      : RESOLVE_DIRECTIVE,
+  );
+  for (let i = 0; i < assets.length; i++) {
+    let id = assets[i];
+    // potential component implicit self-reference inferred from SFC filename
+    const maybeSelfReference = id.endsWith('__self');
+    if (maybeSelfReference) {
+      id = id.slice(0, -6);
+    }
+    push(
+      `const ${toValidAssetId(id, type)} = ${resolver}(${JSON.stringify(id)}${
+        maybeSelfReference ? ', true' : ''
+      })${isTS ? '!' : ''}`,
+    );
+    if (i < assets.length - 1) {
+      newline();
+    }
+  }
+}
+
 function genFunctionPreamble(ast, context) {
   const {
     ssr,

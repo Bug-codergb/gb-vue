@@ -149,7 +149,7 @@ export function transform(root, options) {
   }
 
   root.helpers = new Set([...context.helpers.keys()]);
-  root.conpoments = [...context.components];
+  root.components = [...context.components];
   root.directives = [...context.directives];
   root.imports = context.imports;
   root.hoists = context.hoists;

@@ -11,6 +11,7 @@ export {
   createElementBlock,
   closeBlock,
   createCommentVNode,
+  createVNode,
 } from './vnode.js';
 export {
   Comment,
@@ -43,4 +44,7 @@ export {
   onUmounted,
 } from './apiLIfecycle.js';
 
+export { resolveComponent } from './helpers/resolveAssets.js';
+
 export { renderList } from './helpers/renderList.js';
+export { renderSlot } from './helpers/renderSlot.js';

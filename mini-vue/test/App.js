@@ -3,22 +3,14 @@ import {
   parseSfc,
 } from '../packages/vue/src/index.js';
 
-// import Bar from './Bar.js';
+import Bar from './Bar.js';
 
 const temp = `
   <div class="container" key="91">
-    <div class="app">{{foo}}</div>
-    <div class="oop">
-      <span>123</span>
-    </div>
-    <div style="color:pink">11-{{appProp}}</div>
-    <div v-if="app">
-      <span>app</span>
-    </div>
-    <div v-else>
-      <span>else</span>
-    </div>
-    <button @click="handlers">点击改变顺序</button>
+    <slot name="app">
+      <span>今天是个好日子</span>
+    </slot>
+    <Bar :name="name"/>
   </div>
 `;
 const App = {
@@ -29,7 +21,11 @@ const App = {
       default: false,
     },
   },
-  setup() {
+  components: {
+    Bar,
+  },
+  setup(props, { attrs, slots }) {
+    console.log(props);
     const user = reactive({
       name: 'app',
       age: 18,

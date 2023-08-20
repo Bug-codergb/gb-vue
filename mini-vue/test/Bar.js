@@ -1,4 +1,4 @@
-import { reactive, ref } from '../packages/vue/index.js';
+import { reactive, ref } from '../packages/vue/src/index.js';
 
 const temp = `
   <div class="bar">
@@ -15,6 +15,7 @@ const temp = `
 
 export default {
   name: 'Bar',
+  template: temp,
   props: {
     name: {
       type: Object,
@@ -31,6 +32,7 @@ export default {
   },
 
   setup(props, { emit, attrs, slot }) {
+    console.log(props);
     const user = reactive({
       id: 1001,
       alias: 'lina',

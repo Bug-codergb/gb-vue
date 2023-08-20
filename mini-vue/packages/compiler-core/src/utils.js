@@ -146,3 +146,10 @@ export function isSlotOutlet(node) {
 export function isTemplateNode(node) {
   return node.type === NodeTypes.ELEMENT && node.tagType === ElementTypes.TEMPLATE;
 }
+export function toValidAssetId(
+  name,
+  type,
+) {
+  // see issue#4422, we need adding identifier on validAssetId if variable `name` has specific character
+  return `_${type}_${name.replace(/[^\w]/g, (searchValue, replaceValue) => (searchValue === '-' ? '_' : name.charCodeAt(replaceValue).toString()))}`;
+}

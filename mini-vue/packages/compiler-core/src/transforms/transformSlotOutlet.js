@@ -5,12 +5,13 @@ import { isSlotOutlet, isStaticArgOf, isStaticExp } from '../utils.js';
 import { buildProps } from './transformElement.js';
 
 export const transformSlotOutlet = (node, context) => {
-  if (isSlotOutlet(node)) {
+  if (isSlotOutlet(node)) { // 标签类型时插槽类型
     const { children, loc } = node;
+    // console.log(children);
     const { slotName, slotProps } = processSlotOutlet(node, context);
     console.log(slotProps);
     const slotArgs = [
-      context.prefixIdentifiers ? '_ctx.$slot' : '$slot',
+      context.prefixIdentifiers || true ? '_ctx.$slot' : '$slot',
       slotName,
       '{}',
       'undefined',
@@ -32,6 +33,7 @@ export const transformSlotOutlet = (node, context) => {
       slotArgs,
       {},
     );
+    console.log(node);// 插槽这里默认会生成一个函数，它的返回值为<slot></slot>的children
   }
 };
 export function processSlotOutlet(node, context) {
@@ -44,7 +46,7 @@ export function processSlotOutlet(node, context) {
     if (p.type === NodeTypes.ATTRIBUTE) {
       if (p.value) {
         if (p.name === 'name') {
-          slotName = JSON.stringify(p.value.content);
+          slotName = JSON.stringify(p.value.content);// 获取具名插槽名称
         } else {
           p.name = camelize(p.name);
           nonNameProps.push(p);

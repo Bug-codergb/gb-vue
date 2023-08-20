@@ -7,6 +7,8 @@ import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { markRaw } from '../../reactivity/src/reactive.js';
 import { initProps, normalizePropsOptions } from './componentProps.js';
 
+import { applyOptions } from './componentOptions.js';
+
 let compile = void 0;
 
 let uid = 0;
@@ -96,7 +98,7 @@ function setupStatefulComponent(instance) {
     // 返回setup的结果如果是函数则是render函数，否则就是需要代理的对象
     const setupResult = setup(shallowReadonly(instance.props), setupContext);
 
-    setCurrentInstance(null);
+    // setCurrentInstance(null);
     handleSetupResult(instance, setupResult);
   } else {
     finishComponentSetup(instance);
@@ -129,6 +131,9 @@ function finishComponentSetup(instance) {
     }
     instance.render = Component.render;
   }
+
+  applyOptions(instance);
+  console.log(instance);
 }
 export let currentInstance = {};
 export function getCurrentInstance() {
@@ -139,4 +144,12 @@ export function setCurrentInstance(instance) {
 }
 export function registerRuntimeCompiler(_compile) {
   compile = _compile;
+}
+export function getComponentName(
+  Component,
+  includeInferred = true,
+) {
+  return isFunction(Component)
+    ? Component.displayName || Component.name
+    : Component.name || (includeInferred && Component.__name);
 }
