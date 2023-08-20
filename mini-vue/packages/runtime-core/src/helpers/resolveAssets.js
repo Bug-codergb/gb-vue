@@ -5,7 +5,7 @@ const __DEV__ = true;
 export const COMPONENTS = 'components';
 export function resolveAsset(type, name, warnMissing = true, maybeSelfReference) {
   const instance = currentInstance;
-  console.log(instance, type);
+  // console.log(instance, type);
   if (instance) {
     const Component = instance.type;
 

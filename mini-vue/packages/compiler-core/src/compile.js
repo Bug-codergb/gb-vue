@@ -13,6 +13,7 @@ import { transformBind } from './transforms/vBind.js';
 import { transformOn } from './transforms/vOn.js';
 import { transformModel } from './transforms/vModel.js';
 
+import { transformExpression } from './transforms/transformExpression.js';
 import { generate } from './codegen.js';
 
 export function getBaseTransformPreset() { // 转换所需预设
@@ -20,6 +21,7 @@ export function getBaseTransformPreset() { // 转换所需预设
     [
       transformIf,
       transformFor,
+      // transformExpression,
       transformSlotOutlet,
       transformElement,
       transformText,
@@ -37,6 +39,7 @@ export function baseComplie(template, options) {
 
   const [nodeTransforms, directiveTransforms] = getBaseTransformPreset();
 
+  const prefixIdentifiers = false;
   transform(
     ast,
     {
@@ -53,7 +56,9 @@ export function baseComplie(template, options) {
 
   const generateCode = generate(
     ast,
-    { ...options },
+    Object.assign({}, options, {
+      prefixIdentifiers,
+    }),
   );
   console.log(generateCode.code);
   return generateCode;

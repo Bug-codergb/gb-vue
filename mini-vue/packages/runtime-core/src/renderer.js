@@ -328,6 +328,7 @@ function baseCreateRenderer(options) {
       updateComponent(n1, n2, container, parentComponent);
     }
   }
+  // render函数的执行
   function mountComponent(initialVNode, container, anchor, parentComponent) {
     const instance = createComponentInstance(initialVNode, container);
     initialVNode.component = instance;

@@ -52,5 +52,6 @@ module.exports = {
     'no-cond-assign': 'off',
     'no-useless-return': 'off',
     'no-case-declarations': 'off',
+    'prefer-destructuring': 'off',
   },
 };

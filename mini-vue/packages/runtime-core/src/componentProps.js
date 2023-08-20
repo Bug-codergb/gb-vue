@@ -7,6 +7,7 @@ import {
 import { InternalObjectKey } from './vnode.js';
 import { toRaw } from '../../reactivity/src/index.js';
 import { setCurrentInstance } from './component.js';
+import { shallowReactive } from '../../reactivity/src/reactive.js';
 
 const BooleanFlags = {
   shouldCast: 'shouleCast', // 应该被转换如Boolean没有传值时，默认为false
@@ -105,10 +106,26 @@ export function normalizePropsOptions(comp, appContext, asMixin = false) {
   return res;
 }
 export function initProps(instance, rawProps, isStateful, isSSR) {
+  console.log(rawProps);
   const props = {};
   const attrs = {};
   def(attrs, InternalObjectKey, 1);
   instance.propsDefaults = Object.call(null);
+
+  setFullProps(instance, rawProps, props, attrs);
+  console.log(instance);
+  /**
+   * 如果传过来的props在组件的props选项上没有定义则其值设为undefined;
+   */
+  for (const key in instance.propsOptions[0]) {
+    if (!(key in props)) {
+      props[key] = undefined;
+    }
+  }
+  if (isStateful) {
+    instance.props = shallowReactive(props);
+  }
+  instance.attrs = attrs;
 }
 function setFullProps(instance, rawProps, props, attrs) {
   const [options, needCastKeys] = instance.propsOptions;

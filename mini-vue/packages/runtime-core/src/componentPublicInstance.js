@@ -29,20 +29,20 @@ export const PublicInstanceProxyHandlers = {
     const {
       ctx, setupState, data, type, props, appContext, accessCache,
     } = instance;
-
+    console.log(key);
     let normalizedProps;
 
     if (key[0] !== '$') {
       const n = accessCache[key];
       if (n !== undefined) {
-
+        debugger;
       } else if (hasSetupBinding(setupState, key)) {
         accessCache[key] = AccessTypes.SETUP;
         return setupState[key];
       } else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
         accessCache[key] = AccessTypes.DATA;
         return data[key];
-      } else if (normalizedProps = instance.propsOptions[0] && hasOwn(normalizedProps, key)) {
+      } else if ((normalizedProps = instance.propsOptions[0]) && hasOwn(normalizedProps, key)) {
         accessCache[key] = AccessTypes.PROPS;
         return props[key];
       } else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
@@ -96,6 +96,6 @@ export function createDevRenderContext(instance) {
       get: () => publicPropertiesMap[key](instance),
     });
   });
-
+  console.log(target);
   return target;
 }

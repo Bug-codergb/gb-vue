@@ -9,7 +9,7 @@ export const transformSlotOutlet = (node, context) => {
     const { children, loc } = node;
     // console.log(children);
     const { slotName, slotProps } = processSlotOutlet(node, context);
-    console.log(slotProps);
+    // console.log(slotProps);
     const slotArgs = [
       context.prefixIdentifiers || true ? '_ctx.$slot' : '$slot',
       slotName,
@@ -23,7 +23,7 @@ export const transformSlotOutlet = (node, context) => {
       expectedLen = 3;
     }
     if (children.length) {
-      console.log(children);
+      // console.log(children);
       slotArgs[3] = createFunctionExpression([], children, false, false, {});
       expectedLen = 4;
     }
@@ -33,14 +33,14 @@ export const transformSlotOutlet = (node, context) => {
       slotArgs,
       {},
     );
-    console.log(node);// 插槽这里默认会生成一个函数，它的返回值为<slot></slot>的children
+    // console.log(node);// 插槽这里默认会生成一个函数，它的返回值为<slot></slot>的children
   }
 };
 export function processSlotOutlet(node, context) {
   let slotName = '"default"';
   let slotProps;
   const nonNameProps = [];
-  console.log(node);
+  // console.log(node);
   for (let i = 0; i < node.props.length; i++) {
     const p = node.props[i];
     if (p.type === NodeTypes.ATTRIBUTE) {
@@ -53,14 +53,14 @@ export function processSlotOutlet(node, context) {
         }
       }
     } else {
-      console.log(p);
+      // console.log(p);
 
       if (p.name === 'bind' && isStaticArgOf(p.arg, 'name')) {
         if (p.exp) {
           slotName = p.exp;
         }
       } else {
-        console.log(p);
+        // console.log(p);
         if (p.name === 'bind' && p.arg && isStaticExp(p.arg)) {
           p.arg.content = camelize(p.arg.content);
         }
@@ -68,7 +68,7 @@ export function processSlotOutlet(node, context) {
       }
     }
   }
-  console.log(nonNameProps);
+  // console.log(nonNameProps);
   if (nonNameProps.length > 0) {
     const { props, directives } = buildProps(
       node,
@@ -82,7 +82,7 @@ export function processSlotOutlet(node, context) {
       console.error('slot error');
     }
   }
-  console.log(slotName);
+  // console.log(slotName);
   return {
     slotName,
     slotProps,

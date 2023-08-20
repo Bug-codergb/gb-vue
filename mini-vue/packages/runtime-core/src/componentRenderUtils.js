@@ -18,14 +18,20 @@ export function renderComponentRoot(instance) {
     renderCache,
   } = instance;
   let result;
+  console.log(proxy, proxy.appProp);
+  console.log(render);
   if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    const proxyToUse = setupState;// withProxy || proxy;
-
+    const proxyToUse = proxy;
     result = render.call(
       proxyToUse,
       proxyToUse,
+      renderCache,
+      props,
+      setupState,
+      data,
+      ctx,
     );
   }
-
+  console.log(result  );
   return result;
 }

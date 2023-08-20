@@ -7,9 +7,11 @@ import Bar from './Bar.js';
 
 const temp = `
   <div class="container" key="91">
+    <span>我是父组件</span>
     <slot name="app">
       <span>今天是个好日子</span>
     </slot>
+    <h1>{{appProp}}</h1>
     <Bar :name="name"/>
   </div>
 `;
@@ -43,7 +45,7 @@ const App = {
     const classProp1 = 'active';
     const classProp2 = 'bar';
     const bgc = 'pink';
-
+    const name = ref('郭斌哈哈哈');
     const list = ref(
       [
         {
@@ -123,6 +125,7 @@ const App = {
       classProp2,
       bgc,
       proxy,
+      name,
     };
   },
 };

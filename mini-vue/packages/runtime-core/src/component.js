@@ -54,6 +54,7 @@ export function createComponentInstance(vnode, parent, suspense) {
 
     setupState: EMPTY_OBJ,
     setupContext: EMPTY_OBJ,
+    data: EMPTY_OBJ,
 
     bc: null,
     c: null,
@@ -77,8 +78,8 @@ export function isStatefulComponent(instance) {
 
 export function setupComponent(instance) {
   const { props, children } = instance.vnode;
+  console.log(instance, props);
   const isStateful = isStatefulComponent(instance);
-
   initProps(instance, props, isStateful, false);
 
   const setupResult = isStateful
@@ -88,7 +89,8 @@ export function setupComponent(instance) {
 function setupStatefulComponent(instance) {
   const Component = instance.type;// type 为选项
 
-  instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers));
+  instance.accessCache = Object.create(null);
+  instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers));// render函数传参
 
   const { setup } = Component;
   if (setup) {
@@ -133,7 +135,7 @@ function finishComponentSetup(instance) {
   }
 
   applyOptions(instance);
-  console.log(instance);
+  // console.log(instance);
 }
 export let currentInstance = {};
 export function getCurrentInstance() {

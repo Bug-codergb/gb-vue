@@ -10,6 +10,7 @@ const temp = `
    </ul>
    <button @click="changeUserMsg">修改ta的信息</button>
    <button @click="handler">发个消息吧</button>
+   <span>{{name}}--</span>
   </div>
 `;
 
@@ -32,7 +33,7 @@ export default {
   },
 
   setup(props, { emit, attrs, slot }) {
-    console.log(props);
+    console.log(props.name);
     const user = reactive({
       id: 1001,
       alias: 'lina',
