@@ -7,11 +7,17 @@ import {
 
 const temp = `
   <div class="container" key="91">
-    <ul key="90">
-      <li v-for="(item,index,arr) in list" :key="item.id">
-        {{item.id}}-{{item.name}}
-      </li>
-    </ul>
+    <div class="app">{{foo}}</div>
+    <div class="oop">
+      <span>123</span>
+    </div>
+    <div style="color:pink">11-{{appProp}}</div>
+    <div v-if="app">
+      <span>app</span>
+    </div>
+    <div v-else>
+      <span>else</span>
+    </div>
     <button @click="handlers">点击改变顺序</button>
   </div>
 `;

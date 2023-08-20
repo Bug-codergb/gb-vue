@@ -15,7 +15,7 @@ export function isSingleElementRoot(
   root,
   child,
 ) {
-  const { children } = root;
+  const { children } = root;// 跟节点是否为单个标签 类似于vue2跟节点
   return (
     children.length === 1
     && child.type === NodeTypes.ELEMENT
@@ -26,34 +26,37 @@ export function hoistStatic(root, context) {
   walk(root, context, isSingleElementRoot(root, root.children[0]));
 }
 
-function walk(node, context, doNotHoistNode) {
-  const { children } = node;
+function walk(node, context, doNotHoistNode) { // 节点，上下文，是否做静态提升(不做)
+  const { children } = node;// 获取节点的children
+  // console.log(node, doNotHoistNode);
   const originalCount = children.length;
   let hoistedCount = 0;
 
   for (let i = 0; i < children.length; i++) {
     const child = children[i];
-    if (
+    if (// 只有元素节点可以被提升
       child.type === NodeTypes.ELEMENT
       && child.tagType === ElementTypes.ELEMENT
     ) {
+      // 判断是否做静态提升，getConstantType获取其静态类型
       const constantType = doNotHoistNode ? ConstantTypes.NOT_CONSTANT : getConstantType(child, context);
       if (constantType > ConstantTypes.NOT_CONSTANT) {
         if (constantType >= ConstantTypes.CAN_HOIST) {
-          child.codegenNode.patchFlag = `${PatchFlags.HOISTED} /* HOISTED */`;
+          child.codegenNode.patchFlag = `${PatchFlags.HOISTED} /* HOISTED */`;// patchFlag值为-1
           child.codegenNode = context.hoist(child.codegenNode);
           hoistedCount++;
           continue;
         }
       } else {
+        // child不可以静态提升，判断其props是否可以静态提升
         const { codegenNode } = child;
-        if (codegenNode.type === NodeTypes.VNODE_CALL) {
+        if (codegenNode.type === NodeTypes.VNODE_CALL) { // vnode_call那么一定是element
           const flag = getPatchFlag(codegenNode);
           if (
             (!flag || flag === PatchFlags.NEED_PATCH
             || flag === PatchFlags.TEXT) && getGeneratePropsConstantType(child, context) >= ConstantTypes.CAN_HOIST
           ) {
-            const props = getNodeProps(child);
+            const props = getNodeProps(child);// 获取节点的props
             if (props) {
               codegenNode.props = context.hoist(props);
             }
@@ -78,8 +81,9 @@ function walk(node, context, doNotHoistNode) {
       // Do not hoist v-for single child because it has to be a block
       walk(child, context, child.children.length === 1);
     } else if (child.type === NodeTypes.IF) {
+      // 对于v-if当它的分支节点为的children为1时不做提升,它的child不做提升，但是会判断它的child的child是否提升
       for (let i = 0; i < child.branches.length; i++) {
-        // Do not hoist v-if single child because it has to be a block
+        console.log(child.branches[i]);
         walk(
           child.branches[i],
           context,
@@ -92,7 +96,7 @@ function walk(node, context, doNotHoistNode) {
     context.transformHoist(children, context, node);
   }
 
-  // all children were hoisted - the entire children array is hoistable.
+  // 提升所有children
   if (
     hoistedCount
     && hoistedCount === originalCount
