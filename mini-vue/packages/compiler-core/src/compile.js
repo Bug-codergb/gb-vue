@@ -14,6 +14,8 @@ import { transformOn } from './transforms/vOn.js';
 import { transformModel } from './transforms/vModel.js';
 
 import { transformExpression } from './transforms/transformExpression.js';
+
+import { trackSlotScoped } from './transforms/vSlot.js';
 import { generate } from './codegen.js';
 
 export function getBaseTransformPreset() { // 转换所需预设
@@ -24,6 +26,7 @@ export function getBaseTransformPreset() { // 转换所需预设
       // transformExpression,
       transformSlotOutlet,
       transformElement,
+      trackSlotScoped,
       transformText,
     ],
     { // 转换时指令的处理方法，如果compiler-dom传入则会覆盖，但是compiler-dom中的transform会依赖于这里的transofrm

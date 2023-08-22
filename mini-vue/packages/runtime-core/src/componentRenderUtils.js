@@ -1,5 +1,5 @@
 import ShapeFlags from '../../shared/src/shapeFlags.js';
-
+import { setCurrentRenderingInstance} from "./componentRenderContext.js";
 export function renderComponentRoot(instance) {
   const {
     type: Component,
@@ -18,10 +18,9 @@ export function renderComponentRoot(instance) {
     renderCache,
   } = instance;
   let result;
-  console.log(proxy, proxy.appProp);
-  console.log(render);
+  setCurrentRenderingInstance(instance);
   if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    const proxyToUse = proxy;
+    const proxyToUse = setupState;// proxy;
     result = render.call(
       proxyToUse,
       proxyToUse,
@@ -32,6 +31,6 @@ export function renderComponentRoot(instance) {
       ctx,
     );
   }
-  console.log(result  );
+  console.log(result);
   return result;
 }

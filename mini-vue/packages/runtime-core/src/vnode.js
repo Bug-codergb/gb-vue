@@ -1,7 +1,7 @@
 import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { isRef } from '../../reactivity/src/index.js';
 import {
-  isString, isFunction, EMPTY_ARRAY,
+  isString, isFunction, EMPTY_ARRAY, isArray,
 } from '../../shared/src/general.js';
 import { PatchFlags, isObject } from '../../shared/src/index.js';
 import { normalizeClass, normalizeStyle } from '../../shared/src/normalizeProp.js';
@@ -231,4 +231,99 @@ export {
 };
 export function isSameVNodeType(n1, n2) {
   return n1.type === n2.type && n1.key === n2.key;
+}
+export function normalizeVNode(child) {
+  if (child == null || typeof child === 'boolean') {
+    return createVNode(Comment);
+  } if (isArray(child)) {
+    return createVNode(
+      Fragment,
+      null,
+      child.slice(),
+    );
+  } if (typeof child === 'object') {
+    return cloneIfMounted(child);
+  }
+  return createVNode(Text, null, String(child));
+}
+export function cloneIfMounted(child) {
+  return (child.el === null && child.patchFlag !== PatchFlags.HOISTED)
+    || child.memo
+    ? child
+    : cloneVNode(child);
+}
+
+export function cloneVNode(
+  vnode,
+  extraProps,
+  mergeRef = false,
+) {
+  // This is intentionally NOT using spread or extend to avoid the runtime
+  // key enumeration cost.
+  const {
+    props, ref, patchFlag, children,
+  } = vnode;
+  const mergedProps = extraProps ? mergeProps(props || {}, extraProps) : props;
+  const cloned = {
+    __v_isVNode: true,
+    __v_skip: true,
+    type: vnode.type,
+    props: mergedProps,
+    key: mergedProps && normalizeKey(mergedProps),
+    ref:
+      extraProps && extraProps.ref
+        ? mergeRef && ref
+          ? isArray(ref)
+            ? ref.concat(normalizeRef(extraProps))
+            : [ref, normalizeRef(extraProps)]
+          : normalizeRef(extraProps)
+        : ref,
+    scopeId: vnode.scopeId,
+    slotScopeIds: vnode.slotScopeIds,
+    children:
+     patchFlag === PatchFlags.HOISTED && isArray(children)
+       ? (children).map(deepCloneVNode)
+       : children,
+    target: vnode.target,
+    targetAnchor: vnode.targetAnchor,
+    staticCount: vnode.staticCount,
+    shapeFlag: vnode.shapeFlag,
+    // if the vnode is cloned with extra props, we can no longer assume its
+    // existing patch flag to be reliable and need to add the FULL_PROPS flag.
+    // note: preserve flag for fragments since they use the flag for children
+    // fast paths only.
+    patchFlag:
+      extraProps && vnode.type !== Fragment
+        ? patchFlag === -1 // hoisted node
+          ? PatchFlags.FULL_PROPS
+          : patchFlag | PatchFlags.FULL_PROPS
+        : patchFlag,
+    dynamicProps: vnode.dynamicProps,
+    dynamicChildren: vnode.dynamicChildren,
+    appContext: vnode.appContext,
+    dirs: vnode.dirs,
+    transition: vnode.transition,
+
+    // These should technically only be non-null on mounted VNodes. However,
+    // they *should* be copied for kept-alive vnodes. So we just always copy
+    // them since them being non-null during a mount doesn't affect the logic as
+    // they will simply be overwritten.
+    component: vnode.component,
+    suspense: vnode.suspense,
+    ssContent: vnode.ssContent && cloneVNode(vnode.ssContent),
+    ssFallback: vnode.ssFallback && cloneVNode(vnode.ssFallback),
+    el: vnode.el,
+    anchor: vnode.anchor,
+    ctx: vnode.ctx,
+    ce: vnode.ce,
+  };
+
+  return cloned;
+}
+function deepCloneVNode(vnode) {
+  const cloned = cloneVNode(vnode);
+  if (isArray(vnode.children)) {
+    cloned.children = (vnode.children).map(deepCloneVNode);
+  }
+  return cloned;
 }

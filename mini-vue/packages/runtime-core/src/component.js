@@ -6,7 +6,7 @@ import { isObject } from '../../shared/src/index.js';
 import ShapeFlags from '../../shared/src/shapeFlags.js';
 import { markRaw } from '../../reactivity/src/reactive.js';
 import { initProps, normalizePropsOptions } from './componentProps.js';
-
+import { initSlots } from './componentSlots.js';
 import { applyOptions } from './componentOptions.js';
 
 let compile = void 0;
@@ -78,10 +78,10 @@ export function isStatefulComponent(instance) {
 
 export function setupComponent(instance) {
   const { props, children } = instance.vnode;
-  console.log(instance, props);
+  // console.log(instance, props);
   const isStateful = isStatefulComponent(instance);
   initProps(instance, props, isStateful, false);
-
+  initSlots(instance, children);
   const setupResult = isStateful
     ? setupStatefulComponent(instance) : undefined;
   return setupResult;

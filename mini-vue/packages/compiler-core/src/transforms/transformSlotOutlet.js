@@ -9,7 +9,7 @@ export const transformSlotOutlet = (node, context) => {
     const { children, loc } = node;
     // console.log(children);
     const { slotName, slotProps } = processSlotOutlet(node, context);
-    // console.log(slotProps);
+    console.log(slotProps);
     const slotArgs = [
       context.prefixIdentifiers || true ? '_ctx.$slot' : '$slot',
       slotName,
@@ -24,7 +24,7 @@ export const transformSlotOutlet = (node, context) => {
     }
     if (children.length) {
       // console.log(children);
-      slotArgs[3] = createFunctionExpression([], children, false, false, {});
+      slotArgs[3] = createFunctionExpression([], children, false, false, {});// []:函数参数，children:函数返回值
       expectedLen = 4;
     }
     slotArgs.splice(expectedLen);

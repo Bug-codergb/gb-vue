@@ -352,7 +352,8 @@ function baseCreateRenderer(options) {
           invokArrayFns(bm);// 调用生命周期钩子，同一个生命周期可能存在多个钩子
         }
         const subTree = (instance.subTree = renderComponentRoot(instance));
-        // console.log(subTree);
+
+        console.log(subTree);
         patch(
           null,
           subTree,

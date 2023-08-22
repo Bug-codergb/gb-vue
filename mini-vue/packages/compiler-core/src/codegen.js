@@ -15,6 +15,7 @@ import {
   RESOLVE_COMPONENT,
   OPEN_BLOCK,
   RESOLVE_DIRECTIVE,
+  WITH_CTX,
 } from './runtimeHelpers.js';
 import {
   NodeTypes,
@@ -378,7 +379,7 @@ function genFunctionExpression(
   } = node;
   if (isSlot) {
     // wrap slot functions with owner context
-    // push(`_${helperNameMap[WITH_CTX]}(`);
+    push(`_${helperNameMap[WITH_CTX]}(`);
   }
   push('(', node);
   if (isArray(params)) {

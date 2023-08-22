@@ -8,11 +8,12 @@ import Bar from './Bar.js';
 const temp = `
   <div class="container" key="91">
     <span>我是父组件</span>
-    <slot name="app">
-      <span>今天是个好日子</span>
-    </slot>
     <h1>{{appProp}}</h1>
-    <Bar :name="name"/>
+    <Bar :name="name">
+      <template v-slot:gblina>
+        <h1>郭斌李娜</h1>
+      </template>
+    </Bar>
   </div>
 `;
 const App = {

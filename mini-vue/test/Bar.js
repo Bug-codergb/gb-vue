@@ -11,6 +11,12 @@ const temp = `
    <button @click="changeUserMsg">修改ta的信息</button>
    <button @click="handler">发个消息吧</button>
    <span>{{name}}--</span>
+   <slot name="gblina">
+     <p>我是子组件的插槽1</p>
+   </slot>
+   <slot name="linagb">
+     <span>我是自组件插槽2</span>
+   </slot>
   </div>
 `;
 

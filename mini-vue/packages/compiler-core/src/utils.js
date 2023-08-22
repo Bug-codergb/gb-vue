@@ -1,4 +1,5 @@
 import { ElementTypes, NodeTypes } from './ast.js';
+import { isString } from '../../shared/src/general.js';
 
 const nonIdentifierRE = /^\d|[^\$\w]/;
 export const isSimpleIdentifier = (name) => !nonIdentifierRE.test(name);
@@ -41,6 +42,22 @@ export function findProp(node, name, dynamicOnly, allowEmpty) {
         return p;
       }
     } else if (p.name === 'bind' && (p.exp || allowEmpty) && isStaticArgOf(p.arg, name)) {
+      return p;
+    }
+  }
+}
+export function findDir(
+  node,
+  name,
+  allowEmpty = false,
+) {
+  for (let i = 0; i < node.props.length; i++) {
+    const p = node.props[i];
+    if (
+      p.type === NodeTypes.DIRECTIVE
+      && (allowEmpty || p.exp)
+      && (isString(name) ? p.name === name : name.test(p.name))
+    ) {
       return p;
     }
   }

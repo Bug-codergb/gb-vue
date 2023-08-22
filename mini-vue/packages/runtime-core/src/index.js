@@ -17,9 +17,10 @@ export {
   Comment,
   Fragment,
   Text,
-
 } from './vnode.js';
 export { withDirectives } from './directives.js';
+
+export { withCtx } from './componentRenderContext.js';
 
 export {
   reactive,

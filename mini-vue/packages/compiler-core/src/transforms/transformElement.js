@@ -14,6 +14,7 @@ import {
 } from '../../../shared/src/general.js';
 import {
   GUARD_REACTIVE_PROPS,
+  KEEP_ALIVE,
   MERGE_PROPS,
   NORMALIZE_CLASS,
   NORMALIZE_PROPS,
@@ -28,6 +29,7 @@ import {
   findProp, isStaticArgOf, isStaticExp, toValidateId,
 } from '../utils.js';
 import { PatchFlagNames } from '../../../shared/src/patchFlags.js';
+import { buildSlots } from './vSlot.js';
 
 const directiveImportMap = new WeakMap();
 const __DEV__ = true;
@@ -86,7 +88,17 @@ export const transformElement = (node, context) => function postTransformElement
     }
   }
   if (node.children.length > 0) {
-    if (node.children.length === 1 && vnodeTag !== TELEPORT) {
+    const shouldBuildAsSlots = isComponent && vnodeTag !== TELEPORT && vnodeTag !== KEEP_ALIVE;
+
+    if (shouldBuildAsSlots) {
+      const { slots, hasDynamicSlots } = buildSlots(node, context);
+      console.log(slots, hasDynamicSlots);
+
+      vnodeChildren = slots;
+      if (hasDynamicSlots) {
+        patchFlag |= PatchFlags.DYNAMIC_SLOTS;
+      }
+    } else if (node.children.length === 1 && vnodeTag !== TELEPORT) {
       const child = node.children[0];
       const { type } = child;
 
