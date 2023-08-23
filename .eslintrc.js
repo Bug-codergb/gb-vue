@@ -53,5 +53,6 @@ module.exports = {
     'no-useless-return': 'off',
     'no-case-declarations': 'off',
     'prefer-destructuring': 'off',
+    'import/no-mutable-exports': 'off',
   },
 };

@@ -5,6 +5,7 @@ import {
 } from '../../shared/src/general.js';
 import { PatchFlags, isObject } from '../../shared/src/index.js';
 import { normalizeClass, normalizeStyle } from '../../shared/src/normalizeProp.js';
+import { currentRenderingInstance } from './componentRenderContext.js';
 
 const isSuspense = () => false;
 const isTeleport = () => false;
@@ -15,7 +16,7 @@ const __FEATURE_SUSPENSE__ = false;
 export const InternalObjectKey = '__vInternal';
 
 const normalizeKey = ({ key }) => (key != null ? key : null);
-const currentRenderingInstance = {};
+
 const normalizeRef = ({
   ref,
   ref_key,
@@ -39,16 +40,17 @@ export function guardReactiveProps(props) {
   return props;
 }
 
-export const blockStack = [];
-export let currentBlock = null;
+export const blockStack = [];// block栈存在block嵌套
+export let currentBlock = null;// 数组｜null
 
+// 创建一个虚拟节点
 function createBaseVNode(
   type,
-  props,
-  children,
-  patchFlag = 0,
+  props = null,
+  children = null,
+  patchFlag = 0, // 默认情况下patchFlag为0
   dynamicProps = null,
-  shapeFlag = type === Fragment ? 0 : ShapeFlags.ELEMENT,
+  shapeFlag = type === Fragment ? 0 : ShapeFlags.ELEMENT, // 默认情况下元素类型为普通元素element
   isBlockNode,
   needFullChildrenNormalization = false,
 ) {
@@ -78,7 +80,7 @@ function createBaseVNode(
     dynamicProps,
     dynamicChildren: null,
     appContext: null,
-    ctx: currentRenderingInstance,
+    ctx: currentRenderingInstance, // 当前渲染组件实例 render函数执行之前
   };
   // 为设虚拟节点设置 shapeShape;
   if (Array.isArray(children)) {
@@ -86,7 +88,10 @@ function createBaseVNode(
   } else if (typeof children === 'string') {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   }
-
+  /*
+    开始构建blockTree, isBlockTreeEnabled默认情况下为1,
+    isBlockNode是否为block节点
+  */
   if (
     isBlockTreeEnabled > 0
     && !isBlockNode
@@ -124,6 +129,7 @@ function _createVNode(type, props, children, patchFlag, dynamicProps, isBlockNod
 }
 export const createVNode = _createVNode;
 
+// 开始构建block
 export function openBlock(disableTracking = false) {
   blockStack.push((currentBlock = disableTracking ? null : []));
 }
@@ -146,7 +152,7 @@ function setupBlock(vnode) {
   }
   return vnode;
 }
-
+// 在opendBlock后，会通过createElementBlock创建虚拟节点
 export function createElementBlock(
   type,
   props,
@@ -326,4 +332,19 @@ function deepCloneVNode(vnode) {
     cloned.children = (vnode.children).map(deepCloneVNode);
   }
   return cloned;
+}
+
+export function normalizeChildren(vnode, children) {
+  let type = 0;
+  const { shapeFlag } = vnode;
+  if (children == null) {
+    children = null;
+  } else if (isArray(children)) {
+    type = ShapeFlags.ARRAY_CHILDREN;
+  } else if (typeof children === 'object') {
+
+  } else {
+    type = ShapeFlags.SLOTS_CHILDREN;
+  }
+  vnode.shapeFlag |= type;
 }
