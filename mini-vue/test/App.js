@@ -6,7 +6,7 @@ import {
 import Bar from './Bar.js';
 
 const temp = `
-  <div class="container" key="91" @create="handler">
+  <div class="container" key="91" @create="handler" v-model:firstName="foo">
     <span>我是父组件</span>
     <h1>{{appProp}}</h1>
     <Bar :name="name">
