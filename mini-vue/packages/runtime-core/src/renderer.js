@@ -72,7 +72,7 @@ function baseCreateRenderer(options) {
       return;
     }
     console.log(n2);
-    debugger;
+    // debugger;
     if (n1 && !isSameVNodeType(n1, n2)) { // 如果接节存在，但是n1,n2的类型不一致且key不一致
       unmount(n1, parentComponent, null, true);// 类型不一致则直接卸载n1,将n1置为null，开始挂载新节点
       n1 = null;

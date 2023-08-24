@@ -35,7 +35,7 @@ export const PublicInstanceProxyHandlers = {
     if (key[0] !== '$') {
       const n = accessCache[key];
       if (n !== undefined) {
-        debugger;
+        // debugger;
       } else if (hasSetupBinding(setupState, key)) {
         accessCache[key] = AccessTypes.SETUP;
         return setupState[key];

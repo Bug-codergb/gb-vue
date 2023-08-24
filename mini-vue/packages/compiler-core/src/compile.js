@@ -43,6 +43,7 @@ export function baseComplie(template, options) {
   const [nodeTransforms, directiveTransforms] = getBaseTransformPreset();
 
   const prefixIdentifiers = false;
+
   transform(
     ast,
     {
