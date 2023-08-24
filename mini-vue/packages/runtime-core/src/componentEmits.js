@@ -12,7 +12,7 @@ export function emit(instance, event, ...rawArgs) {
   const modelArg = isModelListener && event.slice(7);
   let handlerName;
   let handler = props[(handlerName = toHandlerKey(event))]
-    || props(handlerName = toHandlerKey(camelize(event)));
+    || props(handlerName = toHandlerKey(camelize(event)));// 获取父组件传过来的事件处理函数的handler
 
   if (!handler && isModelListener) {
     handler = props[(handlerName = toHandlerKey(hyphenate(event)))];

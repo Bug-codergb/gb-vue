@@ -71,24 +71,26 @@ function baseCreateRenderer(options) {
     if (n1 === n2) { // 相等则不比较
       return;
     }
+    console.log(n2);
+    debugger;
     if (n1 && !isSameVNodeType(n1, n2)) { // 如果接节存在，但是n1,n2的类型不一致且key不一致
-      unmount(n1, parentComponent, null, true);
+      unmount(n1, parentComponent, null, true);// 类型不一致则直接卸载n1,将n1置为null，开始挂载新节点
       n1 = null;
     }
 
     const { type, ref, shapeFlag } = n2;
 
     switch (type) {
-      case Text:
+      case Text:// 处理文本节点
         processText(n1, n2, container, anchor); break;
-      case Comment:
+      case Comment:// 注释节点
         processCommentNode(n1, n2, container, anchor);
         break;
       case Static:
         if (n1 == null) {
           mountStatic(n2, container, anchor); break;
         } break;
-      case Fragment:
+      case Fragment:// 处理fragment
         processFragment(
           n1,
           n2,
@@ -204,21 +206,26 @@ function baseCreateRenderer(options) {
     const {
       shapeFlag, type, props, dirs,
     } = vnode;
-    const el = vnode.el = hostCreateElement(type, props && props.is, props);
+    const el = vnode.el = hostCreateElement(type, props && props.is, props);// 创建节点，并将其真实dom赋值
     // 文本节点
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el, vnode.children);
-    } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 数组节点
+    } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 字节点为 数组节点
       mountChildren(vnode.children, el, null, parentComponent);
     }
 
     if (dirs) {
+      /*
+        判断其虚拟节点上是否存在dirs属性，该节点如果存在指令，则在编译阶段会通过withDirectives包裹，
+        然后在渲染阶段在该虚拟节点上添加dirs属性，dir为一个对象，每个对象存在不同生命周期
+        在这里调用created阶段的逻辑
+       */
       invokeDirectiveHook(vnode, null, parentComponent, 'created');
     }
 
     if (props) {
       for (const key in props) {
-        if (key !== 'value' && !isReservedProps(key)) {
+        if (key !== 'value' && !isReservedProps(key)) { // 除了key,ref其他props需要处理
           const nextVal = props[key];
           hostPatchProp(el, key, null, nextVal);
         }
@@ -227,12 +234,13 @@ function baseCreateRenderer(options) {
         hostPatchProp(el, 'value', null, props.value);
       }
     }
+    // 调用指令的渲染前生命周期
     if (dirs) {
       invokeDirectiveHook(vnode, null, parentComponent, 'beforeMount');
     }
-    hostInsert(el, container, anchor);
+    hostInsert(el, container, anchor);// 将元素插入到dom中，渲染完毕
 
-    if (dirs) {
+    if (dirs) { // 调用指令的dom渲染完毕的生命周期
       invokeDirectiveHook(vnode, null, parentComponent, 'mounted');
     }
   }
@@ -243,16 +251,37 @@ function baseCreateRenderer(options) {
   }
   // element -> update
   function updateElement(n1, n2, container, anchor, parentComponent) {
-    const el = n2.el = n1.el;
-    const { patchFlag, dirs } = n2;
+    const el = n2.el = n1.el;// 这里注意将旧节点的n1对应的真实dom赋值给n2对应的真实dom
+    const { patchFlag, dirs, dynamicChildren } = n2;
+    // dynamicChilsden是在编译阶段生成openBlock,createELementBlock等api，在生成虚拟dom树时形成block节点list
 
     const oldProps = (n1 && n1.props) || {};
     const newProps = n2.props || {};
 
-    if (dirs) {
+    if (dirs) { // 同样调用元素更新时指令的更新前生命周期
       invokeDirectiveHook(n2, n1, parentComponent, 'beforeUpdate');
     }
     if (patchFlag > 0) {
+      if (patchFlag & PatchFlags.FULL_PROPS) {
+        patchProps(
+          el,
+          n2,
+          oldProps,
+          newProps,
+          parentComponent,
+        );
+      } else {
+        // 只对比class
+        if (patchFlag & PatchFlags.CLASS) {
+          if (oldProps.class !== newProps.class) {
+            hostPatchProp(el, 'class', null, newProps.class);
+          }
+        }
+        // 只对比style
+        if (patchFlag & PatchFlags.STYLE) {
+          hostPatchProp(el, 'style', oldProps.style, newProps.style);
+        }
+      }
       if (patchFlag & PatchFlags.TEXT) {
         if (n1.children !== n2.children) {
           hostSetElementText(el, n2.children);
@@ -328,7 +357,7 @@ function baseCreateRenderer(options) {
       updateComponent(n1, n2, container, parentComponent);
     }
   }
-  // render函数的执行
+  // 渲染组件，创建一个组件实例，将组件实例添加至虚拟节点上。
   function mountComponent(initialVNode, container, anchor, parentComponent) {
     const instance = createComponentInstance(initialVNode, container);
     initialVNode.component = instance;

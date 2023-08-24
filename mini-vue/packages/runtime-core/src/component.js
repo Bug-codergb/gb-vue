@@ -9,6 +9,8 @@ import { initProps, normalizePropsOptions } from './componentProps.js';
 import { initSlots } from './componentSlots.js';
 import { applyOptions } from './componentOptions.js';
 
+import { emit } from './componentEmits.js';
+
 let compile = void 0;
 
 let uid = 0;
@@ -67,8 +69,9 @@ export function createComponentInstance(vnode, parent, suspense) {
   };
 
   instance.ctx = createDevRenderContext(instance);
+  // 创建一个组件的context,之后会对该ctx做一个代理，用户访问setup，props，data,等属性时直接通过instance.proxy访问
   instance.root = parent ? parent.root : instance;
-  instance.emit = null;
+  instance.emit = emit.bind(null, instance);
   return instance;
 }
 

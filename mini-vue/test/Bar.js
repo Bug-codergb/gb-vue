@@ -1,7 +1,7 @@
 import { reactive, ref } from '../packages/vue/src/index.js';
 
 const temp = `
-  <div class="bar">
+  <div class="bar" @refresh-handler="handler">
    <ul>
      <li>lina详细信息表</li>
      <li>姓名: {{user.name}}</li>

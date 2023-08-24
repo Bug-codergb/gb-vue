@@ -1,4 +1,4 @@
-import { NodeTypes } from '../../../compiler-core/src/ast.js';
+import { ElementTypes, NodeTypes } from '../../../compiler-core/src/ast.js';
 import { transformModel as baseTransform } from '../../../compiler-core/src/transforms/vModel.js';
 import { findProp, hasDynamicKeyVBind } from '../../../compiler-core/src/utils.js';
 import {
@@ -10,10 +10,11 @@ import {
 } from '../runtimeHelpers.js';
 
 const __DEV__ = true;
-export const transformModel = (dir, node, context) => {
-  const baseResult = baseTransform(dir, node, context);
-  
-  if (!baseResult.props.length) {
+export const transformModel = (dir, node, context) => { // 这里会将compiler-core中的transformModel覆盖
+  const baseResult = baseTransform(dir, node, context);// 依赖于compiler-core中的transformModel
+
+  // 如果元素类型为组件，则直接return
+  if (!baseResult.props.length || node.tagType === ElementTypes.COMPONENT) {
     return baseResult;
   }
 
@@ -27,6 +28,7 @@ export const transformModel = (dir, node, context) => {
     }
   }
   const { tag } = node;
+  // 判断表单元素类型
   if (
     tag === 'input' || tag === 'textarea'
     || tag === 'select'

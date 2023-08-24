@@ -6,7 +6,7 @@ import {
 import Bar from './Bar.js';
 
 const temp = `
-  <div class="container" key="91">
+  <div class="container" key="91" @create="handler">
     <span>我是父组件</span>
     <h1>{{appProp}}</h1>
     <Bar :name="name">
