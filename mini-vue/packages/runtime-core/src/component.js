@@ -20,18 +20,18 @@ export function createComponentInstance(vnode, parent, suspense) {
   const { type } = vnode;
   const appContext = (parent ? parent.appContext : vnode.appContext) || emptyAppContext;
   const instance = {
-    uid: uid++,
+    uid: uid++, // 每一个组件，
     type,
     vnode,
     parent,
     root: null,
     next: null,
-    subTree: null,
+    subTree: null, // render函数执行结果
     effect: null,
     update: null,
     scope: {},
     render: null,
-    proxy: null,
+    proxy: null, // 这里vue会将setup返回值，data,props的数据全部代理到proxy上面，用户直接通过this访问
     exposed: null,
     exposeProxy: null,
     withProxy: null,
@@ -39,7 +39,7 @@ export function createComponentInstance(vnode, parent, suspense) {
     components: null,
     directives: null,
 
-    propsOptions: normalizePropsOptions(type, appContext),
+    propsOptions: normalizePropsOptions(type, appContext), // 提前将props做处理，比如类型的默认设置
     emitsOptions: {},
 
     accessCache: null,
@@ -54,11 +54,11 @@ export function createComponentInstance(vnode, parent, suspense) {
     props: {},
     attrs: {},
 
-    setupState: EMPTY_OBJ,
+    setupState: EMPTY_OBJ, // setup返回值代理
     setupContext: EMPTY_OBJ,
     data: EMPTY_OBJ,
 
-    bc: null,
+    bc: null, // 生命周期
     c: null,
     bm: null,
     m: null,
@@ -72,6 +72,12 @@ export function createComponentInstance(vnode, parent, suspense) {
   // 创建一个组件的context,之后会对该ctx做一个代理，用户访问setup，props，data,等属性时直接通过instance.proxy访问
   instance.root = parent ? parent.root : instance;
   instance.emit = emit.bind(null, instance);
+  // 组件内部时间处理，原理和react子组件通信一致，就是将一个函数传给子组件，子组件调用这个函数，在父组件里面的函数声明里面响应
+  /**
+   * 父组件 const foo=()=>{ 这里获取调用  }
+   *
+   * 子组件调用foo(...arg)
+   */
   return instance;
 }
 
@@ -83,7 +89,13 @@ export function setupComponent(instance) {
   const { props, children } = instance.vnode;
   // console.log(instance, props);
   const isStateful = isStatefulComponent(instance);
-  initProps(instance, props, isStateful, false);
+  initProps(instance, props, isStateful, false);// 将props和attrs分别设置到对应obj上面
+
+  /**
+   * 设置插槽相关，<slot name="foo"></slot> 在编译阶段会编译成renderSlot(ctx.$slot,"foo",()=>vnode);
+   * renderSlot调用renderslot后，会生成vnode( Fragment, {key:_name}, fallback() )
+   *
+   */
   initSlots(instance, children);
   const setupResult = isStateful
     ? setupStatefulComponent(instance) : undefined;
