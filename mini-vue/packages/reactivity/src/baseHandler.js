@@ -10,7 +10,7 @@ import {
 } from './reactive.js';
 import { ITERATE_KEY, track, trigger } from './effect.js';
 import { isObject, hasChanged, isIntegerKey } from '../../shared/src/index.js';
-
+// 通过createGetter会创建一个闭包，之后判断数据是readonly或者shallow
 const get = createGetter(false, false);
 const set = createSetter(false, false);
 
@@ -22,7 +22,20 @@ const shallowSet = createSetter(false, true);
 const shallowReadonlyGet = createGetter(true, true);
 
 const arrayInstrumentations = createArrayInstrumentations();
+/*
+  let arr = [1,2,3];
+  instrumentations={
+    includes:(arg)=>{
 
+    },
+    indexOf:()=>{
+
+    },
+    lastIndex:()=>{
+
+    }
+  }
+*/
 function createArrayInstrumentations() {
   const instrumentations = {};
   ['includes', 'indexOf', 'lastIndexOf'].forEach((key) => {
@@ -60,15 +73,15 @@ function createGetter(isReadonly, isShallow) {
     }
 
     // 判断是否调用数组方法
-    /* const targetIsArray = Array.isArray(target);
+    const targetIsArray = Array.isArray(target);
     if (!isReadonly) {
       if (targetIsArray && arrayInstrumentations.hasOwnProperty(key)) {
         return Reflect.get(arrayInstrumentations, key, receiver);
       }
-    } */
+    }
 
     const res = Reflect.get(target, key, receiver);
-    if (!isReadonly) {
+    if (!isReadonly) { // 如果不是readonly则收集依赖
       track(target, key, 'get');
     }
 

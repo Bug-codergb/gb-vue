@@ -17,35 +17,42 @@ import { PatchFlags } from '../../../shared/src/index.js';
 import { PatchFlagNames } from '../../../shared/src/patchFlags.js';
 
 const __DEV__ = true;
-export const transformIf = createStructuralDirectiveTransform(/^(if|else|else-if)$/, (node, dir, context) => processIf(node, dir, context, (ifNode, branch, isRoot) => {
-  const siblings = context.parent.children;
+/*
+*  v-if最终会被编译为三元运算符,
+*  如果不存在v-else，则会创建一个注释节点
+* */
+export const transformIf = createStructuralDirectiveTransform(
+  /^(if|else|else-if)$/,
+  (node, dir, context) => processIf(node, dir, context, (ifNode, branch, isRoot) => {
+    const siblings = context.parent.children;
 
-  let i = siblings.indexOf(ifNode);
-  let key = 0;
-  while (i-- >= 0) {
-    const sibling = siblings[i];
-    if (sibling && sibling.type === NodeTypes.IF) {
-      key += sibling.branches.length;
+    let i = siblings.indexOf(ifNode);
+    let key = 0;
+    while (i-- >= 0) {
+      const sibling = siblings[i];
+      if (sibling && sibling.type === NodeTypes.IF) {
+        key += sibling.branches.length;
+      }
     }
-  }
 
-  return () => {
-    if (isRoot) {
-      ifNode.codegenNode = createCodegenNodeForBranch(
-        branch,
-        key,
-        context,
-      );
-    } else {
-      const parentCondition = getParentCondition(ifNode.codegenNode);
-      parentCondition.alternate = createCodegenNodeForBranch(
-        branch,
-        key + ifNode.branches.length - 1,
-        context,
-      );
-    }
-  };
-}));
+    return () => {
+      if (isRoot) {
+        ifNode.codegenNode = createCodegenNodeForBranch(
+          branch,
+          key,
+          context,
+        );
+      } else {
+        const parentCondition = getParentCondition(ifNode.codegenNode);
+        parentCondition.alternate = createCodegenNodeForBranch(
+          branch,
+          key + ifNode.branches.length - 1,
+          context,
+        );
+      }
+    };
+  }),
+);
 export function processIf(node, dir, context, processCodegen) {
   // v-if 或者 v-else-if 没有value, v-if = undefined,v-else-if=undefined
   if (dir.name !== 'else' && (!dir.exp || !dir.exp.content.trim())) {
@@ -150,7 +157,8 @@ function createChildrenCodegenNode(branch, keyIndex, context) {
   const { children } = branch;
 
   const firstChild = children[0];
-
+  // 是否需要fragment包裹，生成fragment是在renderer渲染阶段
+  // children的length不为1说明v-if存在于template上
   const needFragmentWrapper = children.length !== 1 || firstChild.type !== NodeTypes.ELEMENT;
 
   if (needFragmentWrapper) {
@@ -169,7 +177,7 @@ function createChildrenCodegenNode(branch, keyIndex, context) {
       helper(FRAGMENT),
       createObjectExpression([keyProperty]),
       children,
-      patchFlag + (__DEV__ ? ` /* ${patchFlagText} */ ` : ''),
+      patchFlag + (__DEV__ ? ` /* ${patchFlagText} */ ` : ''), // 此时它的patchFlag为fragment
       undefined,
       undefined,
       true,

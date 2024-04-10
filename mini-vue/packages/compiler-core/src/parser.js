@@ -43,7 +43,7 @@ export function baseParser(content, options) {
   // vue 在转换时都会创建一个context,贯穿整个过程（在transform,codegen）都是如此
   const context = createParserContext(content, options);
   const start = getCursor(context);// 获取当前编译位置
-  return createRoot(
+  return createRoot( // 使用根节点对其进行包裹，跟节点中还要存储编译过程中形成的数据
     parseChildren(context, TextModes.DATA, []),
     getSelection(context, start),
   );
@@ -68,7 +68,7 @@ function createParserContext(content, rawOptions) {
 }
 // 核心转换
 function parseChildren(context, mode, ancestors) {
-  const parent = last(ancestors); // 获取副节点
+  const parent = last(ancestors); // 获取父节点
   const ns = parent ? parent.ns : Namespaces.HTML;
   const nodes = [];
   while (!isEnd(context, mode, ancestors)) { // 是否解析至末尾，如何判断是否解析至末尾》isEnd
@@ -112,6 +112,7 @@ function parseChildren(context, mode, ancestors) {
     }
   }
 
+  // 是否去除空格，换行节点等
   let removedWhitespace = false;
   if (mode !== TextModes.RAWTEXT && mode !== TextModes.RCDATA) {
     const shouldCondense = context.options.whitespace !== 'preserve'; // 是否应该压缩
@@ -151,7 +152,7 @@ function parseChildren(context, mode, ancestors) {
 }
 
 function parseInterpolation(context, mode) {
-  const [open, close] = context.options.delimiters;
+  const [open, close] = context.options.delimiters;// 获取插值语法的语法形式,{{}}用户也可以自定义
   const closeIndex = context.source.indexOf(close, open.length); // 获取 }} 的索引
   if (closeIndex === -1) {
     return undefined;
@@ -192,12 +193,12 @@ function parseInterpolation(context, mode) {
   };
 }
 function parseElement(context, ancestors) {
-  const wasInPre = context.inPre;
-  const wasInVPre = context.inVPrev;
+  const wasInPre = context.inPre;// 是否为pre标签
+  const wasInVPre = context.inVPrev;// 是否为v-pre标签
 
   const parent = last(ancestors);// 获取父元素，初始化则为[],当树节点层级嵌套时，ancestors会一直保存其父节点（父节点的父节点）；
 
-  const element = parseTag(context, TagType.Start, parent);
+  const element = parseTag(context, TagType.Start, parent);// 处理标签
   const isPreBoundary = context.inPre && !wasInPre;
   const isVPreBoundary = context.inVPre && !wasInVPre;
 
@@ -211,7 +212,7 @@ function parseElement(context, ancestors) {
     return element;
   }
 
-  ancestors.push(element);
+  ancestors.push(element);// 将当前解析完毕的元素节点添加至祖先节点里面
   const mode = context.options.getTextMode(element, parent);
   const children = parseChildren(context, mode, ancestors);
   ancestors.pop();// 类似于回溯的思想
@@ -242,13 +243,14 @@ function parseTag(context, type, parent) {
   const tag = match[1]; // 匹配到标签名称
   const ns = context.options.getNamespace(tag, parent);
   advanceBy(context, match[0].length);// 推进<div
-  advanceSpaces(context);
+  advanceSpaces(context);// 推进空格
 
   const cursor = getCursor(context);
   const currentSource = context.source;
   if (context.options.isPreTag(tag)) {
     context.inPre = true;
   }
+  // 向后推进后去解析标签上的属性
   const props = parseAttributes(context, type);
 
   if (
@@ -268,6 +270,7 @@ function parseTag(context, type, parent) {
     return;
   }
 
+  // 表示元素的类型
   let tagType = ElementTypes.ELEMENT;
 
   if (!context.inVPre) {
@@ -311,7 +314,7 @@ function isComponent(tag, props, context) {
 
 function parseAttributes(context, type) {
   const props = [];
-  const attributeNames = new Set();
+  const attributeNames = new Set();// 防止属性名称重复
   // 匹配标签上的属性直至标签结束 div> 或者自结束标签 div/>
   while (
     context.source.length > 0 && !context.source.startsWith('>')
@@ -377,7 +380,7 @@ function parseAttribute(context, nameSet) {
       const isSlot = dirName === 'slot';
       let content = match[2];
       let isStatic = true;
-      if (content.startsWith('[')) {
+      if (content.startsWith('[')) { // 这种情况说明属性名称为动态类型 :[app]="foo"
         isStatic = false;
         if (!content.endsWith(']')) {
           console.error('error');
@@ -484,6 +487,7 @@ function getCursor(context) {
     offset,
   };
 }
+// 判断是否为结束标签，当前template以</开头，获取ancestors的最后一个节点
 function isEnd(context, mode, ancestors) {
   const s = context.source;
   switch (mode) {

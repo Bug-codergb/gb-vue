@@ -21,6 +21,7 @@ import {
 import { FRAGMENT, helperNameMap, TO_DISPLAY_STRING } from './runtimeHelpers.js';
 import { isVSlot } from './utils.js';
 
+// 同样创建一个transform的上下文
 export function createTransformContext(root, {
   filename = '',
   prefixIdentifiers = false,

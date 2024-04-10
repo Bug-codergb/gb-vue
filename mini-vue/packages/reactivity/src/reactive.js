@@ -7,12 +7,13 @@ import {
   shallowReadonlyHandlers,
 } from './baseHandler.js';
 
-const reactiveMap = new WeakMap();
+const reactiveMap = new WeakMap();// 用于缓存原始对象和代理对象
 const readonlyMap = new WeakMap();
 
 const shallowReactiveMap = new WeakMap();
 const shallowReadonlyMap = new WeakMap();
 
+// 响应式数据的类型
 const ReactiveFlags = {
   RAW: 'raw',
   SKIP: '_v_skip',
@@ -21,6 +22,7 @@ const ReactiveFlags = {
   SHALLOW: '_v_isShallow',
 };
 const reactive = (raw) => createReactive(raw, false, reactiveMap, baseHandler);
+
 export const isReactive = (value) => {
   if (isReadonly(value)) {
     return isReactive(value[ReactiveFlags.RAW]);
@@ -55,6 +57,7 @@ const createReactive = (raw, isReadonly, proxyMap, handler) => {
     return raw;
   }
 
+  // 如果对象上存在 ReactiveFlags.RAW，说明该对象为代理对象
   if (raw[ReactiveFlags.RAW] && !(isReadonly && raw[ReactiveFlags.REACTIVE])) {
     return raw;
   }

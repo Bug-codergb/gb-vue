@@ -16,7 +16,7 @@ class ComputedRefImpl {
     if (this._dirty) {
       trackRefValue(this);
       this._dirty = false;
-      this._value = this._effect.run();
+      this._value = this._effect.run();// 就是把getter重新执行一边
     }
     return this._value;
   }

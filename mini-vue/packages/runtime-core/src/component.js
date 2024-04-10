@@ -133,7 +133,7 @@ function handleSetupResult(instance, setupResult) {
   if (isFunction(setupResult)) {
     instance.render = setupResult;
   } else if (isObject(setupResult)) {
-    instance.setupState = proxyRefs(setupResult);
+    instance.setupState = proxyRefs(setupResult);// 对setup的返回值做一个代理，在视图中使用的时候ref解包
   }
   finishComponentSetup(instance);
 }
@@ -143,7 +143,7 @@ function finishComponentSetup(instance) {
     // 模板编译
     if (compile && !Component.render) {
       if (Component.template) {
-        Component.render = compile(Component.template);
+        Component.render = compile(Component.template);// 用户没有书写render函数则进行模板编译
       }
     }
     instance.render = Component.render;

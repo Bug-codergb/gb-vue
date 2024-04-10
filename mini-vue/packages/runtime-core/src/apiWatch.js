@@ -17,7 +17,11 @@ export function watch(source, cb, options) {
   return doWatch(source, cb, options);
 }
 function doWatch(source, cb, {
-  immediate, deep, flush, onTrach, onTrigger,
+  immediate,
+  deep,
+  flush,
+  onTrach,
+  onTrigger,
 } = EMPTY_OBJ) {
   const instance = currentInstance;
   const isMultiSource = false;

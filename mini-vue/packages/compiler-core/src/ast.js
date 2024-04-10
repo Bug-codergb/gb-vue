@@ -65,17 +65,27 @@ export const locSub = {
   end: { line: 1, column: 1, offset: 0 },
 };
 export function createRoot(children, loc) {
+  /*
+    最终生成一棵抽象语法树
+    抽象语法树的节点属性主要有
+    children:存放字节点数组
+    codegenNode:ast转化阶段为undefined,在transform阶段生成，之后用于生成render函数
+    props:存放节点上的属性，属性一般分为2类，attr和指令
+    tag:当前元素的标签类型（div,span,a,ul,li）
+    tagType: 当前元素的标签类型(component,slot,template,普通元素),
+    type:既可以描述元素类型也可以描述属性类型
+  */
   return {
     type: NodeTypes.ROOT,
     children,
-    helpers: new Set(),
-    components: [],
-    directives: [],
-    hoists: [],
-    imports: [],
+    helpers: new Set(), // 存储编译过程中所需要的运行时所需方法
+    components: [], // 编译过程中需要组件嵌套
+    directives: [], // 指令
+    hoists: [], // 静态提升
+    imports: [], // 单文件组件
     cached: 0,
     temps: 0,
-    codegenNode: undefined,
+    codegenNode: undefined, // 根节点code,render函数生成入口
     loc,
   };
 }

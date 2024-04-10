@@ -94,3 +94,16 @@ export function flushPostFlushCbs(seen) {
   postFlushIndex = 0;
 }
 const getId = (job) => (job.id === null ? Infinity : job.id);
+
+/**
+ * vue3实现了comparator这样一个方法，pre队列排序到前面
+ * const comparator = (a: SchedulerJob, b: SchedulerJob): number => {
+    const diff = getId(a) - getId(b)
+    if (diff === 0) {
+      if (a.pre && !b.pre) return -1
+      if (b.pre && !a.pre) return 1
+    }
+    return diff
+  }
+ *
+ */

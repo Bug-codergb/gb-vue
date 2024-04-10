@@ -24,7 +24,7 @@ class ReactiveEffect {
   constructor(fn, scheduler) {
     this.fn = fn;
     this.active = true;
-    this.deps = [];
+    this.deps = []; // 每个effect都会对应一个deps数组，这里面存储的是当前的effect(()=>{})活跃的对象相关联的属性
     this.parent = undefined;
     this.scheduler = scheduler;
   }
