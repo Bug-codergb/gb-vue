@@ -28,7 +28,6 @@ function parseChildren(context, ancestors) {
         if (/[a-z]/i.test(context.template[2])) {
           const match = /^<\/?([a-z][^\t\r\n\f / >]*)/i.exec(context.template);
           context.template = context.template.slice(match[0].length);
-
           const isSelfClosing = context.template.startsWith('/>');
           context.template = context.template.slice(isSelfClosing ? 2 : 1);
           continue;
