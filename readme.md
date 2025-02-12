@@ -1,4 +1,4 @@
-## gb-mini-vue(记录学习vue3源码过程)
+## gb-mini-vue(记录学习vue3源码过程)(v3.3.4)
 
 huochunyang-mini-vue对于《Vuejs设计与实现》实现思路,在mini-vue中是对于另一个库《mini-vue》+ vue3源码的实现,将vue3源码逻辑抽离出来但又保证主要实现逻辑。不同模块提取中...，直接通过mini-vue/main.html运行调试，//忽略compiler-sfc
 
